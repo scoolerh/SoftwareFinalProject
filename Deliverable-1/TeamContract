@@ -34,3 +34,11 @@ Meeting guidelines:
 - Progress updates
 - Brainstorm problem solutions, work on code 
 - Make team decisions, decide code structure etc
+
+GitHub guidelines:
+- We start with a simple working mock-up
+- Then work in branches out from this mock-up
+- Have descriptive commit messages
+- ONLY COMMIT TO MAIN IF YOU ARE SURE THAT YOUR BRANCH WORKS
+- Use squash and merge with a commit message describing the feature of your branch
+- Get someone to review your branch before committing
