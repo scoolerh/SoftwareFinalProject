@@ -4,11 +4,6 @@ WORKDIR /code
 
 COPY . .
 
-RUN pip install flask
-
-ENV FLASK_APP=ai.py
-ENV FLASK_RUN_HOST=0.0.0.0
-
-CMD ["flask", "run"]
+CMD ["python3", "ai.py"]
 
 EXPOSE 8095

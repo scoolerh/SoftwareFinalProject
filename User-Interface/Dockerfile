@@ -4,11 +4,6 @@ WORKDIR /code
 
 COPY . .
 
-RUN pip install flask
-
-ENV FLASK_APP=userinterface.py
-ENV FLASK_RUN_HOST=0.0.0.0
-
-CMD ["flask", "run"]
+CMD ["python3", "userinterface.py"]
 
 EXPOSE 8095

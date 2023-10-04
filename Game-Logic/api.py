@@ -1,23 +1,14 @@
 import flask
-from data import getProfiles
-
+#run on port 7800 
 app = flask.Flask(__name__)
 
 @app.route("/")
 def home():
     return "Welcome to BACKGAMMON"
 
-@app.route("/login/")
-def findUser():
-    username = "Sophie"
-    userid = 0
-    profiles = getProfiles()
-    for profile in profiles: 
-        if (profile['Name'] == username):
-            userid = profile['Id']
-    if (userid == 0):
-        return "No user found"
-    return "Welcome " + profile['Name'] + ", player ID " + profile['Id']
+@app.route("/login/<username>/")
+def findUser(username):
+    return "Welcome " + str(username) 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8095, debug=True)
+    app.run(host="0.0.0.0", port=7800, debug=True)
