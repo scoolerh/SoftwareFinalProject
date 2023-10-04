@@ -1,21 +1,21 @@
 services:
-  AI:
+  ai:
     build: ./AI
     ports:
       - "7555:5000"
-  Board:
+  board:
     build: ./Board
     ports:
       - "8095:5000"
-  Game-Logic:
+  game-logic:
     build: ./Game-Logic
     ports: 
       - "7800:5000"
-  User-Interface:
+  user-interface:
     build: ./User-Interface
     ports: 
       - "7777:5000"
-  Win-Tracker:
+  win-tracker:
     build: ./Win-Tracker
     ports:
       - "7788:5000"
