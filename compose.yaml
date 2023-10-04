@@ -3,8 +3,8 @@ services:
     build: ./AI
     ports:
       - "7555:5000"
-  board:
-    build: ./Board
+  frontend:
+    build: ./Frontend
     ports:
       - "8095:5000"
   game-logic:
@@ -15,7 +15,7 @@ services:
     build: ./User-Interface
     ports: 
       - "7777:5000"
-  win-tracker:
-    build: ./Win-Tracker
+  database:
+    build: ./db
     ports:
       - "7788:5000"
