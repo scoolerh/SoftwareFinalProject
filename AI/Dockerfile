@@ -4,6 +4,4 @@ WORKDIR /code
 
 COPY . .
 
-CMD ["python3", "ai.py"]
-
-EXPOSE 8095
+EXPOSE 7555

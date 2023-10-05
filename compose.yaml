@@ -3,11 +3,7 @@ services:
     build: ./AI
     ports:
       - "7555:5000"
-  board: 
-    build: ./Board
-    ports: 
-      - "7979:5000"
-  database:
+  db:
     build: ./db
     ports:
       - "7788:5000"
@@ -15,7 +11,11 @@ services:
     build: ./Frontend
     ports:
       - "8095:5000"
-  game-logic:
+  game:
     build: ./Game-Logic
     ports: 
-      - "7800:5000"
+      - "9000:5000"
+    links: 
+      - "frontend"
+      - "db"
+      - "ai"

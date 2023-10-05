@@ -4,6 +4,11 @@ WORKDIR /code
 
 COPY . .
 
-CMD ["python3", "frontend.py"]
+RUN pip install flask
+
+ENV FLASK_APP=frontend.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+CMD ["flask", "run"]
 
 EXPOSE 8095

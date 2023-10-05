@@ -4,6 +4,11 @@ WORKDIR /code
 
 COPY . .
 
-CMD ["python3", "data.py"]
+RUN pip install flask
 
-EXPOSE 8095
+ENV FLASK_APP=data.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+CMD ["flask", "run"]
+
+EXPOSE 7788
