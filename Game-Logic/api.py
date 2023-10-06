@@ -7,11 +7,16 @@ import requests
 #run on port 9000 
 app = flask.Flask(__name__)
 
-initialState = {'1': 'ww', '2': '', '3': '', '4': '', '5': '', '6': 'bbbbbb', '7': '', '8': 'bbb', '9': '', '10': '', '11': '', '12': 'wwwwww',
-                 '13': 'bbbbb', '14': '', '15': '', '16': '', '17': 'www', '18': '', '19': 'wwwww', '20': '', '21': '', '22': '', '23': '', '24': 'bb'}
+#0 and 25 are the homes of black and white respectively, not really a part of the board. Plese keep this in mind!
+initialState = {'0': '', '1': 'ww', '2': '', '3': '', '4': '', '5': '', '6': 'bbbbbb', '7': '', '8': 'bbb', '9': '', '10': '', '11': '', '12': 'wwwwww',
+                 '13': 'bbbbb', '14': '', '15': '', '16': '', '17': 'www', '18': '', '19': 'wwwww', '20': '', '21': '', '22': '', '23': '', '24': 'bb', '25': ''}
 p1 = 0
 p2 = 0
 games = []
+
+#for testing purposes, remove before merging
+game = Game(0, p1, p2, initialState)
+games.append(game)
 
 '''Print how to use for the user.'''
 @app.route("/")
@@ -43,8 +48,10 @@ def play(gameid):
     for i in range(10):
         move1 = game.getMove(game.player1)
         game.board.doMove(game.player1.color, move1)
+        print(game.board.currentState)
         move2 = game.getMove(game.player2)
         game.board.doMove(game.player2.color, move2)
+        print(game.board.currentState)
     currentState = json.dumps(game.board.currentState)
     return requests.get(f"http://frontend:5000/displayboard/{currentState}/").text
 

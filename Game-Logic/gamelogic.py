@@ -17,38 +17,21 @@ class Player
     - send it to game class
 '''
 
-#go or python 
-#docker - what in each container
-#one endpoint? many endpoints, connect them together later
-#frontend tech: HTTP communication. as easy as python, html, css? yes we can do render_template (ask about react, maybe use view(vue?))
-# probably HTTP for communication. Hannah can decide view/html etc. 
-
-#idea for how board state should look:
-#{1: 'ww', 2: '', 3: '', 4: '', 5: '', 6: 'bbbbbb', etc...}
 class Board():
     '''inputs: initial state'''
     def __init__(self, initialState):
         self.currentState = initialState
 
-    def move(self, player, move):
-        #move piece
-        #self.currentState = newState
-        pass
-
     def doMove(self, playerColor, move): 
         #move looks like (slot to move from, # of places to move)
-        #player format should be 'b' or 'w', if not this then translate
         currState = self.currentState
-        #might want to do two moves
+        #might want to do two moves!! Figure out how to handle this
         originalSpace = move[0]
-        if playerColor == "w":
-            newSpace = originalSpace + int(move[1])
-        if playerColor == "b":
-            newSpace = originalSpace - int(move[1])
-        updatedOriginalSpace = currState[str(originalSpace)]
-        currState[str(originalSpace)] = updatedOriginalSpace[0:-1]
-        updatedNewSpace = currState[str(newSpace)]
-        currState[str(newSpace)] = updatedNewSpace + playerColor
+        newSpace = originalSpace + int(move[1])
+        originalSpaceState = currState[str(originalSpace)]
+        currState[str(originalSpace)] = originalSpaceState[0:-1]
+        newSpaceState = currState[str(newSpace)]
+        currState[str(newSpace)] = newSpaceState + playerColor
         self.currentState = currState
         return self.currentState
 
@@ -68,23 +51,52 @@ class Game():
     def rollDice(self):
         die1 = random.randint(1,6)
         die2 = random.randint(1,6)
-        return (die1, die2)
-    #initialState = {1: 'ww', 2: '', 3: '', 4: '', 5: '', 6: 'bbbbbb', 7: '', 8: 'bbb', 9: '', 10: '', 11: '', 12: 'wwwwww',
-    #             13: 'bbbbb', 14: '', 15: '', 16: '', 17: 'www', 18: '', 19: 'wwwww', 20: '', 21: '', 22: '', 23: '', 24: 'bb'}
-    def getPossibleMoves(self, player, board):
-        #this is simple code that won't work, it just shows the idea!
+        return [die1, die2]
+    
+    def getPossibleMoves(self, player, diceRoll, board):
         currState = board.currentState
         possibleMoves = []
+        die1 = diceRoll[0]
+        die2 = diceRoll[1]
         i = 0
-        for i in range(24):
-            i+=1
-            if player.color in currState[str(i)]:
-                possibleMoves.append((i, 2)) #2 is dice roll
+        if player.color == "w":
+            print("white to move")
+            for i in range(24):
+                i+=1
+                if "w" in currState[str(i)]:
+                    print("found slot with white at", i)
+                    if 24-i>die1:
+                        goalPlace = currState[str(i+die1)]
+                        if not("b" in goalPlace and len(goalPlace) >= 2):
+                            possibleMoves.append((i, die1))
+                            print("adding a possible move: ", (i, die1))
+                    if 24-i>die2:
+                        goalPlace = currState[str(i+die2)]
+                        if not("b" in goalPlace and len(goalPlace) >= 2):
+                            possibleMoves.append((i, die2))
+                            print("adding a possible move: ", (i, die2))
+        elif player.color == "b":
+            print("black to move")
+            for i in range(24):
+                i+=1
+                if "b" in currState[str(i)]:
+                    print("found slot with black at", i)
+                    if i>= die1:
+                        goalPlace = currState[str(i-die1)]
+                        if not("w" in goalPlace and len(goalPlace) >= 2):
+                            possibleMoves.append((i, -die1))
+                            print("adding a possible move: ", (i, -die1))
+                    if i>die2:
+                        goalPlace = currState[str(i-die2)]
+                        if not("w" in goalPlace and len(goalPlace) >= 2):
+                            possibleMoves.append((i, -die2))
+                            print("adding a possible move: ", (i, -die2))
         return possibleMoves
     
     def getMove(self, player):
         #gets possible moves, gets move from player
-        possibleMoves = self.getPossibleMoves(player, self.board)
+        diceRoll = self.rollDice() #diceroll might have to be an endpoint instead of being called from getMove!
+        possibleMoves = self.getPossibleMoves(player, diceRoll, self.board)
         move = player.move(possibleMoves)
         return move
     
@@ -105,8 +117,6 @@ class HumanPlayer(Player):
     #get players from login/user interface?
     #will there be a route for choosing players 
     #(ie i want to play w a friend or w an ai)
-    #have to figure out how we know who is playing
-        #some ID thing, but the backend game logic does not need to care, as long as we have it stored somewhere to send to the db
     def __init__(self):
             self.color = "w" #make this an input later
             pass
@@ -123,7 +133,5 @@ class AIPlayer(Player):
             return (possibleMoves[0])
         else:
             return("Error. Not a valid color. Must be b or w")
-        #remember that "first piece" is the opposite for the two players, since they play the board in opposite directions
-            #just think about how to handle that
         #more complicated logic should come here
         
