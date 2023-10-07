@@ -25,9 +25,10 @@ class Board():
     def doMove(self, playerColor, move): 
         #move looks like (slot to move from, # of places to move)
         currState = self.currentState
-        #might want to do two moves!! Figure out how to handle this
+        die = int(move[1])
+        #will want to do two moves!! Figure out how to handle this
         originalSpace = move[0]
-        newSpace = originalSpace + int(move[1])
+        newSpace = originalSpace + die
         originalSpaceState = currState[str(originalSpace)]
         currState[str(originalSpace)] = originalSpaceState[0:-1]
         newSpaceState = currState[str(newSpace)]
@@ -53,11 +54,9 @@ class Game():
         die2 = random.randint(1,6)
         return [die1, die2]
     
-    def getPossibleMoves(self, player, diceRoll, board):
+    def getPossibleMoves(self, player, dice, board):
         currState = board.currentState
         possibleMoves = []
-        die1 = diceRoll[0]
-        die2 = diceRoll[1]
         i = 0
         if player.color == "w":
             print("white to move")
@@ -65,40 +64,61 @@ class Game():
                 i+=1
                 if "w" in currState[str(i)]:
                     print("found slot with white at", i)
-                    if 24-i>die1:
-                        goalPlace = currState[str(i+die1)]
-                        if not("b" in goalPlace and len(goalPlace) >= 2):
-                            possibleMoves.append((i, die1))
-                            print("adding a possible move: ", (i, die1))
-                    if 24-i>die2:
-                        goalPlace = currState[str(i+die2)]
-                        if not("b" in goalPlace and len(goalPlace) >= 2):
-                            possibleMoves.append((i, die2))
-                            print("adding a possible move: ", (i, die2))
+                    for die in dice:
+                        if 24-i>die:
+                            goalPlace = currState[str(i+die)]
+                            if not("b" in goalPlace and len(goalPlace) >= 2):
+                                possibleMoves.append((i, die))
+                                print("adding a possible move: ", (i, die))
+
+
+                        # if 24-i>die2:
+                        #     goalPlace = currState[str(i+die2)]
+                        #     if not("b" in goalPlace and len(goalPlace) >= 2):
+                        #         possibleMoves.append((i, die2))
+                        #         print("adding a possible move: ", (i, die2))
         elif player.color == "b":
             print("black to move")
             for i in range(24):
                 i+=1
                 if "b" in currState[str(i)]:
                     print("found slot with black at", i)
-                    if i>= die1:
-                        goalPlace = currState[str(i-die1)]
-                        if not("w" in goalPlace and len(goalPlace) >= 2):
-                            possibleMoves.append((i, -die1))
-                            print("adding a possible move: ", (i, -die1))
-                    if i>die2:
-                        goalPlace = currState[str(i-die2)]
-                        if not("w" in goalPlace and len(goalPlace) >= 2):
-                            possibleMoves.append((i, -die2))
-                            print("adding a possible move: ", (i, -die2))
+                    for die in dice:
+                        if i>= die:
+                            goalPlace = currState[str(i-die)]
+                            if not("w" in goalPlace and len(goalPlace) >= 2):
+                                possibleMoves.append((i, -die))
+                                print("adding a possible move: ", (i, -die))
+                        # if i>die2:
+                        #     goalPlace = currState[str(i-die2)]
+                        #     if not("w" in goalPlace and len(goalPlace) >= 2):
+                        #         possibleMoves.append((i, -die2))
+                        #         print("adding a possible move: ", (i, -die2))
         return possibleMoves
     
-    def getMove(self, player):
+    def move(self, player):
         #gets possible moves, gets move from player
-        diceRoll = self.rollDice() #diceroll might have to be an endpoint instead of being called from getMove!
-        possibleMoves = self.getPossibleMoves(player, diceRoll, self.board)
-        move = player.move(possibleMoves)
-        return move
+        #moves = []
+        dice = self.rollDice() #diceroll might have to be an endpoint instead of being called from move!
+        while len(dice) != 0:
+            print("dice: ", dice)
+            possibleMoves = self.getPossibleMoves(player, dice, self.board) #figure out how to pass on the turn when no moves are possible
+            print("possible moves: ", possibleMoves)
+            move = player.getMove(possibleMoves)
+            print("move: ", move)
+            if player.color == "b":
+                die = -move[1]
+            elif player.color == "w":
+                die = move[1]
+            currState = self.board.doMove(player.color, move)
+            try: 
+                dice.remove(die)
+            except:
+                print("tried to remove {} from {}".format(die, dice))
+            #call doMove here, so player can see move before doing the second move
+        #return game state rather than the actual move
+        #fix the endpoint to reflect changes
+        return currState
     
     
 
@@ -107,8 +127,6 @@ class Player():
     def __init__(self):
         #what needs to be common for the two?
         #some move function, but they need to be implemented differently.
-        #should players keep track of their own pieces? Or should the game just send it a list of possible moves?
-        # # Or just the full game state for now?
         pass
 
 
@@ -126,7 +144,7 @@ class AIPlayer(Player):
         self.color = color
         pass
 
-    def move(self, possibleMoves):
+    def getMove(self, possibleMoves):
         if self.color == "b":
             return (possibleMoves[-1]) #minus because black moves backwards, white moves forwards
         elif self.color == "w":

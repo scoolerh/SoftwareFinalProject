@@ -46,12 +46,12 @@ def play(gameid):
     game = games[int(gameid)]
     #plays 10 moves
     for i in range(10):
-        move1 = game.getMove(game.player1)
-        game.board.doMove(game.player1.color, move1)
-        print(game.board.currentState)
-        move2 = game.getMove(game.player2)
-        game.board.doMove(game.player2.color, move2)
-        print(game.board.currentState)
+        boardState = game.move(game.player1)
+        #game.board.doMove(game.player1.color, movesPlayer1)
+        print("player 1 made a move: ", boardState)
+        movesPlayer2 = game.move(game.player2)
+        #game.board.doMove(game.player2.color, movesPlayer2)
+        print("player 2 made a move: ", game.board.currentState)
     currentState = json.dumps(game.board.currentState)
     return requests.get(f"http://frontend:5000/displayboard/{currentState}/").text
 
