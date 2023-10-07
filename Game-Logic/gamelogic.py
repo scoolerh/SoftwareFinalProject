@@ -62,17 +62,11 @@ class Game():
                 i+=1
                 if "w" in currState[str(i)]:
                     for die in dice:
-                        if 24-i>die:
+                        if 25-i>=die:
                             goalPlace = currState[str(i+die)]
                             if not("b" in goalPlace and len(goalPlace) >= 2):
                                 possibleMoves.append((i, die))
 
-
-                        # if 24-i>die2:
-                        #     goalPlace = currState[str(i+die2)]
-                        #     if not("b" in goalPlace and len(goalPlace) >= 2):
-                        #         possibleMoves.append((i, die2))
-                        #         print("adding a possible move: ", (i, die2))
         elif player.color == "b":
             print("black to move")
             for i in range(24):
@@ -83,39 +77,24 @@ class Game():
                             goalPlace = currState[str(i-die)]
                             if not("w" in goalPlace and len(goalPlace) >= 2):
                                 possibleMoves.append((i, -die))
-                        # if i>die2:
-                        #     goalPlace = currState[str(i-die2)]
-                        #     if not("w" in goalPlace and len(goalPlace) >= 2):
-                        #         possibleMoves.append((i, -die2))
-                        #         print("adding a possible move: ", (i, -die2))
+
         return possibleMoves
     
     def move(self, player):
         #gets possible moves, gets move from player
-        #moves = []
         dice = self.rollDice() #diceroll might have to be an endpoint instead of being called from move!
         while len(dice) != 0:
-            print("dice: ", dice)
-            possibleMoves = self.getPossibleMoves(player, dice, self.board) #figure out how to pass on the turn when no moves are possible
-            print("possible moves: ", possibleMoves)
+            possibleMoves = self.getPossibleMoves(player, dice, self.board)
             if len(possibleMoves) == 0:
-                print("no possible move. Passing on the turn to ", player.color)
-                return currState
+                return self.board.currentState
             move = player.getMove(possibleMoves)
-            print("move: ", move)
             if player.color == "b":
                 die = -move[1]
             elif player.color == "w":
                 die = move[1]
-            currState = self.board.doMove(player.color, move)
-            try: 
-                dice.remove(die)
-            except:
-                print("tried to remove {} from {}".format(die, dice))
-            #call doMove here, so player can see move before doing the second move
-        #return game state rather than the actual move
-        #fix the endpoint to reflect changes
-        return currState
+            currState = self.board.doMove(player.color, move) 
+            dice.remove(die)
+        return currState #does not really have to return anything
     
     
 
