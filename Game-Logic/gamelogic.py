@@ -48,6 +48,8 @@ class Game():
     def rollDice(self):
         die1 = random.randint(1,6)
         die2 = random.randint(1,6)
+        if die1 == die2:
+            return [die1, die1, die2, die2]
         return [die1, die2]
     
     def getPossibleMoves(self, player, dice, board):
