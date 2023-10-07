@@ -40,12 +40,8 @@ class Game():
     def __init__(self, id, player1, player2, initialState): #id for human, maybe 0 for AI? 
         if player1 == 0:
             self.player1 = AIPlayer("w")
-        else:
-            print("!")
         if player2 == 0:
             self.player2 = AIPlayer("b")   
-        else: 
-            print("!")
         self.board = Board(initialState)
         self.gid = id
     
@@ -63,13 +59,11 @@ class Game():
             for i in range(24):
                 i+=1
                 if "w" in currState[str(i)]:
-                    print("found slot with white at", i)
                     for die in dice:
                         if 24-i>die:
                             goalPlace = currState[str(i+die)]
                             if not("b" in goalPlace and len(goalPlace) >= 2):
                                 possibleMoves.append((i, die))
-                                print("adding a possible move: ", (i, die))
 
 
                         # if 24-i>die2:
@@ -82,13 +76,11 @@ class Game():
             for i in range(24):
                 i+=1
                 if "b" in currState[str(i)]:
-                    print("found slot with black at", i)
                     for die in dice:
                         if i>= die:
                             goalPlace = currState[str(i-die)]
                             if not("w" in goalPlace and len(goalPlace) >= 2):
                                 possibleMoves.append((i, -die))
-                                print("adding a possible move: ", (i, -die))
                         # if i>die2:
                         #     goalPlace = currState[str(i-die2)]
                         #     if not("w" in goalPlace and len(goalPlace) >= 2):
@@ -104,6 +96,9 @@ class Game():
             print("dice: ", dice)
             possibleMoves = self.getPossibleMoves(player, dice, self.board) #figure out how to pass on the turn when no moves are possible
             print("possible moves: ", possibleMoves)
+            if len(possibleMoves) == 0:
+                print("no possible move. Passing on the turn to ", player.color)
+                return currState
             move = player.getMove(possibleMoves)
             print("move: ", move)
             if player.color == "b":
