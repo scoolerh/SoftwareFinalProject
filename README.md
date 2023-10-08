@@ -13,5 +13,6 @@ Once you build and up the Docker file, go to local host and run on port 9000. Th
 ## Currently Implemented
 
 - Create a new game
-- Print the initial game board through a very primitive JSON object 
+- Print the initial and final game board through a very primitive JSON object
+- Check for valid moves given a dice roll
 - View the win/loss ratios for some hardcoded users (Sophie, Hannah, Bryan, Selma, and Matt) 
