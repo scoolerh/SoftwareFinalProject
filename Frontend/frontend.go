@@ -10,8 +10,13 @@ func main() {
 	initialState := [26]string {"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 	fmt.Println(initialState)
 
+	for spot, pieces := range initialState {
+		fmt.Println(spot, pieces)
+	}
+
 	// for position, pieces := range initialState {
 	// 	fmt.Println(position)
 	// 	fmt.Println(pieces)
 	// }
 }
+
