@@ -23,21 +23,24 @@ type gameplay interface {
 	updateState()                 //updates the state of the game to reflect the recent move
 }
 
+// currently returning nothing. originally returned game state but i don't think we need to
 func (g Game) move(player player) {
 	dice := rollDice(2) //change to input?
 	for i := 0; i < len(dice); i++ {
-		possibleMoves := getPossibleMoves(g, dice, player)
+		possibleMoves := g.getPossibleMoves(dice, player.color)
 		if len(possibleMoves) == 0 {
-			return g.state
+			return
 		}
 		move := getMove(possibleMoves, player)
-		if player.color == "b" {
-			die = -move[1]
-		} else if player.color == "w" {
-			die = move[1]
-		}
-		currState := doMove()
-		dice := deleteElement(dice, move[2])
+		// var die int
+		// if player.color == "b" {
+		// 	die = -move.die
+		// } else if player.color == "w" {
+		// 	die = move.die
+		// }
+
+		g.updateState(player.color, move)
+		dice = deleteElement(dice, move.dieIndex)
 	}
 }
 
@@ -47,25 +50,25 @@ func (g Game) updateState(playerColor string, move moveType) [26]string {
 	//figure out how to do two moves
 	originalSpace := move.slot
 	newSpace := originalSpace + die
-	originalSpaceState := currState[originalSpace] //change this variable name? //check indexing +/- 1 error
-	currState[newSpace] = originalSpaceState[0:-1] //can we do -1
+	originalSpaceState := currState[originalSpace]                          //change this variable name? //check indexing +/- 1 error
+	currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
 	newSpaceState := currState[newSpace]
 	currState[newSpace] = newSpaceState + playerColor
 	g.state = currState
 	return g.state
 }
 
-func (g Game) getPossibleMoves(dice []int, currPlayer string) []move {
+func (g Game) getPossibleMoves(dice []int, currPlayer string) []moveType {
 	var moveToDo moveType
 	var possibleMoves []moveType
 	currState := g.state
 
 	if currPlayer == "w" {
 		for i := 1; i <= 24; i++ {
-			if strings.Contains(currState[string(i)], "w") { //needs to use int to string converter here, this creates runes
-				for index, die := range dice { //we don't need index, but it is returned. How to handle this?
+			if strings.Contains(currState[i], "w") {
+				for index, die := range dice {
 					if 25-i >= die {
-						goalPlace := currState[string(i+die)]
+						goalPlace := currState[i+die]
 						if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
 							moveToDo.slot = i
 							moveToDo.die = die
@@ -176,3 +179,8 @@ if exists {
 initialState := map[string]string{"0": "", "1": "ww", "2": "", "3": "", "4": "", "5": "", "6": "bbbbbb", "7": "", "8": "bbb", "9": "", "10": "", "11": "", "12": "wwwwww",
 	// "13": "bbbbb", "14": "", "15": "", "16": "", "17": "www", "18": "", "19": "wwwww", "20": "", "21": "", "22": "", "23": "", "24": "bb", "25": ""}
 */
+
+// from tutorialspoint.com
+func deleteElement(slice []int, index int) []int {
+	return append(slice[:index], slice[index+1:]...)
+}
