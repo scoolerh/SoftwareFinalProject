@@ -6,15 +6,6 @@ import (
 	"strings"
 )
 
-/*
-Questions for Matt:
-	- How to handle player - human - ai without inheritance, things that need a player that can be either human or AI
-	- How does the rest of the go structure look?
-	- Is our thin thread really a thin thread?
-		- We will have to change the structure to get moves from the player
-		- Can we get some help with how to think about this?
-*/
-
 type gameplay interface {
 	//all these still need to be implemented
 	move() map[string]string //move should call getMove and doMove

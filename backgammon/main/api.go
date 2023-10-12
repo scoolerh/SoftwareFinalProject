@@ -3,6 +3,7 @@ package main
 import (
 	"backgammon/gamelogic"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -36,7 +37,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	gameStr := req.URL.Query().Get("gameid")
 	gameid, errGameid := strconv.Atoi(gameStr)
 	if errGameid != nil {
-		log.fatal(Err) //might want to change the way to handle errors
+		log.Fatal(errGameid) //might want to change the way to handle errors
 	}
 	game := games[gameid]
 
@@ -50,21 +51,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 	//does this need to return something?
 }
-
-//HOW THE REST OF THIS API LOOKS DEPENDS ON STRUCTURE, HTML ETC
-//BRYAN AND HANNAH, CAN YOU TAKE RESPONSIBILITY FOR THIS?
-
-// for i := 0; i < 10; i++ {
-// 	move()
-// }
-// for i in range(10):
-//     #returning and printing boardState for testing purposes
-//     boardState = game.move(game.player1)
-//     print("player 1 made a move: ", boardState)
-//     boardState = game.move(game.player2)
-//     print("player 2 made a move: ", boardState)
-// currentState = json.dumps(game.board.currentState)
-// return requests.get(f"http://frontend:5000/displayboard/{currentState}/").text
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
 func won(writer http.ResponseWriter, req *http.Request) {
