@@ -1,7 +1,0 @@
-go 1.21.2
-
-use (
-        ./SoftwareFinalProject/backgammon
-        ./SoftwareFinalProject/backgammon/gamelogic
-        ./SoftwareFinalProject/backgammon/main
-)
