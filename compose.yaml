@@ -7,15 +7,10 @@ services:
     build: ./db
     ports:
       - "7788:5000"
-  frontend:
-    build: ./Frontend
-    ports:
-      - "8095:5000"
-  game:
-    build: ./Game-Logic
+  app:
+    build: ./app
     ports: 
-      - "9000:5000"
+      - "5555:5000"
     links: 
-      - "frontend"
       - "db"
       - "ai"
