@@ -38,8 +38,7 @@ class Board():
 
 class Game():
     def __init__(self, id, player1, player2, initialState): #id for human, maybe 0 for AI? 
-        if player1 == 0:
-            self.player1 = AIPlayer("w")
+     
         if player2 == 0:
             self.player2 = AIPlayer("b")   
         self.board = Board(initialState)
@@ -103,6 +102,7 @@ class Player():
     def __init__(self):
         #what needs to be common for the two?
         #some move function, but they need to be implemented differently.
+        #they both need an Id and a color
         pass
 
 
