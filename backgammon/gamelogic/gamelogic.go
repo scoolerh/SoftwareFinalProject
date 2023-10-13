@@ -1,24 +1,13 @@
-package gamelogic //does this need to be in its own directory or something?
-//TODO: fix package structure
+package gamelogic
 
 import (
 	"math/rand"
 	"strings"
 )
 
-/*
-Questions for Matt:
-	- How to handle player - human - ai without inheritance, things that need a player that can be either human or AI
-	- How does the rest of the go structure look?
-	- Is our thin thread really a thin thread?
-		- We will have to change the structure to get moves from the player
-		- Can we get some help with how to think about this?
-*/
-
 type gameplay interface {
 	//all these still need to be implemented
-	move() map[string]string //move should call getMove and doMove
-	//rollDice() []int          //returns an array of ints. I dont think this has to be a part of the gameplay interface
+	move() map[string]string      //move should call getMove and doMove
 	getPossibleMoves() []moveType //returns an array of moves (slot, die)
 	updateState()                 //updates the state of the game to reflect the recent move
 }
@@ -32,12 +21,11 @@ func (g Game) move(player player) {
 			return
 		}
 		move := getMove(possibleMoves, player)
-		// var die int
-		// if player.color == "b" {
-		// 	die = -move.die
-		// } else if player.color == "w" {
-		// 	die = move.die
-		// }
+		if player.color == "b" {
+			dice[move.dieIndex] = -move.die
+		} else if player.color == "w" {
+			dice[move.dieIndex] = move.die
+		}
 
 		g.updateState(player.color, move)
 		dice = deleteElement(dice, move.dieIndex)
@@ -109,28 +97,14 @@ type Game struct {
 
 }
 
-// type gamestate struct { //could use this or a map for the gamestate - example of map is at the bottom
-// 	tile0, tile1, tile2, tile3, tile4, tile5, tile6, tile7, tile8, tile9, tile10, tile11, tile12, tile13, tile14, tile15, tile16, tile17,
-// 	tile18, tile19, tile20, tile21, tile22, tile23, tile24, tile25 string //this might need to be improved...
-// }
-
 type moveType struct {
 	slot, die, dieIndex int
 }
-
-// // the following three will have to change
-// type player interface {
-// 	getMove() move
-// }
 
 type player struct {
 	id    int //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
 	color string
 }
-
-// type ai struct {
-// 	id, color string
-// }
 
 func getMove(possibleMoves []moveType, player player) moveType {
 	var move moveType
@@ -159,6 +133,11 @@ func getAIMove(possibleMoves []moveType, color string) moveType {
 		return possibleMoves[len(possibleMoves)]
 	}
 }
+
+// type gamestate struct { //could use this or a map for the gamestate - example of map is at the bottom
+// 	tile0, tile1, tile2, tile3, tile4, tile5, tile6, tile7, tile8, tile9, tile10, tile11, tile12, tile13, tile14, tile15, tile16, tile17,
+// 	tile18, tile19, tile20, tile21, tile22, tile23, tile24, tile25 string //this might need to be improved...
+// }
 
 /* 	// Create a map with string keys and int values
 myMap := make(map[string]int)

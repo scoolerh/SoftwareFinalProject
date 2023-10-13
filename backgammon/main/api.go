@@ -1,11 +1,11 @@
 package main
 
 import (
-	"backgammon/gamelogic"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"backgammon/gamelogic"
 )
 
 var games []gamelogic.Game //will be a valid type when we fix packages
@@ -13,7 +13,7 @@ var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", 
 
 // Print the rules and how to use the tool for the user
 func help(writer http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(writer, "Welcome to BACKGAMMON. <br>To start a new game, use the /newgame/ route. This will display the starting board and your game id.<br>To see how many wins or losses you have, you can use the /scoreboard/(player)/ route, where player is your username. For Matt, your username is Matt.<br>Enjoy!!!")
+	http.ServeFile(writer, req, "./html/index.html")
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
@@ -24,11 +24,11 @@ func login(writer http.ResponseWriter, req *http.Request) {
 
 // Starts a new game for the user and displays the initial board
 func newgame(writer http.ResponseWriter, req *http.Request) {
-	p1, p2 := 0, 0 //will need to be an input in the future
+	p1, p2 := gamelogic.player{1, "w"}, gamelogic.player{2, "b"} //will need to be an input in the future
 	gameid := len(games)
-	game := gamelogic.Game(gameid, p1, p2, initialState) //will be fixed when packages are fixed
+	game := gamelogic.Game{gameid, p1, p2, initialState}
 	games = append(games, game)
-	fmt.Fprint(writer, initialState) //needs to be sent to HTML template
+	http.ServeFile(writer, req, "./html/game.html")
 }
 
 // todo: Check whose turn it is, if the game is won, have the player make a move
@@ -51,21 +51,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 	//does this need to return something?
 }
-
-//HOW THE REST OF THIS API LOOKS DEPENDS ON STRUCTURE, HTML ETC
-//BRYAN AND HANNAH, CAN YOU TAKE RESPONSIBILITY FOR THIS?
-
-// for i := 0; i < 10; i++ {
-// 	move()
-// }
-// for i in range(10):
-//     #returning and printing boardState for testing purposes
-//     boardState = game.move(game.player1)
-//     print("player 1 made a move: ", boardState)
-//     boardState = game.move(game.player2)
-//     print("player 2 made a move: ", boardState)
-// currentState = json.dumps(game.board.currentState)
-// return requests.get(f"http://frontend:5000/displayboard/{currentState}/").text
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
 func won(writer http.ResponseWriter, req *http.Request) {
