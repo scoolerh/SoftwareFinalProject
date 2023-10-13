@@ -3,6 +3,7 @@ package main
 import (
 	"backgammon/gamelogic"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -36,7 +37,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	gameStr := req.URL.Query().Get("gameid")
 	gameid, errGameid := strconv.Atoi(gameStr)
 	if errGameid != nil {
-		log.fatal(Err) //might want to change the way to handle errors
+		log.Fatal(errGameid) //might want to change the way to handle errors
 	}
 	game := games[gameid]
 

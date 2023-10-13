@@ -98,12 +98,15 @@ func rollDice(numDice int) []int {
 }
 
 type Game struct {
-	gameid           int
-	player1, player2 player //only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
+	gameid  int
+	player1 player
+	player2 player
+	state   [26]string
+	//only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
 	//NOTE that this is currently wrong. We need this to be a player, but either human or AI, i dont know how to do that
 	//needs to not be an ai, but a player, a general human or ai - i think we might need a player struct...
 	//state map[string]string //maps a string to an int, kind of like dictionary in python. Could also use array for this.
-	state [26]string
+
 }
 
 // type gamestate struct { //could use this or a map for the gamestate - example of map is at the bottom
