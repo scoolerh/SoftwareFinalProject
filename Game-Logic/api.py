@@ -44,13 +44,7 @@ def startGame():
 @app.route('/play/<gameid>/')
 def play(gameid):
     game = games[int(gameid)]
-    #plays 10 moves
-    for i in range(10):
-        #returning and printing boardState for testing purposes
-        boardState = game.move(game.player1)
-        print("player 1 made a move: ", boardState)
-        boardState = game.move(game.player2)
-        print("player 2 made a move: ", boardState)
+    #plays 10 move
     currentState = json.dumps(game.board.currentState)
     return requests.get(f"http://frontend:5000/displayboard/{currentState}/").text
 
