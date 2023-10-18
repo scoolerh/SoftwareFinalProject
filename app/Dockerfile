@@ -1,6 +1,6 @@
 FROM golang:1.21.3
 
-WORKDIR /code
+WORKDIR /usr/src/app
 
 COPY . .
 
