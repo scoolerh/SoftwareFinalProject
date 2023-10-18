@@ -12,7 +12,7 @@ var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", 
 
 // Print the rules and how to use the tool for the user
 func help(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "../Frontend/html/index.html")
+	http.ServeFile(writer, req, "./html/index.html")
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
@@ -27,7 +27,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	gameid := len(games)
 	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState}
 	games = append(games, game)
-	http.ServeFile(writer, req, "../Frontend/html/game.html")
+	http.ServeFile(writer, req, "./html/game.html")
 }
 
 // todo: Check whose turn it is, if the game is won, have the player make a move
@@ -74,5 +74,5 @@ func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/scoreboard", scoreboard)
-	http.ListenAndServe(":5555", nil) //listens for HTTP on port 5555, with standard mapping
+	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping
 }
