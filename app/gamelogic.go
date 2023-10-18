@@ -64,30 +64,71 @@ func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 }
 
 func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
-	var moveToDo MoveType
+	var move MoveType
 	var possibleMoves []MoveType
 	currState := g.State
 
 	if currPlayer == "w" {
-		for i := 1; i <= 24; i++ {
-			if strings.Contains(currState[i], "w") {
-				for index, die := range dice {
-					if 25-i >= die {
-						goalPlace := currState[i+die]
-						if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
-							moveToDo.Slot = i
-							moveToDo.Die = die
-							moveToDo.DieIndex = index
-							moveToDo.CapturePiece = false
-							possibleMoves = append(possibleMoves, moveToDo)
+		if g.Captured["w"] == 0 {
+			for i := 1; i <= 24; i++ {
+				if strings.Contains(currState[i], "w") {
+					for index, die := range dice {
+						if 25-i >= die {
+							goalPlace := currState[i+die]
+							if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
+								move.Slot = i
+								move.Die = die
+								move.DieIndex = index
+								move.CapturePiece = false
+								possibleMoves = append(possibleMoves, move)
+							}
 						}
 					}
+				}
+			}
+		} else {
+			for index, die := range dice {
+				goalPlace := currState[die]
+				if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
+					move.Slot = 0
+					move.Die = die
+					move.DieIndex = index
+					move.CapturePiece = false
+					possibleMoves = append(possibleMoves, move)
 				}
 			}
 		}
 	} else if currPlayer == "b" {
 		for i := 1; i <= 24; i++ {
-
+			if g.Captured["b"] == 0 {
+				for i := 1; i <= 24; i++ {
+					if strings.Contains(currState[i], "b") {
+						for index, die := range dice {
+							if i >= die {
+								goalPlace := currState[i-die]
+								if !(strings.Contains(goalPlace, "w") && len(goalPlace) >= 2) {
+									move.Slot = i
+									move.Die = -die
+									move.DieIndex = index
+									move.CapturePiece = false
+									possibleMoves = append(possibleMoves, move)
+								}
+							}
+						}
+					}
+				}
+			} else {
+				for index, die := range dice {
+					goalPlace := currState[die]
+					if !(strings.Contains(goalPlace, "w") && len(goalPlace) >= 2) {
+						move.Slot = 25
+						move.Die = -die
+						move.DieIndex = index
+						move.CapturePiece = false
+						possibleMoves = append(possibleMoves, move)
+					}
+				}
+			}
 		}
 	}
 
@@ -106,19 +147,6 @@ func checkForCapturedPiece(endSlotState string) bool {
 	return len(endSlotState) == 1
 }
 
-//func capturePiece (slot, color)
-// have some kind of object to keep track of captured pieces. Could be struct captured with w: and b: or just a list/slice of w's and b's
-//if checkForCapturedPiece is true, add piece to captured pieces, and remove it from the board (so updateboard)
-//right now updatestate takes in a move. Either change updatestate to take in pice, from, too, or make a separate update function,
-//or make a move that
-//reflects capturing, and make a way to handle that in updateState
-
-//TODO:
-//create capturePiece
-//create checkForCapturedPiece
-//update the updateState function
-//call capturePiece in the appropriate place - decide where you want to call checkForCapturedPiece
-
 func RollDice(numDice int) []int {
 	var dice []int
 	for i := 0; i < numDice; i++ {
@@ -133,12 +161,7 @@ type Game struct {
 	Player1  Player
 	Player2  Player
 	State    [26]string
-	Captured map[string]int //so like w:2, b:3. Make sure to make this whenever we intialize Game!
-	//only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
-	//NOTE that this is currently wrong. We need this to be a player, but either human or AI, i dont know how to do that
-	//needs to not be an ai, but a player, a general human or ai - i think we might need a player struct...
-	//state map[string]string //maps a string to an int, kind of like dictionary in python. Could also use array for this.
-
+	Captured map[string]int
 }
 
 type MoveType struct {
