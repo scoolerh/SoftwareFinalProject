@@ -1,12 +1,12 @@
 services:
   ai:
     build: ./AI
-    ports:
-      - "7555:5000"
+    expose: 
+      - "7555"
   db:
     build: ./db
-    ports:
-      - "7788:5000"
+    expose: 
+      - "7788"
   app:
     build: ./app
     ports: 
