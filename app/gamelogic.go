@@ -76,6 +76,18 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	return possibleMoves
 }
 
+func checkForCapturedPiece(move MoveType) bool {
+	//if the slot we are moving to/have moved to (be very aware of this!) has one of the different color, return true
+	//not sure if this needs to be separate, or just part of capturePiece
+	return false
+}
+
+//func capturePiece (slot, color)
+// have some kind of object to keep track of captured pieces. Could be struct captured with w: and b: or just a list/slice of w's and b's
+//if checkForCapturedPiece is true, add piece to captured pieces, and remove it from the board (so updateboard)
+//right now updatestate takes in a move. Either change updatestate to take in pice, from, too, or make a separate update function, or make a move that
+//reflects capturing, and make a way to handle that in updateState
+
 func RollDice(numDice int) []int {
 	var dice []int
 	for i := 0; i < numDice; i++ {
@@ -133,34 +145,6 @@ func GetAIMove(possibleMoves []MoveType, color string) MoveType {
 		return possibleMoves[len(possibleMoves)]
 	}
 }
-
-// type gamestate struct { //could use this or a map for the gamestate - example of map is at the bottom
-// 	tile0, tile1, tile2, tile3, tile4, tile5, tile6, tile7, tile8, tile9, tile10, tile11, tile12, tile13, tile14, tile15, tile16, tile17,
-// 	tile18, tile19, tile20, tile21, tile22, tile23, tile24, tile25 string //this might need to be improved...
-// }
-
-/* 	// Create a map with string keys and int values
-myMap := make(map[string]int)
-
-// Assign values to keys
-myMap["one"] = 1
-myMap["two"] = 2
-myMap["three"] = 3
-
-// Access values using keys
-fmt.Println("Value for key 'two':", myMap["two"])
-
-// Check if a key exists
-value, exists := myMap["four"]
-if exists {
-	fmt.Println("Value for key 'four':", value)
-} else {
-	fmt.Println("Key 'four' does not exist.")
-}
-
-initialState := map[string]string{"0": "", "1": "ww", "2": "", "3": "", "4": "", "5": "", "6": "bbbbbb", "7": "", "8": "bbb", "9": "", "10": "", "11": "", "12": "wwwwww",
-	// "13": "bbbbb", "14": "", "15": "", "16": "", "17": "www", "18": "", "19": "wwwww", "20": "", "21": "", "22": "", "23": "", "24": "bb", "25": ""}
-*/
 
 // from tutorialspoint.com
 func DeleteElement(slice []int, index int) []int {
