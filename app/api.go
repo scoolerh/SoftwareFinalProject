@@ -25,9 +25,17 @@ func login(writer http.ResponseWriter, req *http.Request) {
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	p1, p2 := Player{Id: 1, Color: "w"}, Player{Id: 2, Color: "b"} //will need to be an input in the future
 	gameid := len(games)
-	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState}
+	capturedMap := initializeCapturedMap()
+	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
 	games = append(games, game)
 	http.ServeFile(writer, req, "./html/game.html")
+}
+
+func initializeCapturedMap() map[string]int {
+	m := make(map[string]int)
+	m["w"] = 0
+	m["b"] = 0
+	return m
 }
 
 // todo: Check whose turn it is, if the game is won, have the player make a move

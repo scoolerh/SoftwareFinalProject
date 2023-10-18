@@ -27,6 +27,14 @@ func (g Game) Move(player Player) {
 			dice[move.DieIndex] = move.Die
 		}
 
+		//may want to abstract better later - fix when everything else is working
+		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
+		_ = endSlot
+		if checkForCapturedPiece(endSlotState) {
+			move.CapturePiece = true
+			g.Captured["player.Color"] += 1
+		}
+
 		g.UpdateState(player.Color, move)
 		dice = DeleteElement(dice, move.DieIndex)
 	}
@@ -35,13 +43,22 @@ func (g Game) Move(player Player) {
 func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 	currState := g.State
 	die := move.Die
-	//figure out how to do two moves
+	//call getEndSpace where that is applicable
 	originalSpace := move.Slot
 	newSpace := originalSpace + die
-	originalSpaceState := currState[originalSpace]                          //change this variable name? //check indexing +/- 1 error
-	currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
-	newSpaceState := currState[newSpace]
-	currState[newSpace] = newSpaceState + playerColor
+	originalSpaceState := currState[originalSpace] //change this variable name? //check indexing +/- 1 error
+
+	if move.CapturePiece {
+		currState[newSpace] = playerColor
+	} else {
+		currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
+		newSpaceState := currState[newSpace]
+		currState[newSpace] = newSpaceState + playerColor
+
+		// the three above lines could probably be simplified to
+		//currState[newSpace] = currState[newSpace] + playerColor
+	}
+
 	g.State = currState
 	return g.State
 }
@@ -61,6 +78,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 							moveToDo.Slot = i
 							moveToDo.Die = die
 							moveToDo.DieIndex = index
+							moveToDo.CapturePiece = false
 							possibleMoves = append(possibleMoves, moveToDo)
 						}
 					}
@@ -76,17 +94,30 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	return possibleMoves
 }
 
-func checkForCapturedPiece(move MoveType) bool {
-	//if the slot we are moving to/have moved to (be very aware of this!) has one of the different color, return true
-	//not sure if this needs to be separate, or just part of capturePiece
-	return false
+func getEndSlot(move MoveType, gameState [26]string) (int, string) {
+	originalSlot := move.Slot
+	dieRoll := move.Die
+	endSlot := originalSlot + dieRoll
+	endSlotState := gameState[endSlot]
+	return endSlot, endSlotState
+}
+
+func checkForCapturedPiece(endSlotState string) bool {
+	return len(endSlotState) == 1
 }
 
 //func capturePiece (slot, color)
 // have some kind of object to keep track of captured pieces. Could be struct captured with w: and b: or just a list/slice of w's and b's
 //if checkForCapturedPiece is true, add piece to captured pieces, and remove it from the board (so updateboard)
-//right now updatestate takes in a move. Either change updatestate to take in pice, from, too, or make a separate update function, or make a move that
+//right now updatestate takes in a move. Either change updatestate to take in pice, from, too, or make a separate update function,
+//or make a move that
 //reflects capturing, and make a way to handle that in updateState
+
+//TODO:
+//create capturePiece
+//create checkForCapturedPiece
+//update the updateState function
+//call capturePiece in the appropriate place - decide where you want to call checkForCapturedPiece
 
 func RollDice(numDice int) []int {
 	var dice []int
@@ -98,10 +129,11 @@ func RollDice(numDice int) []int {
 }
 
 type Game struct {
-	Gameid  int
-	Player1 Player
-	Player2 Player
-	State   [26]string
+	Gameid   int
+	Player1  Player
+	Player2  Player
+	State    [26]string
+	Captured map[string]int //so like w:2, b:3. Make sure to make this whenever we intialize Game!
 	//only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
 	//NOTE that this is currently wrong. We need this to be a player, but either human or AI, i dont know how to do that
 	//needs to not be an ai, but a player, a general human or ai - i think we might need a player struct...
@@ -111,6 +143,7 @@ type Game struct {
 
 type MoveType struct {
 	Slot, Die, DieIndex int
+	CapturePiece        bool
 }
 
 type Player struct {
