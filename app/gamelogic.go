@@ -112,18 +112,22 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	currState := g.State
 
 	if currPlayer == "w" {
+		canMovePiecesHome := g.isMovingHomePossible("w")
 		if g.Captured["w"] == 0 {
 			for i := 1; i <= 24; i++ {
 				if strings.Contains(currState[i], "w") {
 					for index, die := range dice {
 						if 25-i >= die {
-							goalPlace := currState[i+die]
-							if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
-								move.Slot = i
-								move.Die = die
-								move.DieIndex = index
-								move.CapturePiece = false
-								possibleMoves = append(possibleMoves, move)
+							goalSlot := i + die
+							goalState := currState[i+die]
+							if canMovePiecesHome || goalSlot != 0 {
+								if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
+									move.Slot = i
+									move.Die = die
+									move.DieIndex = index
+									move.CapturePiece = false
+									possibleMoves = append(possibleMoves, move)
+								}
 							}
 						}
 					}
@@ -131,8 +135,8 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		} else {
 			for index, die := range dice {
-				goalPlace := currState[die]
-				if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
+				goalState := currState[die]
+				if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
 					move.Slot = 0
 					move.Die = die
 					move.DieIndex = index
@@ -142,34 +146,38 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 	} else if currPlayer == "b" {
-		for i := 1; i <= 24; i++ {
-			if g.Captured["b"] == 0 {
+		canMovePiecesHome := g.isMovingHomePossible("b")
+		if g.Captured["b"] == 0 {
+			for i := 1; i <= 24; i++ {
 				for i := 1; i <= 24; i++ {
 					if strings.Contains(currState[i], "b") {
 						for index, die := range dice {
 							if i >= die {
-								goalPlace := currState[i-die]
-								if !(strings.Contains(goalPlace, "w") && len(goalPlace) >= 2) {
-									move.Slot = i
-									move.Die = -die
-									move.DieIndex = index
-									move.CapturePiece = false
-									possibleMoves = append(possibleMoves, move)
+								goalSlot := i - die
+								goalState := currState[i-die]
+								if canMovePiecesHome || goalSlot != 0 {
+									if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
+										move.Slot = i
+										move.Die = -die
+										move.DieIndex = index
+										move.CapturePiece = false
+										possibleMoves = append(possibleMoves, move)
+									}
 								}
 							}
 						}
 					}
 				}
-			} else {
-				for index, die := range dice {
-					goalPlace := currState[die]
-					if !(strings.Contains(goalPlace, "w") && len(goalPlace) >= 2) {
-						move.Slot = 25
-						move.Die = -die
-						move.DieIndex = index
-						move.CapturePiece = false
-						possibleMoves = append(possibleMoves, move)
-					}
+			}
+		} else {
+			for index, die := range dice {
+				goalState := currState[die]
+				if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
+					move.Slot = 25
+					move.Die = -die
+					move.DieIndex = index
+					move.CapturePiece = false
+					possibleMoves = append(possibleMoves, move)
 				}
 			}
 		}
