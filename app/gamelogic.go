@@ -11,20 +11,6 @@ type Gameplay interface {
 	GetPossibleMoves() []MoveType                 //returns an array of moves (slot, die)
 	UpdateState()                                 //updates the state of the game to reflect the recent move
 	isMovingHomePossible(playerColor string) bool //make capital if needed outside of package
-	CheckForWin() string                          //checks for a game win //TODO: copy/paste into right branch
-}
-
-func (g Game) CheckForWin() string {
-	// returns empty string if nobody has won. Else, returns "b" or "w" //TODO: copy/paste into right branch
-	gamestate := g.State
-	if len(gamestate[0]) == 15 {
-		return "b"
-	} else if len(gamestate[25]) == 15 {
-		return "w"
-	} else {
-		return ""
-	}
-
 }
 
 func (g Game) isMovingHomePossible(playerColor string) bool {
