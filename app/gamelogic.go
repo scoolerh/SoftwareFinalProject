@@ -7,10 +7,62 @@ import (
 
 type Gameplay interface {
 	//all these still need to be implemented
-	Move() map[string]string      //move should call getMove and doMove
-	GetPossibleMoves() []MoveType //returns an array of moves (slot, die)
-	UpdateState()                 //updates the state of the game to reflect the recent move
+	Move() map[string]string                      //move should call getMove and doMove
+	GetPossibleMoves() []MoveType                 //returns an array of moves (slot, die)
+	UpdateState()                                 //updates the state of the game to reflect the recent move
+	isMovingHomePossible(playerColor string) bool //make capital if needed outside of package
+	CheckForWin() string                          //checks for a game win //TODO: copy/paste into right branch
 }
+
+func (g Game) CheckForWin() string {
+	// returns empty string if nobody has won. Else, returns "b" or "w" //TODO: copy/paste into right branch
+	gamestate := g.State
+	if len(gamestate[0]) == 15 {
+		return "b"
+	} else if len(gamestate[25]) == 15 {
+		return "w"
+	} else {
+		return ""
+	}
+
+}
+
+func (g Game) isMovingHomePossible(playerColor string) bool {
+	gameState := g.State
+	var outPieces int
+	if playerColor == "w" {
+		for i := 1; i <= 18; i++ {
+			if strings.Contains(gameState[i], "w") {
+				outPieces += 1
+			}
+		}
+		if outPieces == 0 && g.Captured["w"] == 0 {
+			return true
+		} else {
+			return false
+		}
+	} else {
+		for i := 7; i <= 24; i++ {
+			if strings.Contains(gameState[i], "b") {
+				outPieces += 1
+			}
+		}
+		if outPieces == 0 && g.Captured["b"] == 0 {
+			return true
+		} else {
+			return false
+		}
+	}
+}
+
+/*
+NOTES: make moving pieces home only possible if all pieces are in final board slot
+- a function like isMovingHomePossible
+	- Will check if any pieces are outside of the 6 home slots
+- update getPossibleMoves
+	- if isMovingHomePossible returns false, remove moves that end on home slot
+	- if true, continue as normal (right?) (update exact rules for this later)
+*/
 
 // currently returning nothing. originally returned game state but i don't think we need to
 func (g Game) Move(player Player) {
@@ -64,6 +116,7 @@ func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 }
 
 func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
+	//run as normally, then remove illegal moves if not isMovingHomePossible? Or check first?
 	var move MoveType
 	var possibleMoves []MoveType
 	currState := g.State
