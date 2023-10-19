@@ -6,17 +6,17 @@ import (
 )
 
 type Gameplay interface {
-	//all these still need to be implemented
 	Move() map[string]string      //move should call getMove and doMove
 	GetPossibleMoves() []MoveType //returns an array of moves (slot, die)
 	UpdateState()                 //updates the state of the game to reflect the recent move
 	IsWon() bool
-	isMovingHomePossible(playerColor string) bool //make capital if needed outside of package
+	isBearingOffAllowed(playerColor string) bool //make capital if needed outside of package
 }
 
 func (g Game) IsWon() string {
 	// returns empty string if nobody has won. Else, returns "b" or "w"
 	gamestate := g.State
+	//checks if all pieces are beared off
 	if len(gamestate[0]) == 15 {
 		return "b"
 	} else if len(gamestate[25]) == 15 {
@@ -26,7 +26,8 @@ func (g Game) IsWon() string {
 	}
 }
 
-func (g Game) isMovingHomePossible(playerColor string) bool {
+func (g Game) isBearingOffAllowed(playerColor string) bool {
+	//checks if any pieces are not in home board
 	gameState := g.State
 	var outPieces int
 	if playerColor == "w" {
@@ -56,6 +57,8 @@ func (g Game) isMovingHomePossible(playerColor string) bool {
 
 // currently returning nothing. originally returned game state but i don't think we need to
 func (g Game) Move(player Player) {
+	//administers everything that is needed to identify and execute move.
+	//Changes done here lately might have to be reflected in changes to updateBoard
 	dice := RollDice(2) //change to input?
 	for i := 0; i < len(dice); i++ {
 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
@@ -69,10 +72,10 @@ func (g Game) Move(player Player) {
 			dice[move.DieIndex] = move.Die
 		}
 
-		//may want to abstract better later - fix when everything else is working
+		//may want to abstract better later - fix when everything else is working (this might need to be redone when play endpoint is done)
 		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
 		_ = endSlot
-		if checkForCapturedPiece(endSlotState) {
+		if willCapturePiece(endSlotState) {
 			move.CapturePiece = true
 			g.Captured["player.Color"] += 1
 		}
@@ -83,6 +86,7 @@ func (g Game) Move(player Player) {
 }
 
 func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
+	//updates the state of the board to reflect most recent move
 	currState := g.State
 	die := move.Die
 	//call getEndSpace where that is applicable
@@ -106,22 +110,31 @@ func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 }
 
 func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
-	//run as normally, then remove illegal moves if not isMovingHomePossible? Or check first?
+	//gets all the possible moves the player can choose from
 	var move MoveType
 	var possibleMoves []MoveType
 	currState := g.State
 
+	//logic for finding white's moves
 	if currPlayer == "w" {
-		canMovePiecesHome := g.isMovingHomePossible("w")
+		//checks if the player is allowed to bear off pieces. Uses this information later.
+		canBearOff := g.isBearingOffAllowed("w")
+		//finds all possible moves when there are no captured pieces
 		if g.Captured["w"] == 0 {
+			//loops through all slots of board
 			for i := 1; i <= 24; i++ {
+				//locates slots where white has pieces
 				if strings.Contains(currState[i], "w") {
 					for index, die := range dice {
+						//checks that the move won't move the piece off the board
 						if 25-i >= die {
 							goalSlot := i + die
 							goalState := currState[i+die]
-							if canMovePiecesHome || goalSlot != 0 {
+							//checks that either bearing off is legal, or that we are not planning on bearing off
+							if canBearOff || goalSlot != 0 {
+								//checks that the goal slot is not occupied by tower of opposite color
 								if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
+									//gets necessary numbers and adds move to list
 									move.Slot = i
 									move.Die = die
 									move.DieIndex = index
@@ -133,9 +146,12 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 					}
 				}
 			}
+			//if we have captured pieces, those are the only ones that can move
 		} else {
 			for index, die := range dice {
+				//captured pieces start from 0
 				goalState := currState[die]
+				//does not need to check for bearing off, it is not possible when starting from 0
 				if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
 					move.Slot = 0
 					move.Die = die
@@ -145,8 +161,11 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 				}
 			}
 		}
+
+		//same process for black.
+		//Note that black moves in opposite direction of white, so bearing of slot, home board and direction of dice are all different
 	} else if currPlayer == "b" {
-		canMovePiecesHome := g.isMovingHomePossible("b")
+		canBearOff := g.isBearingOffAllowed("b")
 		if g.Captured["b"] == 0 {
 			for i := 1; i <= 24; i++ {
 				for i := 1; i <= 24; i++ {
@@ -155,7 +174,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 							if i >= die {
 								goalSlot := i - die
 								goalState := currState[i-die]
-								if canMovePiecesHome || goalSlot != 0 {
+								if canBearOff || goalSlot != 0 {
 									if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
 										move.Slot = i
 										move.Die = -die
@@ -187,6 +206,8 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 }
 
 func getEndSlot(move MoveType, gameState [26]string) (int, string) {
+	//helper function to get the end slot and end state of a move (where the piece is moving to)
+	//is not used a lot yet. Should be used more later when we improve levels of abstraction
 	originalSlot := move.Slot
 	dieRoll := move.Die
 	endSlot := originalSlot + dieRoll
@@ -194,11 +215,13 @@ func getEndSlot(move MoveType, gameState [26]string) (int, string) {
 	return endSlot, endSlotState
 }
 
-func checkForCapturedPiece(endSlotState string) bool {
+func willCapturePiece(endSlotState string) bool {
+	//checks if there is a piece thats captured if move is made
 	return len(endSlotState) == 1
 }
 
 func RollDice(numDice int) []int {
+	//helper function to roll dice
 	var dice []int
 	for i := 0; i < numDice; i++ {
 		die := rand.Intn(6) + 1
@@ -227,6 +250,7 @@ type Player struct {
 }
 
 func GetMove(possibleMoves []MoveType, player Player) MoveType {
+	//prompts either the player or the AI to pick a move
 	var move MoveType
 	if player.Id == 0 { //AI
 		move = GetAIMove(possibleMoves, player.Color)
@@ -238,6 +262,7 @@ func GetMove(possibleMoves []MoveType, player Player) MoveType {
 }
 
 func GetHumanMove(possibleMoves []MoveType, color string) MoveType {
+	//dummy function
 	if color == "w" {
 		return possibleMoves[0]
 	} else {
@@ -247,6 +272,7 @@ func GetHumanMove(possibleMoves []MoveType, color string) MoveType {
 
 // change this implementation
 func GetAIMove(possibleMoves []MoveType, color string) MoveType {
+	//picks the first possible move to do. Will be improved in the future
 	if color == "w" {
 		return possibleMoves[0]
 	} else {
