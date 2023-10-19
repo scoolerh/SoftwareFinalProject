@@ -89,6 +89,7 @@ type Game struct {
 	Gameid  int
 	Player1 Player
 	Player2 Player
+	CurrTurn Player
 	State   [26]string
 	//only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
 	//NOTE that this is currently wrong. We need this to be a player, but either human or AI, i dont know how to do that

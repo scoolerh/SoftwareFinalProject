@@ -27,10 +27,11 @@ func login(writer http.ResponseWriter, req *http.Request) {
 // Creates a new game for the user
 // TODO: Create a button that sends user to /play endpoint with corresponding game id
 // TODO: Get user input about players, initial state
+// TODO: Get new player IDs with each new game
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	p1, p2 := Player{Id: 1, Color: "w"}, Player{Id: 2, Color: "b"} //will need to be an input in the future
 	gameid := len(games)
-	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState}
+	game := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: p1, State: initialState}
 	games = append(games, game)
 	http.ServeFile(writer, req, "../Frontend/html/game.html")
 }
@@ -45,20 +46,22 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 	game := games[gameid]
 
-	var gameWon bool 	//default is False
-	var currPlayer = "w" //should always be "w" or "b"
-	//plays 10 moves
+	// var gameWon bool 	//default is False
+
+	// do 10 moves
 	//for loop placeholder for testing. should be: for !gameWon {
 	for i:= 0; i < 10; i++ {
 		dice := RollDice(2)
 		for i := 0; i < len(dice); i++ {
-			possibleMoves := game.GetPossibleMoves(dice, game.player.Color)
+			tmpl := template.Must(template.ParseFiles("../Frontend/html/play.html"))
+			possibleMoves := game.GetPossibleMoves(dice, game.CurrTurn.Color)
 			if len(possibleMoves) == 0 {
 				fmt.Fprint(writer, "no possible moves")
 				break 	//tell player there are no moves, go to next turn
 			}
-			if game.player.Id != 0 {
-				err = testTemplate.execute(writer, possibleMoves)
+			var move MoveType
+			if game.CurrTurn.Id != 0 {
+				err := tmpl.Execute(writer, possibleMoves)
 				if err != nil {
 					panic(err)
 				}
@@ -67,26 +70,27 @@ func play(writer http.ResponseWriter, req *http.Request) {
 				if err != nil {
 					panic(err)
 				}
+				fmt.Println(reqBody) // for testing
 
-				move := GetHumanMove(possibleMoves, game.player.Color) //TODO: get user input
+				// move := GetHumanMove(possibleMoves, game.CurrTurn.Color) //TODO: get user input
 			} else {
 				http.ServeFile(writer, req, "../Frontend/html/play.html")
-				move := GetAIMove(possibleMoves, game.player.Color)
+				// move := GetAIMove(possibleMoves, game.CurrTurn.Color)
 			}
 
-			if game.player.Color == "b" {
+			if game.CurrTurn.Color == "b" {
 				dice[i] = -move.Die		//was originally move.DieIndex
-			} else if player.Color == "w" {
+			} else if game.CurrTurn.Color == "w" {
 				dice[i] = move.Die		//was originally move.DieIndex
 			}
-			game.UpdateState(player.Color, move)
+			game.UpdateState(game.CurrTurn.Color, move)
 			dice = DeleteElement(dice, move.DieIndex)
 			http.ServeFile(writer, req, "../Frontend/html/play.html")
 		}
-		if currPlayer == "w" {
-			currPlayer == "b"
+		if game.CurrTurn == game.Player1 {
+			game.CurrTurn = game.Player2
 		} else {
-			currPlayer == "w"
+			game.CurrTurn = game.Player1
 		}
 		//gameWon := IsWon()
 	}
@@ -109,7 +113,6 @@ func scoreboard(writer http.ResponseWriter, req *http.Request) {
 func main() {
 	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
 	http.HandleFunc("/newgame", newgame)
-	tmpl := template.Must(template.ParseFiles("play.html"))		//do we need path?
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/won", won)
