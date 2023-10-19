@@ -7,10 +7,23 @@ import (
 
 type Gameplay interface {
 	//all these still need to be implemented
-	Move() map[string]string                      //move should call getMove and doMove
-	GetPossibleMoves() []MoveType                 //returns an array of moves (slot, die)
-	UpdateState()                                 //updates the state of the game to reflect the recent move
+	Move() map[string]string      //move should call getMove and doMove
+	GetPossibleMoves() []MoveType //returns an array of moves (slot, die)
+	UpdateState()                 //updates the state of the game to reflect the recent move
+	IsWon() bool
 	isMovingHomePossible(playerColor string) bool //make capital if needed outside of package
+}
+
+func (g Game) IsWon() string {
+	// returns empty string if nobody has won. Else, returns "b" or "w"
+	gamestate := g.State
+	if len(gamestate[0]) == 15 {
+		return "b"
+	} else if len(gamestate[25]) == 15 {
+		return "w"
+	} else {
+		return ""
+	}
 }
 
 func (g Game) isMovingHomePossible(playerColor string) bool {
@@ -40,15 +53,6 @@ func (g Game) isMovingHomePossible(playerColor string) bool {
 		}
 	}
 }
-
-/*
-NOTES: make moving pieces home only possible if all pieces are in final board slot
-- a function like isMovingHomePossible
-	- Will check if any pieces are outside of the 6 home slots
-- update getPossibleMoves
-	- if isMovingHomePossible returns false, remove moves that end on home slot
-	- if true, continue as normal (right?) (update exact rules for this later)
-*/
 
 // currently returning nothing. originally returned game state but i don't think we need to
 func (g Game) Move(player Player) {
@@ -199,6 +203,7 @@ type Game struct {
 	Gameid   int
 	Player1  Player
 	Player2  Player
+	CurrTurn Player
 	State    [26]string
 	Captured map[string]int
 }
