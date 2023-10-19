@@ -71,6 +71,7 @@ func (g Game) Move(player Player) {
 		}
 		log.Println("letting player choose move")
 		move := GetMove(possibleMoves, player)
+		log.Printf("player %s chose move %v", player.Color, move)
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
 		} else if player.Color == "w" {
@@ -94,13 +95,17 @@ func (g Game) Move(player Player) {
 
 func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 	//updates the state of the board to reflect most recent move
+	//NOTE! THIS IS NOT DOING WHAT IT SHOULD DO!! NEEDS FIXING
 	currState := g.State
 	die := move.Die
 	//call getEndSpace where that is applicable
 	originalSpace := move.Slot
 	newSpace := originalSpace + die
-	originalSpaceState := currState[originalSpace] //change this variable name? //check indexing +/- 1 error
+	originalSpaceState := currState[originalSpace]
+	//removing piece from original space
+	currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
 
+	//if piece in endSlot is captured there will only be one piece there
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -113,6 +118,7 @@ func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 	}
 
 	g.State = currState
+	log.Printf("state updated to: %v", g.State)
 	return g.State
 }
 
@@ -273,7 +279,7 @@ func GetHumanMove(possibleMoves []MoveType, color string) MoveType {
 	if color == "w" {
 		return possibleMoves[0]
 	} else {
-		return possibleMoves[len(possibleMoves)]
+		return possibleMoves[len(possibleMoves)-1]
 	}
 }
 
@@ -283,7 +289,7 @@ func GetAIMove(possibleMoves []MoveType, color string) MoveType {
 	if color == "w" {
 		return possibleMoves[0]
 	} else {
-		return possibleMoves[len(possibleMoves)]
+		return possibleMoves[len(possibleMoves)-1]
 	}
 }
 

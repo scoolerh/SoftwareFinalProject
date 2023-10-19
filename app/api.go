@@ -47,11 +47,11 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		// returning and printing boardState for testing purposes
 		log.Println("calling move for player 1 and testing log")
 		game.Move(game.Player1)
-		fmt.Fprint(writer, "player 1 made a move ")
+		fmt.Fprint(writer, "player 1 made a move \n")
+		fmt.Fprint(writer, game.State) //this game is not updated. See terminal for game
 		game.Move(game.Player2)
-		//print the game state
-		fmt.Fprint(writer, "player 2 made a move: ")
-		//print the game state
+		fmt.Fprint(writer, "player 2 made a move \n")
+		fmt.Fprint(writer, game.State)
 	}
 
 	/*original thing:
