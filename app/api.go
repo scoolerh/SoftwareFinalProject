@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"io/ioutil"
+	"html/template"
+	// "encoding/json" // Maybe don't need this
 )
 
 var games []Game //will be a valid type when we fix packages
@@ -21,7 +24,9 @@ func login(writer http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(writer, "Welcome "+username+" !")
 }
 
-// Starts a new game for the user and displays the initial board
+// Creates a new game for the user
+// TODO: Create a button that sends user to /play endpoint with corresponding game id
+// TODO: Get user input about players, initial state
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	p1, p2 := Player{Id: 1, Color: "w"}, Player{Id: 2, Color: "b"} //will need to be an input in the future
 	gameid := len(games)
@@ -30,7 +35,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	http.ServeFile(writer, req, "../Frontend/html/game.html")
 }
 
-// todo: Check whose turn it is, if the game is won, have the player make a move
+// Assume correct game-id is given.
 func play(writer http.ResponseWriter, req *http.Request) {
 	//make sure to get the gameid through the url
 	gameStr := req.URL.Query().Get("gameid")
@@ -40,18 +45,51 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 	game := games[gameid]
 
+	var gameWon bool 	//default is False
+	var currPlayer = "w" //should always be "w" or "b"
 	//plays 10 moves
-	for i := 0; i < 10; i++ {
-		// returning and printing boardState for testing purposes
-		game.Move(game.Player1)
-		
-		fmt.Fprint(writer, "player 1 made a move ")
-		game.Move(game.Player2)
-		//print the game state
-		fmt.Fprint(writer, "player 2 made a move: ")
-		//print the game state
+	//for loop placeholder for testing. should be: for !gameWon {
+	for i:= 0; i < 10; i++ {
+		dice := RollDice(2)
+		for i := 0; i < len(dice); i++ {
+			possibleMoves := game.GetPossibleMoves(dice, game.player.Color)
+			if len(possibleMoves) == 0 {
+				fmt.Fprint(writer, "no possible moves")
+				break 	//tell player there are no moves, go to next turn
+			}
+			if game.player.Id != 0 {
+				err = testTemplate.execute(writer, possibleMoves)
+				if err != nil {
+					panic(err)
+				}
+				http.ServeFile(writer, req, "../Frontend/html/play.html")
+				reqBody, err := ioutil.ReadAll(req.Body)
+				if err != nil {
+					panic(err)
+				}
+
+				move := GetHumanMove(possibleMoves, game.player.Color) //TODO: get user input
+			} else {
+				http.ServeFile(writer, req, "../Frontend/html/play.html")
+				move := GetAIMove(possibleMoves, game.player.Color)
+			}
+
+			if game.player.Color == "b" {
+				dice[i] = -move.Die		//was originally move.DieIndex
+			} else if player.Color == "w" {
+				dice[i] = move.Die		//was originally move.DieIndex
+			}
+			game.UpdateState(player.Color, move)
+			dice = DeleteElement(dice, move.DieIndex)
+			http.ServeFile(writer, req, "../Frontend/html/play.html")
+		}
+		if currPlayer == "w" {
+			currPlayer == "b"
+		} else {
+			currPlayer == "w"
+		}
+		//gameWon := IsWon()
 	}
-	//does this need to return something?
 }
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
@@ -71,6 +109,7 @@ func scoreboard(writer http.ResponseWriter, req *http.Request) {
 func main() {
 	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
 	http.HandleFunc("/newgame", newgame)
+	tmpl := template.Must(template.ParseFiles("play.html"))		//do we need path?
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/won", won)
