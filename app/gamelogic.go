@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"strings"
 )
@@ -59,12 +60,16 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 func (g Game) Move(player Player) {
 	//administers everything that is needed to identify and execute move.
 	//Changes done here lately might have to be reflected in changes to updateBoard
+	log.Println("rolling dice")
 	dice := RollDice(2) //change to input?
 	for i := 0; i < len(dice); i++ {
+		log.Println("getting possible move for this set of dice")
 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
 		if len(possibleMoves) == 0 {
+			log.Println("No possible moves, returning empty")
 			return
 		}
+		log.Println("letting player choose move")
 		move := GetMove(possibleMoves, player)
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
@@ -72,6 +77,7 @@ func (g Game) Move(player Player) {
 			dice[move.DieIndex] = move.Die
 		}
 
+		log.Println("Checks if piece needs to be captured")
 		//may want to abstract better later - fix when everything else is working (this might need to be redone when play endpoint is done)
 		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
 		_ = endSlot
@@ -80,6 +86,7 @@ func (g Game) Move(player Player) {
 			g.Captured["player.Color"] += 1
 		}
 
+		log.Println("updates gamestate according to move")
 		g.UpdateState(player.Color, move)
 		dice = DeleteElement(dice, move.DieIndex)
 	}
@@ -97,12 +104,12 @@ func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
-		currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
-		newSpaceState := currState[newSpace]
-		currState[newSpace] = newSpaceState + playerColor
+		// currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
+		// newSpaceState := currState[newSpace]
+		// currState[newSpace] = newSpaceState + playerColor
 
 		// the three above lines could probably be simplified to
-		//currState[newSpace] = currState[newSpace] + playerColor
+		currState[newSpace] = currState[newSpace] + playerColor
 	}
 
 	g.State = currState
