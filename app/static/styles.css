@@ -1,1 +1,32 @@
+header, footer
+{
+    background-color: green;
+    width: 100%;
+    text-align: center; 
+    display: inline;
+}
+body
+{
+    line-height: 1;
+    font-size: 12;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+h1
+{
+    color: white;
+    font-size: 150%;
+    text-align: center;
+}
+section
+{
+    background-color: rgba(188, 188, 206, 0.708);
+    border: 2px whitesmoke;
+    text-align: center;
+    border-radius: 15px; 
+    padding: 15px; 
+    margin: 20px 10%;
+}
 
