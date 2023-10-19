@@ -44,6 +44,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	for i := 0; i < 10; i++ {
 		// returning and printing boardState for testing purposes
 		game.Move(game.Player1)
+		
 		fmt.Fprint(writer, "player 1 made a move ")
 		game.Move(game.Player2)
 		//print the game state
