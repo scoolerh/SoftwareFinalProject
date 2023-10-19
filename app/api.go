@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-	"io/ioutil"
-	"html/template"
 	// "encoding/json" // Maybe don't need this
 )
 
@@ -46,18 +46,18 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 	game := games[gameid]
 
-	// var gameWon bool 	//default is False
+	var gameWon bool //default is False (this is annoyed. Do we have to declare it inside the loop?)
 
 	// do 10 moves
 	//for loop placeholder for testing. should be: for !gameWon {
-	for i:= 0; i < 10; i++ {
+	for i := 0; i < 10; i++ {
 		dice := RollDice(2)
 		for i := 0; i < len(dice); i++ {
 			tmpl := template.Must(template.ParseFiles("../Frontend/html/play.html"))
 			possibleMoves := game.GetPossibleMoves(dice, game.CurrTurn.Color)
 			if len(possibleMoves) == 0 {
 				fmt.Fprint(writer, "no possible moves")
-				break 	//tell player there are no moves, go to next turn
+				break //tell player there are no moves, go to next turn
 			}
 			var move MoveType
 			if game.CurrTurn.Id != 0 {
@@ -79,9 +79,9 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			}
 
 			if game.CurrTurn.Color == "b" {
-				dice[i] = -move.Die		//was originally move.DieIndex
+				dice[i] = -move.Die //was originally move.DieIndex
 			} else if game.CurrTurn.Color == "w" {
-				dice[i] = move.Die		//was originally move.DieIndex
+				dice[i] = move.Die //was originally move.DieIndex
 			}
 			game.UpdateState(game.CurrTurn.Color, move)
 			dice = DeleteElement(dice, move.DieIndex)
@@ -92,7 +92,13 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		} else {
 			game.CurrTurn = game.Player1
 		}
-		//gameWon := IsWon()
+
+		//We might want to change how this works. IsWon returns "" or "w" or "b" so we can return the winner of the game
+		if game.IsWon() == "" {
+			gameWon = false
+		} else {
+			gameWon = true
+		}
 	}
 }
 

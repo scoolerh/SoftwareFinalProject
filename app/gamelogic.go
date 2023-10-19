@@ -10,6 +10,19 @@ type Gameplay interface {
 	Move() map[string]string      //move should call getMove and doMove
 	GetPossibleMoves() []MoveType //returns an array of moves (slot, die)
 	UpdateState()                 //updates the state of the game to reflect the recent move
+	IsWon() bool
+}
+
+func (g Game) IsWon() string {
+	// returns empty string if nobody has won. Else, returns "b" or "w" //TODO: copy/paste into right branch
+	gamestate := g.State
+	if len(gamestate[0]) == 15 {
+		return "b"
+	} else if len(gamestate[25]) == 15 {
+		return "w"
+	} else {
+		return ""
+	}
 }
 
 // currently returning nothing. originally returned game state but i don't think we need to
@@ -86,11 +99,11 @@ func RollDice(numDice int) []int {
 }
 
 type Game struct {
-	Gameid  int
-	Player1 Player
-	Player2 Player
+	Gameid   int
+	Player1  Player
+	Player2  Player
 	CurrTurn Player
-	State   [26]string
+	State    [26]string
 	//only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
 	//NOTE that this is currently wrong. We need this to be a player, but either human or AI, i dont know how to do that
 	//needs to not be an ai, but a player, a general human or ai - i think we might need a player struct...
