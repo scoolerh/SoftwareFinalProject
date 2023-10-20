@@ -183,26 +183,40 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 
+		//NEEDS TO BE TESTED!
+		//YOU CAN MAKE A NEW INITIALSTATE TO TEST WHAT YOU WANT
+		if len(possibleMoves) == 0 && canBearOff {
+			for index, die := range dice {
+				for i := 25 - die; i < 25; i++ {
+					if strings.Contains(currState[i], "w") {
+						move.Slot = 25 - i
+						move.Die = i
+						move.DieIndex = index
+						move.CapturePiece = false
+						possibleMoves = append(possibleMoves, move)
+					}
+				}
+			}
+		}
+
 		//same process for black.
 		//Note that black moves in opposite direction of white, so bearing of slot, home board and direction of dice are all different
 	} else if currPlayer == "b" {
 		canBearOff := g.isBearingOffAllowed("b")
 		if g.Captured["b"] == 0 {
 			for i := 1; i <= 24; i++ {
-				for i := 1; i <= 24; i++ {
-					if strings.Contains(currState[i], "b") {
-						for index, die := range dice {
-							if i >= die {
-								goalSlot := i - die
-								goalState := currState[i-die]
-								if canBearOff || goalSlot != 0 {
-									if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
-										move.Slot = i
-										move.Die = -die
-										move.DieIndex = index
-										move.CapturePiece = false
-										possibleMoves = append(possibleMoves, move)
-									}
+				if strings.Contains(currState[i], "b") {
+					for index, die := range dice {
+						if i >= die {
+							goalSlot := i - die
+							goalState := currState[i-die]
+							if canBearOff || goalSlot != 0 {
+								if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
+									move.Slot = i
+									move.Die = -die
+									move.DieIndex = index
+									move.CapturePiece = false
+									possibleMoves = append(possibleMoves, move)
 								}
 							}
 						}
@@ -218,6 +232,21 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 					move.DieIndex = index
 					move.CapturePiece = false
 					possibleMoves = append(possibleMoves, move)
+				}
+			}
+		}
+		//NEEDS TO BE TESTED!
+		//YOU CAN MAKE A NEW INITIALSTATE TO TEST WHAT YOU WANT
+		if len(possibleMoves) == 0 && canBearOff {
+			for index, die := range dice {
+				for i := die; i > 0; i-- {
+					if strings.Contains(currState[i], "b") {
+						move.Slot = i
+						move.Die = -i
+						move.DieIndex = index
+						move.CapturePiece = false
+						possibleMoves = append(possibleMoves, move)
+					}
 				}
 			}
 		}
