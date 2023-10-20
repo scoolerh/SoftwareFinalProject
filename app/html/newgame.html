@@ -20,14 +20,10 @@
 
         <main>
             <section>
-                <p>One of the oldest known board games, Backgammon is 
-                    a super fun game for super fun people!
-                </p>
-                <p>This version was brought to you by Sophie Quinn, Hannah Scooler, Selma Vangstein, and Bryan Yang.</p>
-            </section>
-            <section>
-                <h2>How to Play: </h2>
-                <p>Rules list rules list</p>
+                <p>Game ID: {{ .id }}</p>
+                <p>White: {{ .p1 }}</p>
+                <p>Black: {{ .p2 }}</p>
+                <a href="/play"><button class="button">START GAME</button></a>
             </section>
         </main>
 

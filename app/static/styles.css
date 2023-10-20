@@ -1,32 +1,68 @@
-header, footer
+nav 
 {
-    background-color: green;
-    width: 100%;
-    text-align: center; 
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(0, 128, 0, 0.504);
+}
+nav ul li 
+{
     display: inline;
+    cursor: pointer;
+}
+nav ul li a
+{
+    text-decoration: none;
+    font-size: 150%;
+    color: white;
+    padding: 15px 8%;
+}
+nav ul li a:hover
+{
+    color: rgba(0, 128, 0, 0.504);
+    background-color: white;
 }
 body
 {
-    line-height: 1;
-    font-size: 12;
-    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-    margin: 0px;
-    padding: 0px;
+    font-family: 'Bookman', 'Lucida Sans', Geneva, sans-serif;
     text-align: center;
 }
 h1
 {
-    color: white;
-    font-size: 150%;
+    color: green;
+    font-size: 400%;
     text-align: center;
+    padding: 20px;
+    margin: 0px;
+    font-family: 'Blippo', 'Lucida Sans', fantasy;
+}
+p
+{
+    font-size: 120%;
 }
 section
-{
-    background-color: rgba(188, 188, 206, 0.708);
-    border: 2px whitesmoke;
+{   
+    color: black;
+    border-style: solid;
+    border-width: medium;
+    border-color: rgba(0, 128, 0, 0.504);
     text-align: center;
+    padding: 10px;
+    margin: 20px;
     border-radius: 15px; 
-    padding: 15px; 
-    margin: 20px 10%;
 }
-
+.button
+{
+    background-color: green;
+    color: white;
+    border-style: solid;
+    border-color: green;
+    border-width: medium;
+    border-radius: 15px;
+    text-decoration: none;
+    padding: 15px 30px 15px 30px;
+    font-size: 150%;
+}
+.button:hover 
+{
+    box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
