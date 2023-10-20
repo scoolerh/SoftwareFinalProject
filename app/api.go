@@ -43,17 +43,18 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(writer, "TIME TO PLAY \n")
 
 	game := games[0]
-	for i := 0; i < 10; i++ {
+	fmt.Fprintf(writer, "%v \n", game.State)
+	for i := 0; i < 50; i++ {
 		// returning and printing boardState for testing purposes
 		log.Println("calling move for player 1 and testing log")
 		game.Move(game.Player1)
 		//NOTE! GAME IS NOT PROPERLY UPDATED! See updateState
-		fmt.Fprint(writer, "player 1 made a move \n")
-		fmt.Fprintf(writer, "%v \n", game.State)
+		fmt.Fprint(writer, "player 1 made a move")
+		fmt.Fprintf(writer, "%v", game.State)
 		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
 		game.Move(game.Player2)
-		fmt.Fprint(writer, "player 2 made a move \n")
-		fmt.Fprintf(writer, "%v \n", game.State)
+		fmt.Fprint(writer, "player 2 made a move")
+		fmt.Fprintf(writer, "%v", game.State)
 		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
 	}
 

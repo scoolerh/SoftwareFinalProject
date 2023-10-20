@@ -61,13 +61,16 @@ func (g *Game) Move(player Player) {
 	//administers everything that is needed to identify and execute move.
 	//Changes done here lately might have to be reflected in changes to updateBoard
 	dice := RollDice(2) //change to input?
-	for i := 0; i < len(dice); i++ {
+	numDice := len(dice)
+	for i := 0; i < numDice; i++ {
+		log.Printf("Using dice %v", i+1)
 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
 		if len(possibleMoves) == 0 {
+			log.Println("no possible moves")
 			return
 		}
 		move := GetMove(possibleMoves, player)
-		log.Printf("player %s chose move %v", player.Color, move)
+
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
 		} else if player.Color == "w" {
@@ -77,20 +80,27 @@ func (g *Game) Move(player Player) {
 		//may want to abstract better later - fix when everything else is working (this might need to be redone when play endpoint is done)
 		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
 		_ = endSlot
-		if willCapturePiece(endSlotState) {
+		if willCapturePiece(endSlotState, player.Color) {
 			move.CapturePiece = true
-			g.Captured["player.Color"] += 1
+			g.Captured[endSlotState] += 1
 		}
+		log.Printf("player %s chose move %v", player.Color, move)
 
 		g.UpdateState(player.Color, move)
 		log.Printf("state updated to: %v", g.State)
+
+		if player.Color == "w" && move.Slot == 0 {
+			g.Captured["w"] -= 1
+		} else if player.Color == "b" && move.Slot == 25 {
+			g.Captured["b"] -= 1
+		}
+
 		dice = DeleteElement(dice, move.DieIndex)
 	}
 }
 
 func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the * makes it a pointer and not a value. Remember this if similar issues arise later.
 	//updates the state of the board to reflect most recent move
-	//NOTE! THIS IS NOT DOING WHAT IT SHOULD DO!! NEEDS FIXING
 	currState := g.State
 	die := move.Die
 	//call getEndSpace where that is applicable
@@ -98,9 +108,13 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	newSpace := originalSpace + die
 	originalSpaceState := currState[originalSpace]
 	//removing piece from original space
-	currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
+	log.Println("updating state of slot we are moving from")
+	if originalSpace != 0 && originalSpace != 25 { //pieces with these locations are either captured or beared off
+		currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
+	}
 
 	//if piece in endSlot is captured there will only be one piece there
+	log.Println("checking if piece needs to be captured")
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -222,9 +236,10 @@ func getEndSlot(move MoveType, gameState [26]string) (int, string) {
 	return endSlot, endSlotState
 }
 
-func willCapturePiece(endSlotState string) bool {
+func willCapturePiece(endSlotState string, playerColor string) bool {
 	//checks if there is a piece thats captured if move is made
-	return len(endSlotState) == 1
+	return len(endSlotState) == 1 && endSlotState != playerColor
+	//so if the length of state is 1 and the color is not the same as the moving piece, we are good
 }
 
 func RollDice(numDice int) []int {
