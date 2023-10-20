@@ -1,82 +1,249 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"strings"
 )
 
 type Gameplay interface {
-	//all these still need to be implemented
 	Move() map[string]string      //move should call getMove and doMove
 	GetPossibleMoves() []MoveType //returns an array of moves (slot, die)
 	UpdateState()                 //updates the state of the game to reflect the recent move
+	IsWon() bool
+	isBearingOffAllowed(playerColor string) bool //make capital if needed outside of package
+}
+
+func (g Game) IsWon() string {
+	// returns empty string if nobody has won. Else, returns "b" or "w"
+	gamestate := g.State
+	//checks if all pieces are beared off
+	if len(gamestate[0]) == 15 {
+		return "b"
+	} else if len(gamestate[25]) == 15 {
+		return "w"
+	} else {
+		return ""
+	}
+}
+
+func (g Game) isBearingOffAllowed(playerColor string) bool {
+	//checks if any pieces are not in home board
+	gameState := g.State
+	var outPieces int
+	if playerColor == "w" {
+		for i := 1; i <= 18; i++ {
+			if strings.Contains(gameState[i], "w") {
+				outPieces += 1
+			}
+		}
+		if outPieces == 0 && g.Captured["w"] == 0 {
+			return true
+		} else {
+			return false
+		}
+	} else {
+		for i := 7; i <= 24; i++ {
+			if strings.Contains(gameState[i], "b") {
+				outPieces += 1
+			}
+		}
+		if outPieces == 0 && g.Captured["b"] == 0 {
+			return true
+		} else {
+			return false
+		}
+	}
 }
 
 // currently returning nothing. originally returned game state but i don't think we need to
-func (g Game) Move(player Player) {
+func (g *Game) Move(player Player) {
+	//administers everything that is needed to identify and execute move.
+	//Changes done here lately might have to be reflected in changes to updateBoard
 	dice := RollDice(2) //change to input?
-	for i := 0; i < len(dice); i++ {
+	numDice := len(dice)
+	for i := 0; i < numDice; i++ {
+		log.Printf("Using dice %v", i+1)
 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
 		if len(possibleMoves) == 0 {
+			log.Println("no possible moves")
 			return
 		}
 		move := GetMove(possibleMoves, player)
+
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
 		} else if player.Color == "w" {
 			dice[move.DieIndex] = move.Die
 		}
 
+		//may want to abstract better later - fix when everything else is working (this might need to be redone when play endpoint is done)
+		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
+		_ = endSlot
+		if willCapturePiece(endSlotState, player.Color) {
+			move.CapturePiece = true
+			g.Captured[endSlotState] += 1
+		}
+		log.Printf("player %s chose move %v", player.Color, move)
+
 		g.UpdateState(player.Color, move)
+		log.Printf("state updated to: %v", g.State)
+
+		if player.Color == "w" && move.Slot == 0 {
+			g.Captured["w"] -= 1
+		} else if player.Color == "b" && move.Slot == 25 {
+			g.Captured["b"] -= 1
+		}
+
 		dice = DeleteElement(dice, move.DieIndex)
 	}
 }
 
-func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
+func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the * makes it a pointer and not a value. Remember this if similar issues arise later.
+	//updates the state of the board to reflect most recent move
 	currState := g.State
 	die := move.Die
-	//figure out how to do two moves
+	//call getEndSpace where that is applicable
 	originalSpace := move.Slot
 	newSpace := originalSpace + die
-	originalSpaceState := currState[originalSpace]                          //change this variable name? //check indexing +/- 1 error
-	currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
-	newSpaceState := currState[newSpace]
-	currState[newSpace] = newSpaceState + playerColor
+	originalSpaceState := currState[originalSpace]
+	//removing piece from original space
+	log.Println("updating state of slot we are moving from")
+	if originalSpace != 0 && originalSpace != 25 { //pieces with these locations are either captured or beared off
+		currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
+	}
+
+	//if piece in endSlot is captured there will only be one piece there
+	log.Println("checking if piece needs to be captured")
+	if move.CapturePiece {
+		currState[newSpace] = playerColor
+	} else {
+		// currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
+		// newSpaceState := currState[newSpace]
+		// currState[newSpace] = newSpaceState + playerColor
+
+		// the three above lines could probably be simplified to
+		currState[newSpace] = currState[newSpace] + playerColor
+	}
+
 	g.State = currState
 	return g.State
 }
 
 func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
-	var moveToDo MoveType
+	//gets all the possible moves the player can choose from
+	var move MoveType
 	var possibleMoves []MoveType
 	currState := g.State
 
+	//logic for finding white's moves
 	if currPlayer == "w" {
-		for i := 1; i <= 24; i++ {
-			if strings.Contains(currState[i], "w") {
-				for index, die := range dice {
-					if 25-i >= die {
-						goalPlace := currState[i+die]
-						if !(strings.Contains(goalPlace, "b") && len(goalPlace) >= 2) {
-							moveToDo.Slot = i
-							moveToDo.Die = die
-							moveToDo.DieIndex = index
-							possibleMoves = append(possibleMoves, moveToDo)
+		//checks if the player is allowed to bear off pieces. Uses this information later.
+		canBearOff := g.isBearingOffAllowed("w")
+		//finds all possible moves when there are no captured pieces
+		if g.Captured["w"] == 0 {
+			//loops through all slots of board
+			for i := 1; i <= 24; i++ {
+				//locates slots where white has pieces
+				if strings.Contains(currState[i], "w") {
+					for index, die := range dice {
+						//checks that the move won't move the piece off the board
+						if 25-i >= die {
+							goalSlot := i + die
+							goalState := currState[i+die]
+							//checks that either bearing off is legal, or that we are not planning on bearing off
+							if canBearOff || goalSlot != 0 {
+								//checks that the goal slot is not occupied by tower of opposite color
+								if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
+									//gets necessary numbers and adds move to list
+									move.Slot = i
+									move.Die = die
+									move.DieIndex = index
+									move.CapturePiece = false
+									possibleMoves = append(possibleMoves, move)
+								}
+							}
 						}
 					}
 				}
 			}
+			//if we have captured pieces, those are the only ones that can move
+		} else {
+			for index, die := range dice {
+				//captured pieces start from 0
+				goalState := currState[die]
+				//does not need to check for bearing off, it is not possible when starting from 0
+				if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
+					move.Slot = 0
+					move.Die = die
+					move.DieIndex = index
+					move.CapturePiece = false
+					possibleMoves = append(possibleMoves, move)
+				}
+			}
 		}
-	} else if currPlayer == "b" {
-		for i := 1; i <= 24; i++ {
 
+		//same process for black.
+		//Note that black moves in opposite direction of white, so bearing of slot, home board and direction of dice are all different
+	} else if currPlayer == "b" {
+		canBearOff := g.isBearingOffAllowed("b")
+		if g.Captured["b"] == 0 {
+			for i := 1; i <= 24; i++ {
+				for i := 1; i <= 24; i++ {
+					if strings.Contains(currState[i], "b") {
+						for index, die := range dice {
+							if i >= die {
+								goalSlot := i - die
+								goalState := currState[i-die]
+								if canBearOff || goalSlot != 0 {
+									if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
+										move.Slot = i
+										move.Die = -die
+										move.DieIndex = index
+										move.CapturePiece = false
+										possibleMoves = append(possibleMoves, move)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else {
+			for index, die := range dice {
+				goalState := currState[die]
+				if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
+					move.Slot = 25
+					move.Die = -die
+					move.DieIndex = index
+					move.CapturePiece = false
+					possibleMoves = append(possibleMoves, move)
+				}
+			}
 		}
 	}
 
 	return possibleMoves
 }
 
+func getEndSlot(move MoveType, gameState [26]string) (int, string) {
+	//helper function to get the end slot and end state of a move (where the piece is moving to)
+	//is not used a lot yet. Should be used more later when we improve levels of abstraction
+	originalSlot := move.Slot
+	dieRoll := move.Die
+	endSlot := originalSlot + dieRoll
+	endSlotState := gameState[endSlot]
+	return endSlot, endSlotState
+}
+
+func willCapturePiece(endSlotState string, playerColor string) bool {
+	//checks if there is a piece thats captured if move is made
+	return len(endSlotState) == 1 && endSlotState != playerColor
+	//so if the length of state is 1 and the color is not the same as the moving piece, we are good
+}
+
 func RollDice(numDice int) []int {
+	//helper function to roll dice
 	var dice []int
 	for i := 0; i < numDice; i++ {
 		die := rand.Intn(6) + 1
@@ -86,19 +253,17 @@ func RollDice(numDice int) []int {
 }
 
 type Game struct {
-	Gameid  int
-	Player1 Player
-	Player2 Player
-	State   [26]string
-	//only have one type player, in getmove have an if-statement that checks for human or AI, then execute different versions
-	//NOTE that this is currently wrong. We need this to be a player, but either human or AI, i dont know how to do that
-	//needs to not be an ai, but a player, a general human or ai - i think we might need a player struct...
-	//state map[string]string //maps a string to an int, kind of like dictionary in python. Could also use array for this.
-
+	Gameid   int
+	Player1  Player
+	Player2  Player
+	CurrTurn Player
+	State    [26]string
+	Captured map[string]int
 }
 
 type MoveType struct {
 	Slot, Die, DieIndex int
+	CapturePiece        bool
 }
 
 type Player struct {
@@ -107,6 +272,7 @@ type Player struct {
 }
 
 func GetMove(possibleMoves []MoveType, player Player) MoveType {
+	//prompts either the player or the AI to pick a move
 	var move MoveType
 	if player.Id == 0 { //AI
 		move = GetAIMove(possibleMoves, player.Color)
@@ -118,49 +284,23 @@ func GetMove(possibleMoves []MoveType, player Player) MoveType {
 }
 
 func GetHumanMove(possibleMoves []MoveType, color string) MoveType {
+	//dummy function
 	if color == "w" {
 		return possibleMoves[0]
 	} else {
-		return possibleMoves[len(possibleMoves)]
+		return possibleMoves[len(possibleMoves)-1]
 	}
 }
 
 // change this implementation
 func GetAIMove(possibleMoves []MoveType, color string) MoveType {
+	//picks the first possible move to do. Will be improved in the future
 	if color == "w" {
 		return possibleMoves[0]
 	} else {
-		return possibleMoves[len(possibleMoves)]
+		return possibleMoves[len(possibleMoves)-1]
 	}
 }
-
-// type gamestate struct { //could use this or a map for the gamestate - example of map is at the bottom
-// 	tile0, tile1, tile2, tile3, tile4, tile5, tile6, tile7, tile8, tile9, tile10, tile11, tile12, tile13, tile14, tile15, tile16, tile17,
-// 	tile18, tile19, tile20, tile21, tile22, tile23, tile24, tile25 string //this might need to be improved...
-// }
-
-/* 	// Create a map with string keys and int values
-myMap := make(map[string]int)
-
-// Assign values to keys
-myMap["one"] = 1
-myMap["two"] = 2
-myMap["three"] = 3
-
-// Access values using keys
-fmt.Println("Value for key 'two':", myMap["two"])
-
-// Check if a key exists
-value, exists := myMap["four"]
-if exists {
-	fmt.Println("Value for key 'four':", value)
-} else {
-	fmt.Println("Key 'four' does not exist.")
-}
-
-initialState := map[string]string{"0": "", "1": "ww", "2": "", "3": "", "4": "", "5": "", "6": "bbbbbb", "7": "", "8": "bbb", "9": "", "10": "", "11": "", "12": "wwwwww",
-	// "13": "bbbbb", "14": "", "15": "", "16": "", "17": "www", "18": "", "19": "wwwww", "20": "", "21": "", "22": "", "23": "", "24": "bb", "25": ""}
-*/
 
 // from tutorialspoint.com
 func DeleteElement(slice []int, index int) []int {
