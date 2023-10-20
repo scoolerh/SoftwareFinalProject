@@ -152,7 +152,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 							goalSlot := i + die
 							goalState := currState[i+die]
 							//checks that either bearing off is legal, or that we are not planning on bearing off
-							if canBearOff || goalSlot != 0 {
+							if canBearOff || goalSlot != 25 {
 								//checks that the goal slot is not occupied by tower of opposite color
 								if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
 									//gets necessary numbers and adds move to list
