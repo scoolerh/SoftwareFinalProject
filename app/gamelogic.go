@@ -189,20 +189,18 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 		canBearOff := g.isBearingOffAllowed("b")
 		if g.Captured["b"] == 0 {
 			for i := 1; i <= 24; i++ {
-				for i := 1; i <= 24; i++ {
-					if strings.Contains(currState[i], "b") {
-						for index, die := range dice {
-							if i >= die {
-								goalSlot := i - die
-								goalState := currState[i-die]
-								if canBearOff || goalSlot != 0 {
-									if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
-										move.Slot = i
-										move.Die = -die
-										move.DieIndex = index
-										move.CapturePiece = false
-										possibleMoves = append(possibleMoves, move)
-									}
+				if strings.Contains(currState[i], "b") {
+					for index, die := range dice {
+						if i >= die {
+							goalSlot := i - die
+							goalState := currState[i-die]
+							if canBearOff || goalSlot != 0 {
+								if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
+									move.Slot = i
+									move.Die = -die
+									move.DieIndex = index
+									move.CapturePiece = false
+									possibleMoves = append(possibleMoves, move)
 								}
 							}
 						}
