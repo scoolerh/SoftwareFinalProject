@@ -40,18 +40,21 @@ func initializeCapturedMap() map[string]int {
 // todo: Check whose turn it is, if the game is won, have the player make a move
 func play(writer http.ResponseWriter, req *http.Request) {
 	//for testing purposes
-	fmt.Fprint(writer, "TIME TO PLAY")
+	fmt.Fprint(writer, "TIME TO PLAY \n")
 
 	game := games[0]
 	for i := 0; i < 10; i++ {
 		// returning and printing boardState for testing purposes
 		log.Println("calling move for player 1 and testing log")
 		game.Move(game.Player1)
+		//NOTE! GAME IS NOT PROPERLY UPDATED! See updateState
 		fmt.Fprint(writer, "player 1 made a move \n")
-		fmt.Fprint(writer, game.State) //this game is not updated. See terminal for game
+		fmt.Fprintf(writer, "%v \n", game.State)
+		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
 		game.Move(game.Player2)
 		fmt.Fprint(writer, "player 2 made a move \n")
-		fmt.Fprint(writer, game.State)
+		fmt.Fprintf(writer, "%v \n", game.State)
+		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
 	}
 
 	/*original thing:

@@ -57,19 +57,15 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 }
 
 // currently returning nothing. originally returned game state but i don't think we need to
-func (g Game) Move(player Player) {
+func (g *Game) Move(player Player) {
 	//administers everything that is needed to identify and execute move.
 	//Changes done here lately might have to be reflected in changes to updateBoard
-	log.Println("rolling dice")
 	dice := RollDice(2) //change to input?
 	for i := 0; i < len(dice); i++ {
-		log.Println("getting possible move for this set of dice")
 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
 		if len(possibleMoves) == 0 {
-			log.Println("No possible moves, returning empty")
 			return
 		}
-		log.Println("letting player choose move")
 		move := GetMove(possibleMoves, player)
 		log.Printf("player %s chose move %v", player.Color, move)
 		if player.Color == "b" {
@@ -78,7 +74,6 @@ func (g Game) Move(player Player) {
 			dice[move.DieIndex] = move.Die
 		}
 
-		log.Println("Checks if piece needs to be captured")
 		//may want to abstract better later - fix when everything else is working (this might need to be redone when play endpoint is done)
 		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
 		_ = endSlot
@@ -87,13 +82,13 @@ func (g Game) Move(player Player) {
 			g.Captured["player.Color"] += 1
 		}
 
-		log.Println("updates gamestate according to move")
 		g.UpdateState(player.Color, move)
+		log.Printf("state updated to: %v", g.State)
 		dice = DeleteElement(dice, move.DieIndex)
 	}
 }
 
-func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
+func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the * makes it a pointer and not a value. Remember this if similar issues arise later.
 	//updates the state of the board to reflect most recent move
 	//NOTE! THIS IS NOT DOING WHAT IT SHOULD DO!! NEEDS FIXING
 	currState := g.State
@@ -118,7 +113,6 @@ func (g Game) UpdateState(playerColor string, move MoveType) [26]string {
 	}
 
 	g.State = currState
-	log.Printf("state updated to: %v", g.State)
 	return g.State
 }
 
