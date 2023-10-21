@@ -61,6 +61,7 @@ func (g *Game) Move(player Player) {
 	//administers everything that is needed to identify and execute move.
 	//Changes done here lately might have to be reflected in changes to updateBoard
 	dice := RollDice(2) //change to input?
+	log.Printf("diceroll: %v \n", dice)
 	numDice := len(dice)
 	for i := 0; i < numDice; i++ {
 		log.Printf("Using dice %v", i+1)
@@ -70,6 +71,7 @@ func (g *Game) Move(player Player) {
 			return
 		}
 		move := GetMove(possibleMoves, player)
+		log.Printf("player %s just chose move: %v", player.Color, move)
 
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
@@ -84,10 +86,14 @@ func (g *Game) Move(player Player) {
 			move.CapturePiece = true
 			g.Captured[endSlotState] += 1
 		}
-		log.Printf("player %s chose move %v", player.Color, move)
+		log.Printf("move after checked for captured %v", move)
+		g.currMove = move
+		log.Printf("move set as currMove %v", g.currMove)
 
 		g.UpdateState(player.Color, move)
-		log.Printf("state updated to: %v", g.State)
+		log.Printf("move after updateState %v", move)
+		log.Printf("g.CurrMove after updateState %v", g.currMove)
+		//log.Printf("state updated to: %v", g.State)
 
 		if player.Color == "w" && move.Slot == 0 {
 			g.Captured["w"] -= 1
@@ -96,6 +102,9 @@ func (g *Game) Move(player Player) {
 		}
 
 		dice = DeleteElement(dice, move.DieIndex)
+
+		log.Printf("move after updated captured %v", move)
+		log.Printf("g.CurrMove after updated captured %v", g.currMove)
 	}
 }
 
@@ -108,13 +117,13 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	newSpace := originalSpace + die
 	originalSpaceState := currState[originalSpace]
 	//removing piece from original space
-	log.Println("updating state of slot we are moving from")
+	//log.Println("updating state of slot we are moving from")
 	if originalSpace != 0 && originalSpace != 25 { //pieces with these locations are either captured or beared off
 		currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
 	}
 
 	//if piece in endSlot is captured there will only be one piece there
-	log.Println("checking if piece needs to be captured")
+	//log.Println("checking if piece needs to be captured")
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -189,11 +198,13 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			for index, die := range dice {
 				for i := 25 - die; i < 25; i++ {
 					if strings.Contains(currState[i], "w") {
-						move.Slot = 25 - i
-						move.Die = i
+						move.Slot = i
+						move.Die = 25 - i
 						move.DieIndex = index
 						move.CapturePiece = false
 						possibleMoves = append(possibleMoves, move)
+						//this should be a forced move, only one possibility, so return right away
+						return possibleMoves
 					}
 				}
 			}
@@ -246,6 +257,8 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 						move.DieIndex = index
 						move.CapturePiece = false
 						possibleMoves = append(possibleMoves, move)
+						//this should be a forced move, only one possibility, so return right away
+						return possibleMoves
 					}
 				}
 			}
@@ -288,6 +301,9 @@ type Game struct {
 	CurrTurn Player
 	State    [26]string
 	Captured map[string]int
+
+	//only for testing purposes, can be removed later
+	currMove MoveType
 }
 
 type MoveType struct {
