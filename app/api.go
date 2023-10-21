@@ -71,16 +71,19 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "w"
+		games[gameid] = game
 	} else if whoseTurn == "w" {
 		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "state": game.State, "captured": game.Captured}
 		game.Move(game.Player1)
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "b"
+		games[gameid] = game
 	} else {
 		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
 		game.Move(game.Player2)
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "w"
+		games[gameid] = game
 	}
 }
 
