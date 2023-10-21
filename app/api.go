@@ -9,7 +9,7 @@ import (
 
 var games []Game //will be a valid type when we fix packages
 var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-var testState = [26]string{"", "bbb", "bbb", "bb", "bb", "b", "bb", "b", "", "b", "", "", "", "", "", "", "www", "", "", "www", "", "www", "www", "", "www", ""}
+var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b"}
 var p1 Player
 var p2 Player
 var whoseTurn string = "first"

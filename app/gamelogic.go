@@ -63,8 +63,10 @@ func (g *Game) Move(player Player) {
 	dice := RollDice(2) //change to input?
 	log.Printf("diceroll: %v \n", dice)
 	numDice := len(dice)
+
 	for i := 0; i < numDice; i++ {
 		log.Printf("Using dice %v", i+1)
+
 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
 		if len(possibleMoves) == 0 {
 			log.Println("no possible moves")
@@ -78,14 +80,15 @@ func (g *Game) Move(player Player) {
 			dice[move.DieIndex] = move.Die
 		}
 
-		//may want to abstract better later - fix when everything else is working (this might need to be redone when play endpoint is done)
-		endSlot, endSlotState := getEndSlot(move, g.State) //check whether we want this to return both slot and state or just one
-		_ = endSlot
+		endSlot := move.Slot + move.Die
+		endSlotState := g.State[endSlot]
+
 		if willCapturePiece(endSlotState, player.Color) {
 			move.CapturePiece = true
 			g.Captured[endSlotState] += 1
 		}
 		log.Printf("player %s chose move %v", player.Color, move)
+		//only for testing purposes
 		g.currMove = move
 
 		g.UpdateState(player.Color, move)
@@ -105,18 +108,17 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	//updates the state of the board to reflect most recent move
 	currState := g.State
 	die := move.Die
-	//call getEndSpace where that is applicable
+
 	originalSpace := move.Slot
 	newSpace := originalSpace + die
 	originalSpaceState := currState[originalSpace]
+
 	//removing piece from original space
-	//log.Println("updating state of slot we are moving from")
 	if originalSpace != 0 && originalSpace != 25 { //pieces with these locations are either captured or beared off
 		currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
 	}
 
 	//if piece in endSlot is captured there will only be one piece there
-	//log.Println("checking if piece needs to be captured")
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -252,20 +254,10 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	return possibleMoves
 }
 
-func getEndSlot(move MoveType, gameState [26]string) (int, string) {
-	//helper function to get the end slot and end state of a move (where the piece is moving to)
-	//is not used a lot yet. Should be used more later when we improve levels of abstraction
-	originalSlot := move.Slot
-	dieRoll := move.Die
-	endSlot := originalSlot + dieRoll
-	endSlotState := gameState[endSlot]
-	return endSlot, endSlotState
-}
-
 func willCapturePiece(endSlotState string, playerColor string) bool {
 	//checks if there is a piece thats captured if move is made
 	return len(endSlotState) == 1 && endSlotState != playerColor
-	//so if the length of state is 1 and the color is not the same as the moving piece, we are good
+	//so if the length of state is 1 and the color is not the same as the moving piece, it is captured
 }
 
 func RollDice(numDice int) []int {
