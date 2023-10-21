@@ -71,7 +71,6 @@ func (g *Game) Move(player Player) {
 			return
 		}
 		move := GetMove(possibleMoves, player)
-		log.Printf("player %s just chose move: %v", player.Color, move)
 
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
@@ -86,14 +85,11 @@ func (g *Game) Move(player Player) {
 			move.CapturePiece = true
 			g.Captured[endSlotState] += 1
 		}
-		log.Printf("move after checked for captured %v", move)
+		log.Printf("player %s chose move %v", player.Color, move)
 		g.currMove = move
-		log.Printf("move set as currMove %v", g.currMove)
 
 		g.UpdateState(player.Color, move)
-		log.Printf("move after updateState %v", move)
-		log.Printf("g.CurrMove after updateState %v", g.currMove)
-		//log.Printf("state updated to: %v", g.State)
+		log.Printf("state updated to: %v", g.State)
 
 		if player.Color == "w" && move.Slot == 0 {
 			g.Captured["w"] -= 1
@@ -102,9 +98,6 @@ func (g *Game) Move(player Player) {
 		}
 
 		dice = DeleteElement(dice, move.DieIndex)
-
-		log.Printf("move after updated captured %v", move)
-		log.Printf("g.CurrMove after updated captured %v", g.currMove)
 	}
 }
 
@@ -290,6 +283,9 @@ func RollDice(numDice int) []int {
 	for i := 0; i < numDice; i++ {
 		die := rand.Intn(6) + 1
 		dice = append(dice, die)
+	}
+	if dice[0] == dice[1] { //assuming only two dice. Might be changed later if we want more
+		dice = append(dice, dice...)
 	}
 	return dice
 }
