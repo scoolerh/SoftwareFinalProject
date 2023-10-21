@@ -61,6 +61,7 @@ func (g *Game) Move(player Player) {
 	//administers everything that is needed to identify and execute move.
 	//Changes done here lately might have to be reflected in changes to updateBoard
 	dice := RollDice(2) //change to input?
+	log.Printf("diceroll: %v \n", dice)
 	numDice := len(dice)
 	for i := 0; i < numDice; i++ {
 		log.Printf("Using dice %v", i+1)
@@ -85,6 +86,7 @@ func (g *Game) Move(player Player) {
 			g.Captured[endSlotState] += 1
 		}
 		log.Printf("player %s chose move %v", player.Color, move)
+		g.currMove = move
 
 		g.UpdateState(player.Color, move)
 		log.Printf("state updated to: %v", g.State)
@@ -108,13 +110,13 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	newSpace := originalSpace + die
 	originalSpaceState := currState[originalSpace]
 	//removing piece from original space
-	log.Println("updating state of slot we are moving from")
+	//log.Println("updating state of slot we are moving from")
 	if originalSpace != 0 && originalSpace != 25 { //pieces with these locations are either captured or beared off
 		currState[originalSpace] = originalSpaceState[0 : len(originalSpaceState)-1]
 	}
 
 	//if piece in endSlot is captured there will only be one piece there
-	log.Println("checking if piece needs to be captured")
+	//log.Println("checking if piece needs to be captured")
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -183,6 +185,24 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 
+		//NEEDS TO BE TESTED!
+		//YOU CAN MAKE A NEW INITIALSTATE TO TEST WHAT YOU WANT
+		if len(possibleMoves) == 0 && canBearOff {
+			for index, die := range dice {
+				for i := 25 - die; i < 25; i++ {
+					if strings.Contains(currState[i], "w") {
+						move.Slot = i
+						move.Die = 25 - i
+						move.DieIndex = index
+						move.CapturePiece = false
+						possibleMoves = append(possibleMoves, move)
+						//this should be a forced move, only one possibility, so return right away
+						return possibleMoves
+					}
+				}
+			}
+		}
+
 		//same process for black.
 		//Note that black moves in opposite direction of white, so bearing of slot, home board and direction of dice are all different
 	} else if currPlayer == "b" {
@@ -219,6 +239,23 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 				}
 			}
 		}
+		//NEEDS TO BE TESTED!
+		//YOU CAN MAKE A NEW INITIALSTATE TO TEST WHAT YOU WANT
+		if len(possibleMoves) == 0 && canBearOff {
+			for index, die := range dice {
+				for i := die; i > 0; i-- {
+					if strings.Contains(currState[i], "b") {
+						move.Slot = i
+						move.Die = -i
+						move.DieIndex = index
+						move.CapturePiece = false
+						possibleMoves = append(possibleMoves, move)
+						//this should be a forced move, only one possibility, so return right away
+						return possibleMoves
+					}
+				}
+			}
+		}
 	}
 
 	return possibleMoves
@@ -247,6 +284,9 @@ func RollDice(numDice int) []int {
 		die := rand.Intn(6) + 1
 		dice = append(dice, die)
 	}
+	if dice[0] == dice[1] { //assuming only two dice. Might be changed later if we want more
+		dice = append(dice, dice...)
+	}
 	return dice
 }
 
@@ -257,6 +297,9 @@ type Game struct {
 	CurrTurn Player
 	State    [26]string
 	Captured map[string]int
+
+	//only for testing purposes, can be removed later
+	currMove MoveType
 }
 
 type MoveType struct {

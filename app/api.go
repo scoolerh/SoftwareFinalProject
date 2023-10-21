@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 )
 
 var games []Game //will be a valid type when we fix packages
 var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
+var testState = [26]string{"", "bbb", "bbb", "bb", "bb", "b", "bb", "b", "", "b", "", "", "", "", "", "", "www", "", "", "www", "", "www", "www", "", "www", ""}
 var p1 Player
 var p2 Player
 var whoseTurn string = "first"
@@ -53,6 +55,32 @@ func initializeCapturedMap() map[string]int {
 	m["w"] = 0
 	m["b"] = 0
 	return m
+}
+
+func testplay(writer http.ResponseWriter, req *http.Request) {
+
+	//for testing purposes
+	p1, p2 := Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
+	gameid := len(games)
+	capturedMap := initializeCapturedMap()
+	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: testState, Captured: capturedMap}
+	games = append(games, game)
+	fmt.Fprint(writer, "TIME TO PLAY \n")
+
+	fmt.Fprintf(writer, "%v \n", game.State)
+	for i := 0; i < 10; i++ {
+		// returning and printing boardState for testing purposes
+		log.Printf("\n move nr %v: \n", i)
+		fmt.Fprintf(writer, "move nr %v: \n", i)
+		game.Move(game.Player1)
+		fmt.Fprintf(writer, "player 1 made a move: %v", game.currMove)
+		fmt.Fprintf(writer, "%v \n", game.State)
+		//fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
+		game.Move(game.Player2)
+		fmt.Fprintf(writer, "player 2 made a move: %v", game.currMove)
+		fmt.Fprintf(writer, "%v \n", game.State)
+		//fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
+	}
 }
 
 // Check whose turn it is and if the game is won, then have the player make a move
@@ -105,6 +133,7 @@ func main() {
 	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
+	http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/scoreboard", scoreboard)
