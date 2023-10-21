@@ -120,11 +120,6 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
-		// currState[newSpace] = originalSpaceState[0 : len(originalSpaceState)+1] //check indexing
-		// newSpaceState := currState[newSpace]
-		// currState[newSpace] = newSpaceState + playerColor
-
-		// the three above lines could probably be simplified to
 		currState[newSpace] = currState[newSpace] + playerColor
 	}
 
@@ -185,8 +180,6 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 
-		//NEEDS TO BE TESTED!
-		//YOU CAN MAKE A NEW INITIALSTATE TO TEST WHAT YOU WANT
 		if len(possibleMoves) == 0 && canBearOff {
 			for index, die := range dice {
 				for i := 25 - die; i < 25; i++ {
@@ -239,8 +232,6 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 				}
 			}
 		}
-		//NEEDS TO BE TESTED!
-		//YOU CAN MAKE A NEW INITIALSTATE TO TEST WHAT YOU WANT
 		if len(possibleMoves) == 0 && canBearOff {
 			for index, die := range dice {
 				for i := die; i > 0; i-- {
