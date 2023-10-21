@@ -312,14 +312,14 @@ type MoveType struct {
 }
 
 type Player struct {
-	Id    int //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
+	Id    string //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
 	Color string
 }
 
 func GetMove(possibleMoves []MoveType, player Player) MoveType {
 	//prompts either the player or the AI to pick a move
 	var move MoveType
-	if player.Id == 0 { //AI
+	if player.Id == "STEVE" || player.Id == "JOE" { //AI
 		move = GetAIMove(possibleMoves, player.Color)
 	} else { //human
 		move = GetHumanMove(possibleMoves, player.Color)
