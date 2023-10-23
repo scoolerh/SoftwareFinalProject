@@ -94,6 +94,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			winner = p1.Id
 		}
 		won(writer, req)
+		return
 	}
 	if whoseTurn == "first" {
 		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
