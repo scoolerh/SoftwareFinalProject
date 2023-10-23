@@ -118,7 +118,8 @@ func play(writer http.ResponseWriter, req *http.Request) {
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
 func won(writer http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(writer, winner+" won!")
+	variables := map[string]interface{}{"winner": winner}
+	outputHTML(writer, "./html/won.html", variables)
 }
 
 // todo: set up SQL database, check if the user is an actual user in the db, then return their win/loss ratio.”'
