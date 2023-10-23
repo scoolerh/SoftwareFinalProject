@@ -104,6 +104,20 @@ func (g *Game) Move(player Player) {
 	}
 }
 
+func countPips(gamestate [26]string, capturedPieces map[string]int) map[string]int {
+	pips := make(map[string]int)
+	/*
+		for slot in gamestate
+			if "w" in slot
+				pips["w"] += len(slot)*slotindex
+			if "b" in slot
+				pips["b"] += len(slot)*(25-slotindex) (check this math)
+		pips["w"] += capturedPieces["w"]*25
+		pips["b"] += capturedPieces["b"]*25
+	*/
+	return pips
+}
+
 func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the * makes it a pointer and not a value. Remember this if similar issues arise later.
 	//updates the state of the board to reflect most recent move
 	currState := g.State
