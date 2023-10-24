@@ -1,7 +1,6 @@
 package main
 
 import (
-	"ai"
 	"fmt"
 	"html/template"
 	"log"
@@ -31,7 +30,6 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 
 // Print the rules and how to use the tool for the user
 func help(writer http.ResponseWriter, req *http.Request) {
-	ai.Testhandler()
 	http.ServeFile(writer, req, "./html/index.html")
 }
 
