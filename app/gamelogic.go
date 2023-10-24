@@ -72,7 +72,8 @@ func (g *Game) Move(player Player) {
 			log.Println("no possible moves")
 			return
 		}
-		move := GetMove(possibleMoves, player)
+		mockGame := *g
+		move := GetMove(possibleMoves, player, mockGame)
 
 		if player.Color == "b" {
 			dice[move.DieIndex] = -move.Die
@@ -93,6 +94,7 @@ func (g *Game) Move(player Player) {
 
 		g.UpdateState(player.Color, move)
 		log.Printf("state updated to: %v", g.State)
+		g.Pips = countPips(g.State, g.Captured)
 
 		if player.Color == "w" && move.Slot == 0 {
 			g.Captured["w"] -= 1
@@ -104,17 +106,22 @@ func (g *Game) Move(player Player) {
 	}
 }
 
-func countPips(gamestate [26]string, capturedPieces map[string]int) map[string]int {
+func countPips(gameState [26]string, capturedPieces map[string]int) map[string]int { //can change this to just update pips based on move if necessary
 	pips := make(map[string]int)
-	/*
-		for slot in gamestate
-			if "w" in slot
-				pips["w"] += len(slot)*slotindex
-			if "b" in slot
-				pips["b"] += len(slot)*(25-slotindex) (check this math)
-		pips["w"] += capturedPieces["w"]*25
-		pips["b"] += capturedPieces["b"]*25
-	*/
+	//goes through board to add pips for all pieces
+	for i := 1; i <= 24; i++ {
+		slot := gameState[i]
+		if strings.Contains(slot, "w") {
+			//each piece of a slot must move i spots
+			pips["w"] += len(slot) * i
+		} else if strings.Contains(slot, "b") {
+			pips["w"] += len(slot) * (25 - i)
+		}
+	}
+	//each captured piece must move 25 pips
+	pips["w"] += capturedPieces["w"] * 25
+	pips["b"] += capturedPieces["b"] * 25
+
 	return pips
 }
 
@@ -238,7 +245,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		} else {
 			for index, die := range dice {
-				goalState := currState[die]
+				goalState := currState[25-die]
 				if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
 					move.Slot = 25
 					move.Die = -die
@@ -294,6 +301,7 @@ type Game struct {
 	CurrTurn Player
 	State    [26]string
 	Captured map[string]int
+	Pips     map[string]int
 
 	//only for testing purposes, can be removed later
 	currMove MoveType
@@ -309,11 +317,13 @@ type Player struct {
 	Color string
 }
 
-func GetMove(possibleMoves []MoveType, player Player) MoveType {
+func GetMove(possibleMoves []MoveType, player Player, game Game) MoveType {
 	//prompts either the player or the AI to pick a move
 	var move MoveType
-	if player.Id == "STEVE" || player.Id == "JOE" { //AI
-		move = GetAIMove(possibleMoves, player.Color)
+	if player.Id == "STEVE" { //AI
+		move = Steve(possibleMoves, player.Color) //only one now, implement Joe later
+	} else if player.Id == "JOE" {
+		move = Joe(possibleMoves, player.Color, game)
 	} else { //human
 		move = GetHumanMove(possibleMoves, player.Color)
 	}
