@@ -1,0 +1,6 @@
+set up html for won page 
+actually incorporate visual board
+online backgammon engine to recommend moves (we will be doing this)
+write the rules 
+button that goes through the AI moves automatically 
+
