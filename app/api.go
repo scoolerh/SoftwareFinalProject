@@ -9,7 +9,7 @@ import (
 
 var games []Game //will be a valid type when we fix packages
 var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b"}
+var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b", ""}
 var p1 Player
 var p2 Player
 var whoseTurn string = "first"
@@ -68,18 +68,23 @@ func testplay(writer http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(writer, "TIME TO PLAY \n")
 
 	fmt.Fprintf(writer, "%v \n", game.State)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100; i++ {
+		if game.IsWon() != "" {
+			fmt.Fprint(writer, "WINNER")
+			return
+		}
+
 		// returning and printing boardState for testing purposes
 		log.Printf("\n move nr %v: \n", i)
 		fmt.Fprintf(writer, "move nr %v: \n", i)
 		game.Move(game.Player1)
 		fmt.Fprintf(writer, "player 1 made a move: %v", game.currMove)
-		fmt.Fprintf(writer, "%v \n", game.State)
-		//fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
+		fmt.Fprintf(writer, "%v", game.State)
+		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
 		game.Move(game.Player2)
 		fmt.Fprintf(writer, "player 2 made a move: %v", game.currMove)
-		fmt.Fprintf(writer, "%v \n", game.State)
-		//fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
+		fmt.Fprintf(writer, "%v", game.State)
+		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
 	}
 }
 
