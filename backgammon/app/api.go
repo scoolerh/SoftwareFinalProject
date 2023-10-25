@@ -1,17 +1,18 @@
 package main
 
 import (
+	"backgammon/game"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 )
 
-var games []Game //will be a valid type when we fix packages
+var games []game.Game //will be a valid type when we fix packages
 var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b", ""}
-var p1 Player
-var p2 Player
+var p1 game.Player
+var p2 game.Player
 var whoseTurn string = "first"
 var gameid int
 var winner string
@@ -41,11 +42,11 @@ func login(writer http.ResponseWriter, req *http.Request) {
 
 // Starts a new game for the user and displays the initial board
 func newgame(writer http.ResponseWriter, req *http.Request) {
-	p1, p2 = Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
+	p1, p2 = game.Player{Id: "STEVE", Color: "w"}, game.Player{Id: "JOE", Color: "b"} //will need to be an input in the future
 	gameid = len(games)
 	capturedMap := initializeCapturedMap()
-	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
-	games = append(games, game)
+	g := game.Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
+	games = append(games, g)
 	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
 	outputHTML(writer, "./html/newgame.html", variables)
 }
@@ -60,16 +61,16 @@ func initializeCapturedMap() map[string]int {
 func testplay(writer http.ResponseWriter, req *http.Request) {
 
 	//for testing purposes
-	p1, p2 := Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
+	p1, p2 := game.Player{Id: "STEVE", Color: "w"}, game.Player{Id: "JOE", Color: "b"} //will need to be an input in the future
 	gameid := len(games)
 	capturedMap := initializeCapturedMap()
-	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: testState, Captured: capturedMap}
-	games = append(games, game)
+	g := game.Game{Gameid: gameid, Player1: p1, Player2: p2, State: testState, Captured: capturedMap}
+	games = append(games, g)
 	fmt.Fprint(writer, "TIME TO PLAY \n")
 
-	fmt.Fprintf(writer, "%v \n", game.State)
+	fmt.Fprintf(writer, "%v \n", g.State)
 	for i := 0; i < 100; i++ {
-		if game.IsWon() != "" {
+		if g.IsWon() != "" {
 			fmt.Fprint(writer, "WINNER")
 			return
 		}
@@ -77,21 +78,21 @@ func testplay(writer http.ResponseWriter, req *http.Request) {
 		// returning and printing boardState for testing purposes
 		log.Printf("\n move nr %v: \n", i)
 		fmt.Fprintf(writer, "move nr %v: \n", i)
-		game.Move(game.Player1)
-		fmt.Fprintf(writer, "player 1 made a move: %v", game.currMove)
-		fmt.Fprintf(writer, "%v", game.State)
-		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
-		game.Move(game.Player2)
-		fmt.Fprintf(writer, "player 2 made a move: %v", game.currMove)
-		fmt.Fprintf(writer, "%v", game.State)
-		fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
+		g.Move(g.Player1)
+		//fmt.Fprintf(writer, "player 1 made a move: %v", g.currMove)
+		fmt.Fprintf(writer, "%v", g.State)
+		fmt.Fprintf(writer, "captured pieces: %v \n", g.Captured)
+		g.Move(g.Player2)
+		//fmt.Fprintf(writer, "player 2 made a move: %v", g.currMove)
+		fmt.Fprintf(writer, "%v", g.State)
+		fmt.Fprintf(writer, "captured pieces: %v \n", g.Captured)
 	}
 }
 
 // Check whose turn it is and if the game is won, then have the player make a move
 func play(writer http.ResponseWriter, req *http.Request) {
-	game := games[gameid]
-	if game.IsWon() != "" {
+	g := games[gameid]
+	if g.IsWon() != "" {
 		if whoseTurn == "w" {
 			winner = p2.Id
 		}
@@ -102,22 +103,22 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if whoseTurn == "first" {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
+		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": g.State, "captured": g.Captured}
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "w"
-		games[gameid] = game
+		games[gameid] = g
 	} else if whoseTurn == "w" {
-		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "state": game.State, "captured": game.Captured}
-		game.Move(game.Player1)
+		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "state": g.State, "captured": g.Captured}
+		g.Move(g.Player1)
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "b"
-		games[gameid] = game
+		games[gameid] = g
 	} else {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
-		game.Move(game.Player2)
+		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": g.State, "captured": g.Captured}
+		g.Move(g.Player2)
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "w"
-		games[gameid] = game
+		games[gameid] = g
 	}
 }
 
