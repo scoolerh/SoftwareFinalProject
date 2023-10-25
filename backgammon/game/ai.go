@@ -37,7 +37,10 @@ func Joe(possibleMoves []MoveType, playerColor string, g Game) MoveType {
 		g.State = originalState //need to do this because updatestate changes the game. Make sure this does not cause any issues.
 		//Maybe we dont need it? We dont have *game - test this
 		pips := countPips(tempState, g.Captured)
-		score = pips[opponentColor] - pips[playerColor] //we want high opponentpip and low playerpip
+		score = pips[opponentColor] - pips[playerColor] //add some weight
+
+		blots := countBlots(tempState)
+		score += (blots[opponentColor] - blots[playerColor]) //add some weight
 
 		//more checks to affect score here
 
@@ -48,4 +51,15 @@ func Joe(possibleMoves []MoveType, playerColor string, g Game) MoveType {
 		}
 	}
 	return bestMove
+}
+
+func countBlots(gameState [26]string) map[string]int {
+	blots := make(map[string]int)
+	for index, slot := range gameState {
+		_ = index
+		if len(slot) == 1 {
+			blots[slot] += 1
+		}
+	}
+	return blots
 }
