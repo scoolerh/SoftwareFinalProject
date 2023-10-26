@@ -5,6 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
 )
 
 var games []Game //will be a valid type when we fix packages
@@ -44,7 +46,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	p1, p2 = Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
 	gameid = len(games)
 	capturedMap := initializeCapturedMap()
-	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
+	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap, Dice: []int}
 	games = append(games, game)
 	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
 	outputHTML(writer, "./html/newgame.html", variables)
@@ -84,8 +86,26 @@ func testplay(writer http.ResponseWriter, req *http.Request) {
 }
 
 // Check whose turn it is and if the game is won, then have the player make a move
+// TODO: build URL for the template to send data to. Should be "/play?key=vlue" stuff
+// TODO: implement so that the list of all games is accessed through database
+// TODO: display dice
+// TODO: tell user if no possible moves
 func play(writer http.ResponseWriter, req *http.Request) {
-	game := games[gameid]
+	// u, err := url.Parse(s) //is this necessary
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// urlVars, _ := url.ParseQuery(u.RawQuery) //parse query param into map
+	urlVars := req.URL.Query()
+	gameid := urlVars["gameid"]
+	g := games[strconv.Atoi(gameid)] // This needs to be changed to work with database
+	move := MoveType{Slot: urlVars["Slot"],
+		Die:          urlVars["Die"],
+		DieIndex:     urlVars["DieIndex"],
+		CapturePiece: urlVars["CapturePiece"],
+	}
+	updateGame(move.DieIndex, g.CurrTurn)
+	updateState(g.CurrTurn.Color, move)
 	if game.IsWon() != "" {
 		if whoseTurn == "w" {
 			winner = p2.Id
@@ -95,24 +115,54 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		}
 		won(writer, req)
 	}
-	if whoseTurn == "first" {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
-		outputHTML(writer, "./html/playing.html", variables)
-		whoseTurn = "w"
-		games[gameid] = game
-	} else if whoseTurn == "w" {
-		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "state": game.State, "captured": game.Captured}
-		game.Move(game.Player1)
-		outputHTML(writer, "./html/playing.html", variables)
-		whoseTurn = "b"
-		games[gameid] = game
-	} else {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": game.State, "captured": game.Captured}
-		game.Move(game.Player2)
-		outputHTML(writer, "./html/playing.html", variables)
-		whoseTurn = "w"
-		games[gameid] = game
+	if len(g.Dice) == 0 {
+		RollDice(2)
 	}
+	outputVars := map[string]interface{}{"game": g}
+	outputHTML(writer, "./html/playing.html", outputVars)
+
+	possibleMoves := g.GetPossibleMoves(g.Dice, g.currPlayer.Color)
+	//deletes all dice if no possible moves
+	//should somehow communicate to user that there are no possible moves
+	if len(possibleMoves) == 0 {
+		g.Dice = []int
+	}
+	var outputVars map[string]interface{}
+	var human bool
+	if g.CurrTurn.Id != 0 {
+		var urlList []string
+		for index, move := range possibleMoves {
+			urlParams := url.Values{}
+			urlParams.Add("gameid", gameid)
+			urlParams.Add("Slot", move.Slot)
+			urlParams.Add("Die", move.Die)
+			urlParams.Add("DieIndex", move.DieIndex)
+			urlParams.Add("CapturePiece", move.CapturePiece)
+			var urlString string = "/play?" + urlParams.Encode()
+			urlList = append("urlList", urlString)
+		}
+		var indexList []int
+		var i int = 0
+		for i < len(possibleMoves) {
+			indexList = append("indexList", i)
+			i++
+		}
+		human := true
+		outputVars := map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "human": human}
+	} else {
+		move := getAIMove(possibleMoves, g.CurrTurn.Color)
+		urlParams := url.Values{}
+		urlParams.Add("gameid", gameid)
+		urlParams.Add("Slot", move.Slot)
+		urlParams.Add("Die", move.Die)
+		urlParams.Add("DieIndex", move.dieIndex)
+		urlParams.Add("CapturePiece", move.CapturePiece)
+		//do we need localhost in url?
+		url := "/play?" + params.Encode()
+		human := false
+		outputVars := map[string]interface{}{"url": url, "human": human}
+	}
+	outputHTML(writer, "./html/playing.html", outputVars)
 }
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.

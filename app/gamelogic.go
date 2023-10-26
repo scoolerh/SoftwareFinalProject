@@ -56,6 +56,19 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 	}
 }
 
+// deletes the die that was just played and switch turns
+func (g *Game) updateGame(dieIndex int, currPlayer Player) {
+	g.Dice.DeleteElement(dieIndex)
+	//switch turn
+	if len(g.Dice) == 0 {
+		if g.CurrTurn == g.Player1 {
+			g.CurrTurn := g.Player2
+		} else {
+			g.CurrTurn := g.Player1
+		}
+	}
+}
+
 // currently returning nothing. originally returned game state but i don't think we need to
 func (g *Game) Move(player Player) {
 	//administers everything that is needed to identify and execute move.
@@ -119,6 +132,7 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	}
 
 	//if piece in endSlot is captured there will only be one piece there
+	//this logic is wrong
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -270,6 +284,7 @@ func RollDice(numDice int) []int {
 	if dice[0] == dice[1] { //assuming only two dice. Might be changed later if we want more
 		dice = append(dice, dice...)
 	}
+	g.Dice := dice
 	return dice
 }
 
@@ -280,6 +295,7 @@ type Game struct {
 	CurrTurn Player
 	State    [26]string
 	Captured map[string]int
+	Dice     []int
 
 	//only for testing purposes, can be removed later
 	currMove MoveType

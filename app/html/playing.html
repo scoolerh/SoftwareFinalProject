@@ -21,10 +21,19 @@
         <main>
             <section>
                 <h2>Here is the current board: </h2>
-                <p>{{ .state }} </p>
-                <p>Now it's {{ .player }}'s turn.</p>
-                <p>Captured Pieces: {{ .captured }}</p>
-                <a href="/play"><button class="button">Next Move</button></a>
+                <p>{{ .game.state }} </p>
+                <p>Now it's {{ .game.CurrTurn }}'s turn.</p>
+                <p>Captured Pieces: {{ .game.Captured }}</p>
+            
+                {% if .human %}
+                    {{ $urllist := .urlList}}
+                    {{ range $index, $possiblemoves := .possibleMoves}}
+                    <button class="button">{{index $urllist $index}}</button>
+                    {{ end }}
+                {% else %}
+                    <button class="button">{{.url}}</button>
+                {% endif %}
+
             </section>
         </main>
 
