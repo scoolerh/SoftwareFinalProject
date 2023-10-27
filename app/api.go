@@ -121,7 +121,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		won(writer, req)
 	}
 	if len(g.Dice) == 0 {
-		RollDice(2)
+		g.Dice = RollDice(2)
 	}
 	var outputVars1 = map[string]interface{}{"game": g}
 	outputHTML(writer, "./html/playing.html", outputVars1)
@@ -138,6 +138,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	if playerId != 0 {
 		var urlList []string
 		for index, move := range possibleMoves {
+			_ = index
 			urlParams := url.Values{}
 			strGameid := strconv.Itoa(gameid)
 			strSlot := strconv.Itoa(move.Slot)

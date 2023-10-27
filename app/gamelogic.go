@@ -58,7 +58,7 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 
 // deletes the die that was just played and switch turns
 func (g *Game) updateGame(dieIndex int, currPlayer Player) {
-	g.Dice.DeleteElement(dieIndex)
+	DeleteElement(g.Dice, dieIndex)
 	//switch turn
 	if len(g.Dice) == 0 {
 		if g.CurrTurn == g.Player1 {
@@ -284,7 +284,6 @@ func RollDice(numDice int) []int {
 	if dice[0] == dice[1] { //assuming only two dice. Might be changed later if we want more
 		dice = append(dice, dice...)
 	}
-	g.Dice := dice
 	return dice
 }
 
