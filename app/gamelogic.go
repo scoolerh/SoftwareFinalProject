@@ -62,9 +62,9 @@ func (g *Game) updateGame(dieIndex int, currPlayer Player) {
 	//switch turn
 	if len(g.Dice) == 0 {
 		if g.CurrTurn == g.Player1 {
-			g.CurrTurn := g.Player2
+			g.CurrTurn = g.Player2
 		} else {
-			g.CurrTurn := g.Player1
+			g.CurrTurn = g.Player1
 		}
 	}
 }

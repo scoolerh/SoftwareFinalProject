@@ -98,12 +98,12 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	// }
 	// urlVars, _ := url.ParseQuery(u.RawQuery) //parse query param into map
 	urlVars := req.URL.Query()
-	gameid := urlVars["gameid"]
-	g := games[strconv.Atoi(gameid)] // This needs to be changed to work with database
+	gameid, _ := strconv.Atoi(urlVars["gameid"][0])
+	g := games[gameid] // This needs to be changed to work with database
 	slot, _ := strconv.Atoi(urlVars["Slot"][0])
 	die, _ := strconv.Atoi(urlVars["Die"][0])
 	dieIndex, _ := strconv.Atoi(urlVars["DieIndex"][0])
-	capturePiece, _ := strconv.Atoi(urlVars["CapturePiece"][0])
+	capturePiece, _ := strconv.ParseBool(urlVars["CapturePiece"][0])
 	move := MoveType{Slot: slot,
 		Die:          die,
 		DieIndex:     dieIndex,
@@ -123,49 +123,55 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	if len(g.Dice) == 0 {
 		RollDice(2)
 	}
-	outputVars := map[string]interface{}{"game": g}
-	outputHTML(writer, "./html/playing.html", outputVars)
+	var outputVars1 = map[string]interface{}{"game": g}
+	outputHTML(writer, "./html/playing.html", outputVars1)
 
-	possibleMoves := g.GetPossibleMoves(g.Dice, g.currPlayer.Color)
+	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
 	//deletes all dice if no possible moves
 	//should somehow communicate to user that there are no possible moves
 	if len(possibleMoves) == 0 {
-		g.Dice = []int
+		g.Dice = nil
 	}
 	var outputVars map[string]interface{}
 	var human bool
-	if g.CurrTurn.Id != 0 {
+	var playerId, _ = strconv.Atoi(g.CurrTurn.Id)
+	if playerId != 0 {
 		var urlList []string
 		for index, move := range possibleMoves {
 			urlParams := url.Values{}
-			urlParams.Add("gameid", gameid)
-			urlParams.Add("Slot", move.Slot)
-			urlParams.Add("Die", move.Die)
-			urlParams.Add("DieIndex", move.DieIndex)
-			urlParams.Add("CapturePiece", move.CapturePiece)
+			strGameid := strconv.Itoa(gameid)
+			strSlot := strconv.Itoa(move.Slot)
+			strDie := strconv.Itoa(move.Die)
+			strDieIndex := strconv.Itoa(move.DieIndex)
+			strCapturePiece := strconv.FormatBool(move.CapturePiece)
+			urlParams.Add("gameid", strGameid)
+			urlParams.Add("Slot", strSlot)
+			urlParams.Add("Die", strDie)
+			urlParams.Add("DieIndex", strDieIndex)
+			urlParams.Add("CapturePiece", strCapturePiece)
 			var urlString string = "/play?" + urlParams.Encode()
-			urlList = append("urlList", urlString)
+			urlList = append(urlList, urlString)
 		}
 		var indexList []int
 		var i int = 0
 		for i < len(possibleMoves) {
-			indexList = append("indexList", i)
+			indexList = append(indexList, i)
 			i++
 		}
-		human := true
-		outputVars := map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "human": human}
+		human = true
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "human": human}
 	} else {
 		move := getAIMove(possibleMoves, g.CurrTurn.Color)
 		urlParams := url.Values{}
-		urlParams.Add("gameid", gameid)
+		urlParams.Add("gameid", strconv.Itoa(gameid))
 		urlParams.Add("Slot", move.Slot)
 		urlParams.Add("Die", move.Die)
 		urlParams.Add("DieIndex", move.dieIndex)
 		urlParams.Add("CapturePiece", move.CapturePiece)
 		//do we need localhost in url?
-		url := "/play?" + params.Encode()
-		human := false
-		outputVars := map[string]interface{}{"url": url, "human": human}
+		url := "/play?" + urlParams.Encode()
+		human = false
+		outputVars = map[string]interface{}{"url": url, "human": human}
 	}
 	outputHTML(writer, "./html/playing.html", outputVars)
 }
