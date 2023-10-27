@@ -46,7 +46,8 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	p1, p2 = Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
 	gameid = len(games)
 	capturedMap := initializeCapturedMap()
-	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap, Dice: []int}
+	var dice []int
+	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap, Dice: dice}
 	games = append(games, game)
 	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
 	outputHTML(writer, "./html/newgame.html", variables)
@@ -99,14 +100,18 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	urlVars := req.URL.Query()
 	gameid := urlVars["gameid"]
 	g := games[strconv.Atoi(gameid)] // This needs to be changed to work with database
-	move := MoveType{Slot: urlVars["Slot"],
-		Die:          urlVars["Die"],
-		DieIndex:     urlVars["DieIndex"],
-		CapturePiece: urlVars["CapturePiece"],
+	slot, _ := strconv.Atoi(urlVars["Slot"][0])
+	die, _ := strconv.Atoi(urlVars["Die"][0])
+	dieIndex, _ := strconv.Atoi(urlVars["DieIndex"][0])
+	capturePiece, _ := strconv.Atoi(urlVars["CapturePiece"][0])
+	move := MoveType{Slot: slot,
+		Die:          die,
+		DieIndex:     dieIndex,
+		CapturePiece: capturePiece,
 	}
 	updateGame(move.DieIndex, g.CurrTurn)
 	updateState(g.CurrTurn.Color, move)
-	if game.IsWon() != "" {
+	if g.IsWon() != "" {
 		if whoseTurn == "w" {
 			winner = p2.Id
 		}
