@@ -109,8 +109,8 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		DieIndex:     dieIndex,
 		CapturePiece: capturePiece,
 	}
-	updateGame(move.DieIndex, g.CurrTurn)
-	updateState(g.CurrTurn.Color, move)
+	g.updateGame(move.DieIndex, g.CurrTurn)
+	g.UpdateState(g.CurrTurn.Color, move)
 	if g.IsWon() != "" {
 		if whoseTurn == "w" {
 			winner = p2.Id
@@ -140,16 +140,12 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		for index, move := range possibleMoves {
 			_ = index
 			urlParams := url.Values{}
-			strGameid := strconv.Itoa(gameid)
-			strSlot := strconv.Itoa(move.Slot)
-			strDie := strconv.Itoa(move.Die)
-			strDieIndex := strconv.Itoa(move.DieIndex)
-			strCapturePiece := strconv.FormatBool(move.CapturePiece)
-			urlParams.Add("gameid", strGameid)
-			urlParams.Add("Slot", strSlot)
-			urlParams.Add("Die", strDie)
-			urlParams.Add("DieIndex", strDieIndex)
-			urlParams.Add("CapturePiece", strCapturePiece)
+			strValues := ConvertParams(gameid, move.Slot, move.Die, move.DieIndex, move.CapturePiece)
+			urlParams.Add("gameid", strValues[0])
+			urlParams.Add("Slot", strValues[1])
+			urlParams.Add("Die", strValues[2])
+			urlParams.Add("DieIndex", strValues[3])
+			urlParams.Add("CapturePiece", strValues[4])
 			var urlString string = "/play?" + urlParams.Encode()
 			urlList = append(urlList, urlString)
 		}
@@ -162,13 +158,14 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		human = true
 		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "human": human}
 	} else {
-		move := getAIMove(possibleMoves, g.CurrTurn.Color)
+		move := GetAIMove(possibleMoves, g.CurrTurn.Color)
 		urlParams := url.Values{}
-		urlParams.Add("gameid", strconv.Itoa(gameid))
-		urlParams.Add("Slot", move.Slot)
-		urlParams.Add("Die", move.Die)
-		urlParams.Add("DieIndex", move.dieIndex)
-		urlParams.Add("CapturePiece", move.CapturePiece)
+		strValues := ConvertParams(gameid, move.Slot, move.Die, move.DieIndex, move.CapturePiece)
+		urlParams.Add("gameid", strValues[0])
+		urlParams.Add("Slot", strValues[1])
+		urlParams.Add("Die", strValues[2])
+		urlParams.Add("DieIndex", strValues[3])
+		urlParams.Add("CapturePiece", strValues[4])
 		//do we need localhost in url?
 		url := "/play?" + urlParams.Encode()
 		human = false

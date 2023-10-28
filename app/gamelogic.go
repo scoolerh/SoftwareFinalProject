@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"math/rand"
+	"strconv"
 	"strings"
 )
 
@@ -344,4 +345,14 @@ func GetAIMove(possibleMoves []MoveType, color string) MoveType {
 // from tutorialspoint.com
 func DeleteElement(slice []int, index int) []int {
 	return append(slice[:index], slice[index+1:]...)
+}
+
+func ConvertParams(id int, slot int, die int, index int, capture bool) [5]string {
+	strGameid := strconv.Itoa(id)
+	strSlot := strconv.Itoa(slot)
+	strDie := strconv.Itoa(die)
+	strDieIndex := strconv.Itoa(index)
+	strCapturePiece := strconv.FormatBool(capture)
+	returns := [5]string{strGameid, strSlot, strDie, strDieIndex, strCapturePiece}
+	return returns
 }
