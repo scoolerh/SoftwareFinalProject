@@ -3,31 +3,57 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <link rel="stylesheet" href="/static/styles.css">
+        <link rel="stylesheet" href="/static/won.css">
     </head>
     <body>
-        <header>
-            <h1>BACKGAMMON</h1> 
-        </header>
-
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/newgame">New Game</a></li>
-            </ul>
-        </nav>
-
         <main>
+            <div class = "board">
+                <div class="left-side">
+                    <div class="top-row">
+                        <div class="space-down odd"></div>
+                        <div class="space-down even"></div>
+                        <div class="space-down odd"></div>
+                        <div class="space-down even"></div>
+                        <div class="space-down odd"></div>
+                        <div class="space-down even"></div>
+                    </div>
+                    <div class="bottom-row"> 
+                        <div class="space-up odd"></div>
+                        <div class="space-up even"></div>
+                        <div class="space-up odd"></div>
+                        <div class="space-up even"></div>
+                        <div class="space-up odd"></div>
+                        <div class="space-up even"></div>
+                    </div>
+                </div> 
+                <div class = "divider"></div>
+                <div class = "right-side">
+                    <div class="top-row">
+                        <div class="space-down odd"></div>
+                        <div class="space-down even"></div>
+                        <div class="space-down odd"></div>
+                        <div class="space-down even"></div>
+                        <div class="space-down odd"></div>
+                        <div class="space-down even"></div>
+                    </div>
+                    <div class="bottom-row"> 
+                        <div class="space-up odd"></div>
+                        <div class="space-up even"></div>
+                        <div class="space-up odd"></div>
+                        <div class="space-up even"></div>
+                        <div class="space-up odd"></div>
+                        <div class="space-up even"></div>
+                    </div>
+                </div>      
+            </div>
             <section>
-                <h2>Here is the current board: </h2>
-                <p>{{ .state }} </p>
+                <p>{{ .state }}</p>
                 <p>Now it's {{ .player }}'s turn.</p>
                 <p>Captured Pieces: {{ .captured }}</p>
                 <a href="/play"><button class="button">Next Move</button></a>
             </section>
         </main>
-
+ 
         <footer>
 
         </footer>
