@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS Games(
     status varchar(15), --"new", "open"(?), "paused", "finished"
     white varchar(50),
     black varchar(50),
+    FOREIGN KEY (white) REFERENCES Users(username),
+    FOREIGN KEY (black) REFERENCES Users(username),
     boardState varchar(1024),
     turn varchar(4),
     winner varchar(4)
