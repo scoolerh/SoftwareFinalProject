@@ -98,12 +98,17 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	// }
 	// urlVars, _ := url.ParseQuery(u.RawQuery) //parse query param into map
 	urlVars := req.URL.Query()
-	gameid, _ := strconv.Atoi(urlVars["gameid"][0])
+	varGameid := urlVars["gameid"][0]
+	varSlot := urlVars["Slot"][0]
+	varDie := urlVars["Die"][0]
+	varDieIndex := urlVars["DieIndex"][0]
+	varCapturePiece := urlVars["CapturePiece"][0]
+	gameid, _ := strconv.Atoi(varGameid)
 	g := games[gameid] // This needs to be changed to work with database
-	slot, _ := strconv.Atoi(urlVars["Slot"][0])
-	die, _ := strconv.Atoi(urlVars["Die"][0])
-	dieIndex, _ := strconv.Atoi(urlVars["DieIndex"][0])
-	capturePiece, _ := strconv.ParseBool(urlVars["CapturePiece"][0])
+	slot, _ := strconv.Atoi(varSlot)
+	die, _ := strconv.Atoi(varDie)
+	dieIndex, _ := strconv.Atoi(varDieIndex)
+	capturePiece, _ := strconv.ParseBool(varCapturePiece)
 	move := MoveType{Slot: slot,
 		Die:          die,
 		DieIndex:     dieIndex,
@@ -123,7 +128,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	if len(g.Dice) == 0 {
 		g.Dice = RollDice(2)
 	}
-	var outputVars1 = map[string]interface{}{"game": g}
+	var outputVars1 = map[string]interface{}{"id": gameid, "player": g.CurrTurn.Id, "state": g.State, "captured": g.Captured}
 	outputHTML(writer, "./html/playing.html", outputVars1)
 
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
