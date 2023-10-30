@@ -10,6 +10,7 @@ games = [{'Id': 0, 'Turn': '', 'Roll': '', 'Move': ''}]
 @app.route('/')
 def fcn():
     backgammonDB = db_fcns.BackgammonDB()
+    return "hello"
 
 @app.route('/newgame/<white>/<black>/<boardState>')
 def newGame(white, black, boardState):
@@ -21,6 +22,12 @@ def newGame(white, black, boardState):
 def register(username, password):
     backgammonDB = db_fcns.BackgammonDB()
     response = backgammonDB.register(username, password)
+    return response
+
+@app.route('/userstats/<username>')
+def userstats(username):
+    backgammonDB = db_fcns.BackgammonDB()
+    response = backgammonDB.userstats(username)
     return response
 
 

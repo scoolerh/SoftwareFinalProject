@@ -41,6 +41,19 @@ class BackgammonDB:
         except(Exception, psycopg2.Error) as error:
             print("Error inserting new game", error)
             return str(error)
+        
+    def userstats(self, username):
+        curr = self.cursor_init()
+        try:
+            #make sure this is working
+            curr.execute("SELECT username=%s FROM TABLE Users", username)
+        except(Exception, psycopg2.Error) as error:
+            print("Error getting user stats", error)
+            return str(error)
+
+    def highscores():
+        #get all usernames, sorted by #wins
+        pass
 
 
 if __name__ == "__main__":

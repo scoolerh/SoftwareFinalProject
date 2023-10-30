@@ -17,6 +17,10 @@ var whoseTurn string = "first"
 var gameid int
 var winner string
 
+//TODO: probably need a user variable here
+//how does it look when two users are logged in? If two people play on different computers?
+//and how does it look if two users play on the same computer? Is one or both going to log in?
+
 func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	t, err := template.ParseFiles(filename)
 	if err != nil {
@@ -37,6 +41,7 @@ func help(writer http.ResponseWriter, req *http.Request) {
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
 func login(writer http.ResponseWriter, req *http.Request) {
 	//username := req.URL.Query().Get("user")
+	//TODO: need a form or something here, then send request to db
 	http.ServeFile(writer, req, "./html/login.html")
 }
 
@@ -47,6 +52,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	capturedMap := initializeCapturedMap()
 	g := game.Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
 	games = append(games, g)
+	//TODO: set up db connection here instead. Think about players and gameID
 	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
 	outputHTML(writer, "./html/newgame.html", variables)
 }
@@ -100,6 +106,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			winner = p1.Id
 		}
 		won(writer, req)
+		//TODO: update both game and user stats here
 		return
 	}
 	if whoseTurn == "first" {
@@ -131,9 +138,12 @@ func won(writer http.ResponseWriter, req *http.Request) {
 // todo: set up SQL database, check if the user is an actual user in the db, then return their win/loss ratio.”'
 func scoreboard(writer http.ResponseWriter, req *http.Request) {
 	//display player's win/loss ratio
-	user := "Hannah"
-	request := "http://db:5000/getprofile/" + user //currently in Flask
-	fmt.Fprint(writer, request)
+	//TODO: set up db connection here
+	user := "Hannah" //have form here
+	request := "http://db:5000/userstats/" + user
+	response := requests.get(request)
+	//request := "http://db:5000/getprofilev0/" + user //currently in Flask
+	fmt.Fprint(writer, response)
 	//fmt.Fprint(writer, requests.get(request).text)
 }
 
