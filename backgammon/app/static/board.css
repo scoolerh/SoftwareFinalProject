@@ -21,6 +21,26 @@ h1
     margin: 0px;
     font-family: 'Blippo', 'Lucida Sans', fantasy;
 }
+h2
+{
+    font-size: 200%;
+    transform: rotate(270deg);
+    position: absolute;
+    white-space: nowrap;
+    left: 10px;
+    right: 10px;
+    bottom: 100px;
+}
+h3
+{
+    font-size: 200%;
+    transform: rotate(90deg);
+    position: absolute;
+    white-space: nowrap;
+    left: 10px;
+    right: 10px;
+    top: 120px;
+}
 p
 {
     font-size: 120%;
@@ -59,7 +79,7 @@ section
 }
 .board 
 {
-    width: 610px;
+    width: 770px;
     height: 480px;
     position: relative;
     box-sizing: border-box;
@@ -69,15 +89,31 @@ section
     float: center;
     margin: auto;
 }
+.left-bin
+{
+    background-color: burlywood;
+    width: 80px;
+    height: 460px;
+    position: absolute;
+}
+.right-bin 
+{
+    background-color: burlywood;
+    width: 80px;
+    left: 670px;
+    top: 0px;
+    height: 460px;
+    position: absolute;
+}
 .left-side 
 {
     position: relative;
-    left: 15px;
+    left: 100px;
 }
 .right-side 
 {
     position: relative;
-    left: 330px;
+    left: 410px;
     top: -390px;
     clear: left;
 }
@@ -98,7 +134,7 @@ section
 {
     border-left: 20px solid transparent;
     border-right: 20px solid transparent;
-    border-top: 195px solid white;
+    border-top: 195px solid burlywood;
     border-bottom: 0px solid;
     display: inline;
     float: left;
@@ -110,17 +146,17 @@ section
     border-top: 0px solid;
     border-left: 20px solid transparent;
     border-right: 20px solid transparent ;
-    border-bottom: 195px solid white;
+    border-bottom: 195px solid burlywood;
     display: inline;
     float: left;
 }
 .space-up.odd 
 {
-    border-bottom: 195px solid black;
+    border-bottom: 195px solid brown;
 }
 .space-down.even 
 {
-    border-top: 195px solid black;
+    border-top: 195px solid brown;
 }
 .divider 
 {
@@ -129,8 +165,25 @@ section
     padding: 5px;
     background-color: black;
     position: absolute;
-    left: 280px;
+    left: 360px;
     top: 0px;
 }
-  
+.mini-divider-left
+{
+    height: 450px;
+    padding: 5px;
+    background-color: black;
+    position: absolute;
+    left: 80px;
+    top: 0px;
+}
+.mini-divider-right
+{
+    height: 450px;
+    padding: 5px;
+    background-color: black;
+    position: absolute;
+    left: 660px;
+    top: 0px;
+} 
   

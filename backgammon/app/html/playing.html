@@ -3,11 +3,15 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <link rel="stylesheet" href="/static/won.css">
+        <link rel="stylesheet" href="/static/board.css">
     </head>
     <body>
         <main>
             <div class = "board">
+                <div class="left-bin">
+                    <h2>WHITE HOME</h2>
+                </div>
+                <div class="mini-divider-left"></div>
                 <div class="left-side">
                     <div class="top-row">
                         <div class="space-down odd"></div>
@@ -44,7 +48,11 @@
                         <div class="space-up odd"></div>
                         <div class="space-up even"></div>
                     </div>
-                </div>      
+                </div>  
+                <div class="mini-divider-right"></div>
+                <div class="right-bin">
+                    <h3>BLACK HOME</h3>
+                </div>  
             </div>
             <section>
                 <p>{{ .state }}</p>
