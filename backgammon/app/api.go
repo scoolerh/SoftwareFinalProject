@@ -52,9 +52,27 @@ func help(writer http.ResponseWriter, req *http.Request) {
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
 func login(writer http.ResponseWriter, req *http.Request) {
-	//username := req.URL.Query().Get("user")
-	//TODO: need a form or something here, then send request to db
-	http.ServeFile(writer, req, "./html/login.html")
+	fmt.Printf("Connecting to login endpoint")
+	http.ServeFile(writer, req, "/html/login.html")
+}
+
+func register(writer http.ResponseWriter, req *http.Request) {
+	var username string
+	var password string
+
+	if req.Method == http.MethodPost {
+		username = req.FormValue("username")
+		password = req.FormValue("password")
+	}
+
+	query := "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
+
+	var err error
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
 }
 
 // Starts a new game for the user and displays the initial board
@@ -223,6 +241,7 @@ func main() {
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
+	http.HandleFunc("/registered", register)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
 	//http.HandleFunc("/scoreboard", scoreboard)
