@@ -3,6 +3,10 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'Backgammon')\gexec
 
 \c Backgammon;
 
+-- all of this does not run when the docker container starts. I had to do it manually.
+-- might be a volumes issue, but I don't know
+-- UPDATE: volumes is definitely not working
+
 CREATE TABLE IF NOT EXISTS users(
     username varchar(50) PRIMARY KEY,
     password varchar(50)
@@ -27,6 +31,7 @@ CREATE TABLE IF NOT EXISTS games(
     turn varchar(4),
     winner varchar(4)
 );
+
 
 CREATE ROLE readaccess;
 GRANT CONNECT ON DATABASE Backgammon to readaccess;

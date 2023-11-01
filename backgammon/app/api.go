@@ -82,7 +82,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 		state += slot + "o"
 	}
 
-	query := "INSERT INTO games (white, black, status, boardstate) VALUES (" + white + ", " + black + ", " + "'new', " + state + ")"
+	query := "INSERT INTO games (white, black, status, boardstate) VALUES ('" + white + "', '" + black + "', 'new', '" + state + "')"
 	//might do something like this instead to prevent injection
 	//func buildSql(email string) string {
 	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
