@@ -3,7 +3,7 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <link rel="stylesheet" href="/static/won.css">
+        <link rel="stylesheet" href="/static/game.css">
     </head>
     <body>
         <main>
@@ -44,7 +44,12 @@
                         <div class="space-up odd"></div>
                         <div class="space-up even"></div>
                     </div>
-                </div>      
+                </div>  
+                <div class="mini-divider"></div>
+                <div class="home-bins">
+                    <div class="side-divider"></div> 
+                </div>   
+                <div id="white-piece"></div>
             </div>
             <section>
                 <p>{{ .state }}</p>
@@ -57,5 +62,6 @@
         <footer>
 
         </footer>
+        <script src="../static/pieces.js"></script>
     </body>
 </html>

@@ -1,0 +1,158 @@
+html
+{
+    background: url(./bg.jpg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    z-index: -1;
+}
+p
+{
+    font-size: 120%;
+    text-align: center;
+}
+section
+{   
+    position: absolute;
+    color: black;
+    background-color: white;
+    border-style: solid;
+    border-width: medium;
+    border-color:black;
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
+    right: 20%;
+    left: 20%;
+    border-radius: 15px; 
+}
+.button
+{
+    background-color: green;
+    color: white;
+    border-style: solid;
+    border-color: green;
+    border-width: medium;
+    border-radius: 15px;
+    text-decoration: none;
+    padding: 15px 30px 15px 30px;
+    font-size: 150%;
+}
+.button:hover 
+{
+    box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+.board 
+{
+    width: 700px;
+    height: 480px;
+    position: relative;
+    box-sizing: border-box;
+    background-color: #335533;
+    border: 10px solid black;
+    border-radius: 10px;
+    float: center;
+    margin: auto;
+}
+.home-bins
+{
+    background-color: burlywood;
+    width: 80px;
+    height: 460px;
+    position: absolute;
+    left: 600px;
+    top: 0px;
+}
+.left-side 
+{
+    position: relative;
+    left: 15px;
+}
+.right-side 
+{
+    position: relative;
+    left: 330px;
+    top: -390px;
+    clear: left;
+}
+.bottom-row 
+{
+    position: relative;
+    top: 70px
+}
+.right-side .bottom-row
+{
+    clear: left;
+}
+.left-side .bottom-row 
+{
+    clear: left;
+}
+.space-down 
+{
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 195px solid brown;
+    border-bottom: 0px solid;
+    display: inline;
+    float: left;
+}
+.space-up 
+{
+    width: 0px; 
+    height: 0px; 
+    border-top: 0px solid;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent ;
+    border-bottom: 195px solid brown;
+    display: inline;
+    float: left;
+}
+.space-up.odd 
+{
+    border-bottom: 195px solid burlywood;
+}
+.space-down.even 
+{
+    border-top: 195px solid burlywood;
+}
+.divider 
+{
+    width: 20px;
+    height: 450px;
+    padding: 5px;
+    background-color: black;
+    position: absolute;
+    left: 280px;
+    top: 0px;
+}
+.mini-divider
+{
+    width: 5px;
+    height: 450px;
+    padding: 5px;
+    background-color: black;
+    position: absolute;
+    left: 585px;
+    top: 0px;
+}
+.side-divider
+{
+    width: 80px;
+    height: 5px;
+    padding: 5px;
+    background-color: black;
+    position: absolute;
+    bottom: 230px;
+}
+.white-piece
+{
+    height: 40px;
+    width: 40px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    left: var(left-position);
+    top: var(top-position);
+}
