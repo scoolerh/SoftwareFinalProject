@@ -195,7 +195,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			}
 
 		}
-		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "human": human}
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human}
 	} else {
 		human = false
 		urlParams := url.Values{}
@@ -209,7 +209,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			urlParams.Add("CapturePiece", strValues[3])
 		}
 		url := "/play?" + urlParams.Encode()
-		outputVars = map[string]interface{}{"url": url, "human": human}
+		outputVars = map[string]interface{}{"url": url, "isHuman": human}
 	}
 	outputHTML(writer, "./html/playing.html", outputVars)
 }
