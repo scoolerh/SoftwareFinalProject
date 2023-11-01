@@ -2,13 +2,24 @@ package main
 
 import (
 	"backgammon/game"
+	"database/sql"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+
+	_ "github.com/lib/pq"
 )
 
-var games []game.Game //will be a valid type when we fix packages
+const (
+	host     = "db"
+	port     = 5432
+	user     = "postgres"
+	password = "collective"
+	dbname   = "backgammon"
+)
+
+var games []game.Game
 var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b", ""}
 var p1 game.Player
@@ -16,6 +27,7 @@ var p2 game.Player
 var whoseTurn string = "first"
 var gameid int
 var winner string
+var db *sql.DB
 
 //TODO: probably need a user variable here
 //how does it look when two users are logged in? If two people play on different computers?
@@ -47,11 +59,40 @@ func login(writer http.ResponseWriter, req *http.Request) {
 
 // Starts a new game for the user and displays the initial board
 func newgame(writer http.ResponseWriter, req *http.Request) {
+
 	p1, p2 = game.Player{Id: "STEVE", Color: "w"}, game.Player{Id: "JOE", Color: "b"} //will need to be an input in the future
 	gameid = len(games)
 	capturedMap := initializeCapturedMap()
 	g := game.Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
 	games = append(games, g)
+
+	var white string
+	var black string
+	var state string
+	if g.Player1.Color == "w" {
+		white = g.Player1.Id
+		black = g.Player2.Id
+	} else {
+		white = g.Player2.Id
+		black = g.Player1.Id
+	}
+
+	for index, slot := range initialState {
+		_ = index
+		state += slot + "o"
+	}
+
+	query := "INSERT INTO games (white, black, status, boardstate) VALUES (" + white + ", " + black + ", " + "'new', " + state + ")"
+	//might do something like this instead to prevent injection
+	//func buildSql(email string) string {
+	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
+
+	var err error
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
 	//TODO: set up db connection here instead. Think about players and gameID
 	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
 	outputHTML(writer, "./html/newgame.html", variables)
@@ -135,26 +176,56 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "./html/won.html", variables)
 }
 
-// todo: set up SQL database, check if the user is an actual user in the db, then return their win/loss ratio.”'
-func scoreboard(writer http.ResponseWriter, req *http.Request) {
-	//display player's win/loss ratio
-	//TODO: set up db connection here
-	user := "Hannah" //have form here
-	request := "http://db:5000/userstats/" + user
-	response := requests.get(request)
-	//request := "http://db:5000/getprofilev0/" + user //currently in Flask
-	fmt.Fprint(writer, response)
-	//fmt.Fprint(writer, requests.get(request).text)
+// just for fun (?), we try to establish a connection to the database here
+func dbHandler(writer http.ResponseWriter, req *http.Request) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
+	var err error
+	db, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	log.Print("successfully connected to database")
+}
+
+func initDB() {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
+	var err error
+	db, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	log.Print("successfully connected to database")
 }
 
 func main() {
+	initDB()
+	defer db.Close()
+
 	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/won", won)
-	http.HandleFunc("/scoreboard", scoreboard)
+	http.HandleFunc("/db", dbHandler)
+	//http.HandleFunc("/scoreboard", scoreboard)
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping
