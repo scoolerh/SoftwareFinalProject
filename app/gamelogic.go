@@ -57,10 +57,13 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 	}
 }
 
-// deletes the die that was just played and switch turns
-func (g *Game) updateGame(dieIndex int, currPlayer Player) {
+// deletes the die that was just played
+func (g *Game) updateDice(dieIndex int) {
 	DeleteElement(g.Dice, dieIndex)
-	//switch turn
+}
+
+// switch turns if necesesary
+func (g *Game) updateTurn() {
 	if len(g.Dice) == 0 {
 		if g.CurrTurn == g.Player1 {
 			g.CurrTurn = g.Player2
@@ -133,7 +136,6 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the
 	}
 
 	//if piece in endSlot is captured there will only be one piece there
-	//this logic is wrong
 	if move.CapturePiece {
 		currState[newSpace] = playerColor
 	} else {
@@ -347,12 +349,26 @@ func DeleteElement(slice []int, index int) []int {
 	return append(slice[:index], slice[index+1:]...)
 }
 
-func ConvertParams(id int, slot int, die int, index int, capture bool) [5]string {
-	strGameid := strconv.Itoa(id)
+func ConvertParams(slot int, die int, index int, capture bool) [4]string {
 	strSlot := strconv.Itoa(slot)
 	strDie := strconv.Itoa(die)
 	strDieIndex := strconv.Itoa(index)
 	strCapturePiece := strconv.FormatBool(capture)
-	returns := [5]string{strGameid, strSlot, strDie, strDieIndex, strCapturePiece}
+	returns := [4]string{strSlot, strDie, strDieIndex, strCapturePiece}
 	return returns
+}
+
+func initializeCapturedMap() map[string]int {
+	m := make(map[string]int)
+	m["w"] = 0
+	m["b"] = 0
+	return m
+}
+
+func createTestGame(gameid int, FirstTurn Player) Game {
+	p1, p2 = Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
+	capturedMap := initializeCapturedMap()
+	var dice []int
+	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: FirstTurn, State: initialState, Captured: capturedMap, Dice: dice}
+	return testGame
 }
