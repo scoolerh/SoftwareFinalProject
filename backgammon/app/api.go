@@ -53,7 +53,7 @@ func help(writer http.ResponseWriter, req *http.Request) {
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
 func login(writer http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Connecting to login endpoint")
-	http.ServeFile(writer, req, "/html/login.html")
+	http.ServeFile(writer, req, "app/html/login.html")
 }
 
 func register(writer http.ResponseWriter, req *http.Request) {
@@ -113,7 +113,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 
 	//TODO: set up db connection here instead. Think about players and gameID
 	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
-	outputHTML(writer, "./html/newgame.html", variables)
+	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
 func initializeCapturedMap() map[string]int {
