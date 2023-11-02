@@ -110,7 +110,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	// urlVars, _ := url.ParseQuery(u.RawQuery) //parse query param into map
 	urlVars := req.URL.Query()
 	varGameid := urlVars["gameid"][0]
-	gameid, _ := strconv.Atoi(varGameid)
 	// g := games[gameid] // This needs to be changed to work with database
 	g := game
 
@@ -154,12 +153,12 @@ func play(writer http.ResponseWriter, req *http.Request) {
 
 	//display after dice roll
 	//TODO: pass in dice?
-	isHuman := true
-	if g.CurrTurn.id == 0 {
-		isHuman = false
-	}
-	var outputVars1 = map[string]interface{}{"id": gameid, "player": g.CurrTurn, "state": g.State, "captured": g.Captured, "isHuman": isHuman}
-	outputHTML(writer, "./html/playing.html", outputVars1)
+	// isHuman := true
+	// if g.CurrTurn.Id == "0" {
+	// 	isHuman = false
+	// }
+	// var outputVars1 = map[string]interface{}{"id": gameid, "player": g.CurrTurn, "state": g.State, "captured": g.Captured, "isHuman": isHuman}
+	// outputHTML(writer, "./html/playing.html", outputVars1)
 
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
 	//deletes all dice if no possible moves

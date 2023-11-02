@@ -24,20 +24,21 @@
                 <p>pretend game state </p>
                 <p>Now it's {{ .player }}'s turn.</p>
                 <p>Captured Pieces: {{ .captured }}</p>
-                
-                <p>
-                {% if .isHuman %}
-                    {{ $urllist := .urlList}}
-                    {{ range $index, $possiblemoves := .possibleMoves}}
-                        <a href="{{index $urllist $index}}"><button class="button">{{index $urllist $index}}</button>
-                    {{ end }}
-                {% else %}
-                    <button class="button">{{.url}}</button>
-                {% endif %}
-                </p>
+            
 
             </section>
         </main>
+            <p>
+            {{ if eq true .isHuman }}
+                {{ $urllist := .urlList}}
+                {{ range $index, $possiblemoves := .possibleMoves}}
+                    <p>TESTING</p>
+                    <a href="{{index $urllist $index}}"><button class="button">{{index $urllist $index}}</button></a>
+                {{ end }}
+            {{ else }}
+                <a href="{{.url}}"><button class="button">AI ELSE</button></p></a>
+            {{ end }}
+            </p>
 
         <footer>
 

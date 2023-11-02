@@ -366,7 +366,7 @@ func initializeCapturedMap() map[string]int {
 }
 
 func createTestGame(gameid int, FirstTurn Player) Game {
-	p1, p2 = Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
+	p1, p2 = Player{Id: "1", Color: "w"}, Player{Id: "2", Color: "b"} //will need to be an input in the future
 	capturedMap := initializeCapturedMap()
 	var dice []int
 	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: FirstTurn, State: initialState, Captured: capturedMap, Dice: dice}
