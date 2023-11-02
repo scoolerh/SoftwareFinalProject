@@ -28,6 +28,7 @@ var whoseTurn string = "first"
 var gameid int
 var winner string
 var db *sql.DB
+var currentUser string
 
 //TODO: probably need a user variable here
 //how does it look when two users are logged in? If two people play on different computers?
@@ -72,6 +73,37 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err) //might want to change this later
 	}
+	http.ServeFile(writer, req, "app/html/index.html") //indicate somehow that registration was successful
+}
+
+func loggedin(writer http.ResponseWriter, req *http.Request) {
+	var username string
+	var password string
+
+	if req.Method == http.MethodPost {
+		username = req.FormValue("username")
+		password = req.FormValue("password")
+	}
+
+	query := "SELECT password FROM users WHERE username='" + username + "'"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	var refPassword string
+	for rows.Next() {
+		rows.Scan(&refPassword)
+	}
+
+	if password != refPassword {
+		http.ServeFile(writer, req, "app/html/loginfailed.html")
+	}
+
+	currentUser = username
+	log.Printf("Welcome %s!", currentUser)
+	http.ServeFile(writer, req, "app/html/index.html") //pass in user here if it is not nil, so that it can say welcome user!
 
 }
 
@@ -242,6 +274,7 @@ func main() {
 	http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/registered", register)
+	http.HandleFunc("/loggedin", loggedin)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
 	//http.HandleFunc("/scoreboard", scoreboard)
