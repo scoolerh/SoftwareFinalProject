@@ -21,7 +21,7 @@ var gameid int
 var winner string
 
 // var games = []Game{createTestGame(0, p1)}
-var game = createTestGame(0, p1)
+var g = createTestGame(0, p1)
 
 func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	t, err := template.ParseFiles(filename)
@@ -56,11 +56,11 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	// games = append(games, game)
 	urlParams := url.Values{}
 	strValues := ConvertParams(50, 0, 0, false)
-	strGameid := strconv.Itoa(game.Gameid)
+	strGameid := strconv.Itoa(g.Gameid)
 	urlParams.Add("gameid", strGameid)
 	urlParams.Add("Slot", strValues[0])
 	startGameURL := "/play?" + urlParams.Encode()
-	variables := map[string]interface{}{"id": game.Gameid, "p1": p1.Id, "p2": p2.Id, "startGameURL": startGameURL}
+	variables := map[string]interface{}{"id": g.Gameid, "p1": p1.Id, "p2": p2.Id, "startGameURL": startGameURL}
 	outputHTML(writer, "./html/newgame.html", variables)
 }
 
@@ -111,7 +111,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	urlVars := req.URL.Query()
 	varGameid := urlVars["gameid"][0]
 	// g := games[gameid] // This needs to be changed to work with database
-	g := game
 
 	//if no move
 	if urlVars["Slot"][0] != "50" {
@@ -125,6 +124,8 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		die, _ := strconv.Atoi(varDie)
 		dieIndex, _ := strconv.Atoi(varDieIndex)
 		capturePiece, _ := strconv.ParseBool(varCapturePiece)
+
+		// slot, die, dieIndex, capturePiece :=
 		move := MoveType{Slot: slot,
 			Die:          die,
 			DieIndex:     dieIndex,
@@ -192,9 +193,8 @@ func play(writer http.ResponseWriter, req *http.Request) {
 				var urlString string = "/play?" + urlParams.Encode()
 				urlList = append(urlList, urlString)
 			}
-
 		}
-		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human}
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "state": g.State}
 	} else {
 		human = false
 		urlParams := url.Values{}
@@ -206,9 +206,11 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			urlParams.Add("Die", strValues[1])
 			urlParams.Add("DieIndex", strValues[2])
 			urlParams.Add("CapturePiece", strValues[3])
+		} else {
+			urlParams.Add("Slot", "50")
 		}
 		url := "/play?" + urlParams.Encode()
-		outputVars = map[string]interface{}{"url": url, "isHuman": human}
+		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State}
 	}
 	outputHTML(writer, "./html/playing.html", outputVars)
 }
