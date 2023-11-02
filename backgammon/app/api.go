@@ -47,7 +47,7 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 
 // Print the rules and how to use the tool for the user
 func help(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "./html/index.html")
+	http.ServeFile(writer, req, "app/html/index.html")
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
@@ -170,19 +170,19 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 	if whoseTurn == "first" {
 		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": g.State, "captured": g.Captured}
-		outputHTML(writer, "./html/playing.html", variables)
+		outputHTML(writer, "app/html/playing.html", variables)
 		whoseTurn = "w"
 		games[gameid] = g
 	} else if whoseTurn == "w" {
 		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "state": g.State, "captured": g.Captured}
 		g.Move(g.Player1)
-		outputHTML(writer, "./html/playing.html", variables)
+		outputHTML(writer, "app/html/playing.html", variables)
 		whoseTurn = "b"
 		games[gameid] = g
 	} else {
 		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": g.State, "captured": g.Captured}
 		g.Move(g.Player2)
-		outputHTML(writer, "./html/playing.html", variables)
+		outputHTML(writer, "app/html/playing.html", variables)
 		whoseTurn = "w"
 		games[gameid] = g
 	}
@@ -191,7 +191,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
 func won(writer http.ResponseWriter, req *http.Request) {
 	variables := map[string]interface{}{"winner": winner}
-	outputHTML(writer, "./html/won.html", variables)
+	outputHTML(writer, "app/html/won.html", variables)
 }
 
 // just for fun (?), we try to establish a connection to the database here

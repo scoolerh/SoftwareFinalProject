@@ -1,6 +1,3 @@
-SELECT 'CREATE DATABASE Backgammon' 
-WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'Backgammon')\gexec
-
 \c Backgammon;
 
 -- all of this does not run when the docker container starts. I had to do it manually.
@@ -32,6 +29,8 @@ CREATE TABLE IF NOT EXISTS games(
     winner varchar(4)
 );
 
+INSERT INTO users VALUES('STEVE', 'ai');
+INSERT INTO users VALUES('JOE', 'ai');
 
 CREATE ROLE readaccess;
 GRANT CONNECT ON DATABASE Backgammon to readaccess;
