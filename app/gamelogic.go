@@ -76,54 +76,6 @@ func (g *Game) updateTurn() {
 	}
 }
 
-// currently returning nothing. originally returned game state but i don't think we need to
-// func (g *Game) Move(player Player) {
-// 	//administers everything that is needed to identify and execute move.
-// 	//Changes done here lately might have to be reflected in changes to updateBoard
-// 	dice := RollDice(2) //change to input?
-// 	log.Printf("diceroll: %v \n", dice)
-// 	numDice := len(dice)
-
-// 	for i := 0; i < numDice; i++ {
-// 		log.Printf("Using dice %v", i+1)
-
-// 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
-// 		if len(possibleMoves) == 0 {
-// 			log.Println("no possible moves")
-// 			return
-// 		}
-// 		move := GetMove(possibleMoves, player)
-
-// 		if player.Color == "b" {
-// 			dice[move.DieIndex] = -move.Die
-// 		} else if player.Color == "w" {
-// 			dice[move.DieIndex] = move.Die
-// 		}
-
-// 		endSlot := move.Slot + move.Die
-// 		endSlotState := g.State[endSlot]
-
-// 		if willCapturePiece(endSlotState, player.Color) {
-// 			move.CapturePiece = true
-// 			g.Captured[endSlotState] += 1
-// 		}
-// 		log.Printf("player %s chose move %v", player.Color, move)
-// 		//only for testing purposes
-// 		g.currMove = move
-
-// 		g.UpdateState(player.Color, move)
-// 		log.Printf("state updated to: %v", g.State)
-
-// 		if player.Color == "w" && move.Slot == 0 {
-// 			g.Captured["w"] -= 1
-// 		} else if player.Color == "b" && move.Slot == 25 {
-// 			g.Captured["b"] -= 1
-// 		}
-
-// 		dice = DeleteElement(dice, move.DieIndex)
-// 	}
-// }
-
 func (g *Game) UpdateState(playerColor string, move MoveType) [26]string { //the * makes it a pointer and not a value. Remember this if similar issues arise later.
 	//updates the state of the board to reflect most recent move
 	currState := g.State
@@ -390,4 +342,12 @@ func parseVariables(urlVariables url.Values) (int, int, int, bool) {
 	dieIndex, _ := strconv.Atoi(varDieIndex)
 	capturePiece, _ := strconv.ParseBool(varCapturePiece)
 	return slot, die, dieIndex, capturePiece
+}
+
+func addUrlParams(urlParams url.Values, valuesToAdd [4]string) url.Values {
+	urlParams.Add("Slot", valuesToAdd[0])
+	urlParams.Add("Die", valuesToAdd[1])
+	urlParams.Add("DieIndex", valuesToAdd[2])
+	urlParams.Add("CapturePiece", valuesToAdd[3])
+	return urlParams
 }

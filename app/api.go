@@ -64,68 +64,24 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "./html/newgame.html", variables)
 }
 
-// func initializeCapturedMap() map[string]int {
-// 	m := make(map[string]int)
-// 	m["w"] = 0
-// 	m["b"] = 0
-// 	return m
-// }
-
-// func testplay(writer http.ResponseWriter, req *http.Request) {
-
-// 	//for testing purposes
-// 	p1, p2 := Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
-// 	gameid := len(games)
-// 	capturedMap := initializeCapturedMap()
-// 	game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: testState, Captured: capturedMap}
-// 	games = append(games, game)
-// 	fmt.Fprint(writer, "TIME TO PLAY \n")
-
-// 	fmt.Fprintf(writer, "%v \n", game.State)
-// 	for i := 0; i < 10; i++ {
-// 		// returning and printing boardState for testing purposes
-// 		log.Printf("\n move nr %v: \n", i)
-// 		fmt.Fprintf(writer, "move nr %v: \n", i)
-// 		game.Move(game.Player1)
-// 		fmt.Fprintf(writer, "player 1 made a move: %v", game.currMove)
-// 		fmt.Fprintf(writer, "%v \n", game.State)
-// 		//fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
-// 		game.Move(game.Player2)
-// 		fmt.Fprintf(writer, "player 2 made a move: %v", game.currMove)
-// 		fmt.Fprintf(writer, "%v \n", game.State)
-// 		//fmt.Fprintf(writer, "captured pieces: %v \n", game.Captured)
-// 	}
-// }
-
 // Check whose turn it is and if the game is won, then have the player make a move
 // TODO: build URL for the template to send data to. Should be "/play?key=vlue" stuff
 // TODO: implement so that the list of all games is accessed through database
 // TODO: display dice
 // TODO: tell user if no possible moves
 func play(writer http.ResponseWriter, req *http.Request) {
-	// u, err := url.Parse(s) //is this necessary
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// urlVars, _ := url.ParseQuery(u.RawQuery) //parse query param into map
+
 	urlVars := req.URL.Query()
 	varGameid := urlVars["gameid"][0]
+	var outputVars map[string]interface{}
+	var human bool
+	var playerId, _ = strconv.Atoi(g.CurrTurn.Id)
 	// g := games[gameid] // This needs to be changed to work with database
+	var noPossibleMoves bool
 
 	//if no move
 	if urlVars["Slot"][0] != "50" {
-		//abstract this?
-		varSlot := urlVars["Slot"][0]
-		varDie := urlVars["Die"][0]
-		varDieIndex := urlVars["DieIndex"][0]
-		varCapturePiece := urlVars["CapturePiece"][0]
-
-		slot, _ := strconv.Atoi(varSlot)
-		die, _ := strconv.Atoi(varDie)
-		dieIndex, _ := strconv.Atoi(varDieIndex)
-		capturePiece, _ := strconv.ParseBool(varCapturePiece)
-
-		// slot, die, dieIndex, capturePiece :=
+		slot, die, dieIndex, capturePiece := parseVariables(urlVars)
 		move := MoveType{Slot: slot,
 			Die:          die,
 			DieIndex:     dieIndex,
@@ -152,24 +108,14 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		g.Dice = RollDice(2)
 	}
 
-	//display after dice roll
-	//TODO: pass in dice?
-	// isHuman := true
-	// if g.CurrTurn.Id == "0" {
-	// 	isHuman = false
-	// }
-	// var outputVars1 = map[string]interface{}{"id": gameid, "player": g.CurrTurn, "state": g.State, "captured": g.Captured, "isHuman": isHuman}
-	// outputHTML(writer, "./html/playing.html", outputVars1)
-
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
+
 	//deletes all dice if no possible moves
-	//should somehow communicate to user that there are no possible moves
 	if len(possibleMoves) == 0 {
 		g.Dice = nil
+		noPossibleMoves = true
 	}
-	var outputVars map[string]interface{}
-	var human bool
-	var playerId, _ = strconv.Atoi(g.CurrTurn.Id)
+
 	if playerId != 0 {
 		human = true
 		var urlList []string
@@ -186,15 +132,12 @@ func play(writer http.ResponseWriter, req *http.Request) {
 				urlParams := url.Values{}
 				strValues := ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
 				urlParams.Add("gameid", varGameid)
-				urlParams.Add("Slot", strValues[0])
-				urlParams.Add("Die", strValues[1])
-				urlParams.Add("DieIndex", strValues[2])
-				urlParams.Add("CapturePiece", strValues[3])
+				urlParams = addUrlParams(urlParams, strValues)
 				var urlString string = "/play?" + urlParams.Encode()
 				urlList = append(urlList, urlString)
 			}
 		}
-		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "state": g.State}
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
 	} else {
 		human = false
 		urlParams := url.Values{}
@@ -202,15 +145,12 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		if len(possibleMoves) != 0 {
 			move := GetAIMove(possibleMoves, g.CurrTurn.Color)
 			strValues := ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
-			urlParams.Add("Slot", strValues[0])
-			urlParams.Add("Die", strValues[1])
-			urlParams.Add("DieIndex", strValues[2])
-			urlParams.Add("CapturePiece", strValues[3])
+			urlParams = addUrlParams(urlParams, strValues)
 		} else {
 			urlParams.Add("Slot", "50")
 		}
 		url := "/play?" + urlParams.Encode()
-		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State}
+		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
 	}
 	outputHTML(writer, "./html/playing.html", outputVars)
 }
