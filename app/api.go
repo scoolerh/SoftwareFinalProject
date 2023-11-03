@@ -21,7 +21,7 @@ var gameid int
 var winner string
 
 // var games = []Game{createTestGame(0, p1)}
-var g = createTestGame(0, p1)
+var g = createTestGame(0)
 
 func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	t, err := template.ParseFiles(filename)
@@ -75,11 +75,10 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	varGameid := urlVars["gameid"][0]
 	var outputVars map[string]interface{}
 	var human bool
-	var playerId, _ = strconv.Atoi(g.CurrTurn.Id)
 	// g := games[gameid] // This needs to be changed to work with database
 	var noPossibleMoves bool
 
-	//if no move
+	//if there is a move
 	if urlVars["Slot"][0] != "50" {
 		slot, die, dieIndex, capturePiece := parseVariables(urlVars)
 		move := MoveType{Slot: slot,
@@ -88,6 +87,8 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			CapturePiece: capturePiece,
 		}
 		g.updateDice(dieIndex)
+		fmt.Printf("This is the move; ", move)
+		fmt.Printf("This is the board before the move: ", g.State)
 		g.UpdateState(g.CurrTurn.Color, move)
 		if g.IsWon() != "" {
 			if whoseTurn == "w" {
@@ -98,10 +99,13 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			}
 			won(writer, req)
 		}
+	} else {
+		fmt.Println("no move")
 	}
 
 	//think about this logic for first turn
 	g.updateTurn()
+	var playerId, _ = strconv.Atoi(g.CurrTurn.Id)
 
 	//rolls the dice if the dice list is empty
 	if len(g.Dice) == 0 {
@@ -117,6 +121,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	if playerId != 0 {
+		fmt.Println("human move now")
 		human = true
 		var urlList []string
 		if len(possibleMoves) == 0 {
@@ -139,6 +144,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		}
 		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
 	} else {
+		fmt.Println("ai move now")
 		human = false
 		urlParams := url.Values{}
 		urlParams.Add("gameid", varGameid)

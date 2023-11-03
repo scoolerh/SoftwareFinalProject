@@ -323,11 +323,12 @@ func initializeCapturedMap() map[string]int {
 	return m
 }
 
-func createTestGame(gameid int, FirstTurn Player) Game {
+// the player set as currturn here will play second, not first
+func createTestGame(gameid int) Game {
 	p1, p2 = Player{Id: "0", Color: "w"}, Player{Id: "1", Color: "b"} //will need to be an input in the future
 	capturedMap := initializeCapturedMap()
 	var dice []int
-	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: FirstTurn, State: initialState, Captured: capturedMap, Dice: dice}
+	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap, Dice: dice}
 	return testGame
 }
 
