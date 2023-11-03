@@ -7,6 +7,7 @@
     </head>
     <body>
         <main>
+            <script src="../static/pieces.js"></script>
             <div class = "board">
                 <div class="left-side">
                     <div class="top-row">
@@ -48,20 +49,19 @@
                 <div class="mini-divider"></div>
                 <div class="home-bins">
                     <div class="side-divider"></div> 
-                </div>   
-                <div id="white-piece"></div>
+                </div>
+                <div class="white-piece"></div>
             </div>
             <section>
-                <p>{{ .state }}</p>
+                <h5 id="state">{{ .state }}</h5>
                 <p>Now it's {{ .player }}'s turn.</p>
-                <p>Captured Pieces: {{ .captured }}</p>
-                <a href="/play"><button class="button">Next Move</button></a>
+                <h5 id="captured">{{ .captured }}</h5>
+                <a href="/play"><button class="button" onclick="setPiece(document.getElementById('state').textContent, document.getElementById('captured').textContent)">Next Move</button></a>
             </section>
         </main>
  
         <footer>
 
         </footer>
-        <script src="../static/pieces.js"></script>
     </body>
 </html>

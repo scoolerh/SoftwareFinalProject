@@ -1,4 +1,7 @@
-function setPieces() {
-    document.getElementById("white-piece").style.setProperty('--top-position', '0px');
-    document.getElementById("white-piece").style.setProperty('--left-position', '15px');
+function setPiece(gameState, capturedPieces) {
+    var state = gameState;
+    var captured = capturedPieces;
+    var root = document.querySelector(":root");
+    root.style.setProperty('--top', '0px');
+    root.style.setProperty('--left', '15px');
 }

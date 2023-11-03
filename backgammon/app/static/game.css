@@ -1,3 +1,8 @@
+:root 
+{
+    --top: 0px;
+    --left: 15px;
+}
 html
 {
     background: url(./bg.jpg) no-repeat center center fixed;
@@ -10,21 +15,29 @@ html
 p
 {
     font-size: 120%;
-    text-align: center;
+}
+h5 
+{
+    margin: 0px;
+    padding: 0px;
+    color: white;
+    size: 0px;
+    font-size: 0%;
 }
 section
 {   
-    position: absolute;
+    position: relative;
+    width: 690px;
     color: black;
     background-color: white;
     border-style: solid;
     border-width: medium;
     border-color:black;
-    text-align: center;
-    padding: 10px;
-    margin-top: 20px;
-    right: 20%;
-    left: 20%;
+    padding: 5px;
+    margin: auto;
+    align-content: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
     border-radius: 15px; 
 }
 .button
@@ -153,6 +166,6 @@ section
     background-color: white;
     border-radius: 50%;
     position: absolute;
-    left: var(left-position);
-    top: var(top-position);
+    left: var(--left);
+    top: var(--top);
 }
