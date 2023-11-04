@@ -22,6 +22,8 @@ services:
     build: ./backgammon
     ports: 
       - "9000:5555"
+    depends_on:
+      - "db"
     links: 
       - "db"
     # - "ai"
