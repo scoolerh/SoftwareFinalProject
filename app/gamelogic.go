@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"net/url"
 	"strconv"
@@ -60,9 +59,7 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 
 // deletes the die that was just played
 func (g *Game) updateDice(dieIndex int) {
-	fmt.Println("updateDice before: ", g.Dice)
 	g.Dice = DeleteElement(g.Dice, dieIndex)
-	fmt.Println("updateDice after: ", g.Dice)
 }
 
 // switch turns if necesesary
@@ -242,7 +239,6 @@ func RollDice(numDice int) []int {
 	if dice[0] == dice[1] { //assuming only two dice. Might be changed later if we want more
 		dice = append(dice, dice...)
 	}
-	fmt.Println("Roll dice function: ", dice)
 	return dice
 }
 
@@ -254,6 +250,7 @@ type Game struct {
 	State    [26]string
 	Captured map[string]int
 	Dice     []int
+	// Winner   Player
 
 	//only for testing purposes, can be removed later
 	currMove MoveType
@@ -302,8 +299,6 @@ func GetAIMove(possibleMoves []MoveType, color string) MoveType {
 
 // from tutorialspoint.com
 func DeleteElement(dice []int, dieIndex int) []int {
-	fmt.Println("deleteElement dice: ", dice)
-	fmt.Println("deleteElement dieIndex: ", dieIndex)
 	return append(dice[:dieIndex], dice[dieIndex+1:]...)
 }
 
@@ -324,11 +319,14 @@ func initializeCapturedMap() map[string]int {
 }
 
 // the player set as currturn here will play second, not first
-func createTestGame(gameid int) Game {
-	p1, p2 = Player{Id: "0", Color: "w"}, Player{Id: "1", Color: "b"} //will need to be an input in the future
+func createGame(games []Game) Game {
+	p1, p2 := Player{Id: "0", Color: "w"}, Player{Id: "1", Color: "b"} //will need to be an input in the future
+	//var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
+	testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
 	capturedMap := initializeCapturedMap()
 	var dice []int
-	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap, Dice: dice}
+	gameid := len(games)
+	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: p1, State: testState, Captured: capturedMap, Dice: dice}
 	return testGame
 }
 

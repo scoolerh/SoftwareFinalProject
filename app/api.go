@@ -10,18 +10,7 @@ import (
 
 // WE NEED TO HANDLE "EMPTY" URL KEYWORDS
 
-// var games []Game //will be a valid type when we fix packages
-// var games = append(games, createTestGame(1, p1))
-var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b"}
-var p1 Player
-var p2 Player
-var whoseTurn string = "first"
-var gameid int
-var winner string
-
-// var games = []Game{createTestGame(0, p1)}
-var g = createTestGame(0)
+var games []Game
 
 func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	t, err := template.ParseFiles(filename)
@@ -48,27 +37,19 @@ func login(writer http.ResponseWriter, req *http.Request) {
 
 // Starts a new game for the user and displays the initial board
 func newgame(writer http.ResponseWriter, req *http.Request) {
-	// p1, p2 = Player{Id: "STEVE", Color: "w"}, Player{Id: "JOE", Color: "b"} //will need to be an input in the future
-	// gameid = len(games)
-	// capturedMap := initializeCapturedMap()
-	// var dice []int
-	// game := Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap, Dice: dice}
-	// games = append(games, game)
+	g := createGame(games)
+	games = append(games, g)
 	urlParams := url.Values{}
-	strValues := ConvertParams(50, 0, 0, false)
 	strGameid := strconv.Itoa(g.Gameid)
 	urlParams.Add("gameid", strGameid)
-	urlParams.Add("Slot", strValues[0])
+	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
-	variables := map[string]interface{}{"id": g.Gameid, "p1": p1.Id, "p2": p2.Id, "startGameURL": startGameURL}
+	variables := map[string]interface{}{"id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL}
 	outputHTML(writer, "./html/newgame.html", variables)
 }
 
 // Check whose turn it is and if the game is won, then have the player make a move
-// TODO: build URL for the template to send data to. Should be "/play?key=vlue" stuff
-// TODO: implement so that the list of all games is accessed through database
 // TODO: display dice
-// TODO: tell user if no possible moves
 func play(writer http.ResponseWriter, req *http.Request) {
 
 	urlVars := req.URL.Query()
@@ -77,27 +58,38 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	var human bool
 	// g := games[gameid] // This needs to be changed to work with database
 	var noPossibleMoves bool
+	var gameid, _ = strconv.Atoi(varGameid)
+	g := games[gameid]
 
 	//if there is a move
-	if urlVars["Slot"][0] != "50" {
+	if urlVars["Slot"][0] != "-1" {
 		slot, die, dieIndex, capturePiece := parseVariables(urlVars)
 		move := MoveType{Slot: slot,
 			Die:          die,
 			DieIndex:     dieIndex,
 			CapturePiece: capturePiece,
 		}
+
+		endSlot := move.Slot + move.Die
+		endSlotState := g.State[endSlot]
+		if willCapturePiece(endSlotState, g.CurrTurn.Color) {
+			move.CapturePiece = true
+			g.Captured[endSlotState] += 1
+		}
+		fmt.Printf("player %s chose move %v \n", g.CurrTurn.Color, move)
+
 		g.updateDice(dieIndex)
-		fmt.Printf("This is the move; ", move)
-		fmt.Printf("This is the board before the move: ", g.State)
+		if g.CurrTurn.Color == "w" && move.Slot == 0 {
+			g.Captured["w"] -= 1
+		} else if g.CurrTurn.Color == "b" && move.Slot == 25 {
+			g.Captured["b"] -= 1
+		}
 		g.UpdateState(g.CurrTurn.Color, move)
+		fmt.Printf("Board updated to: %v \n", g.State)
+		fmt.Printf("dice left: %v \n", g.Dice)
 		if g.IsWon() != "" {
-			if whoseTurn == "w" {
-				winner = p2.Id
-			}
-			if whoseTurn == "b" {
-				winner = p1.Id
-			}
-			won(writer, req)
+			winner := g.CurrTurn.Id
+			http.Redirect(writer, req, "/won?winner="+winner, http.StatusSeeOther)
 		}
 	} else {
 		fmt.Println("no move")
@@ -110,6 +102,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	//rolls the dice if the dice list is empty
 	if len(g.Dice) == 0 {
 		g.Dice = RollDice(2)
+		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
 
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
@@ -126,7 +119,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		var urlList []string
 		if len(possibleMoves) == 0 {
 			urlParams := url.Values{}
-			strValues := ConvertParams(50, 0, 0, false)
+			strValues := ConvertParams(-1, 0, 0, false)
 			urlParams.Add("gameid", varGameid)
 			urlParams.Add("Slot", strValues[0])
 			var urlString string = "/play?" + urlParams.Encode()
@@ -153,17 +146,21 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			strValues := ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
 			urlParams = addUrlParams(urlParams, strValues)
 		} else {
-			urlParams.Add("Slot", "50")
+			urlParams.Add("Slot", "-1")
 		}
 		url := "/play?" + urlParams.Encode()
 		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
 	}
+	games[gameid] = g
 	outputHTML(writer, "./html/playing.html", outputVars)
 }
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
+// TODO: pass in winner
 func won(writer http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(writer, winner+" won!")
+	winner := req.URL.Query().Get("winner")
+	variables := map[string]interface{}{"winner": winner}
+	outputHTML(writer, "./html/won.html", variables)
 }
 
 // todo: set up SQL database, check if the user is an actual user in the db, then return their win/loss ratio.”'
