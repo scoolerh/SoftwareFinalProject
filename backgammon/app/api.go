@@ -4,11 +4,10 @@ import (
 	"backgammon/game"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 )
 
-var games []game.Game //will be a valid type when we fix packages
+var games []game.Game
 var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b", ""}
 var p1 game.Player
@@ -75,7 +74,7 @@ func testplay(writer http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		// returning and printing boardState for testing purposes
+		/* // returning and printing boardState for testing purposes
 		log.Printf("\n move nr %v: \n", i)
 		fmt.Fprintf(writer, "move nr %v: \n", i)
 		g.Move(g.Player1)
@@ -85,7 +84,7 @@ func testplay(writer http.ResponseWriter, req *http.Request) {
 		g.Move(g.Player2)
 		//fmt.Fprintf(writer, "player 2 made a move: %v", g.currMove)
 		fmt.Fprintf(writer, "%v", g.State)
-		fmt.Fprintf(writer, "captured pieces: %v \n", g.Captured)
+		fmt.Fprintf(writer, "captured pieces: %v \n", g.Captured) */
 	}
 }
 
@@ -103,18 +102,18 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if whoseTurn == "first" {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": g.State, "captured": g.Captured}
+		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "captured": g.Captured, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "twentyfive": g.State[24], "twentysix": g.State[25]}
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "w"
 		games[gameid] = g
 	} else if whoseTurn == "w" {
-		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "state": g.State, "captured": g.Captured}
+		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "captured": g.Captured, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "twentyfive": g.State[24], "twentysix": g.State[25]}
 		g.Move(g.Player1)
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "b"
 		games[gameid] = g
 	} else {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "state": g.State, "captured": g.Captured}
+		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "captured": g.Captured, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "twentyfive": g.State[24], "twentysix": g.State[25]}
 		g.Move(g.Player2)
 		outputHTML(writer, "./html/playing.html", variables)
 		whoseTurn = "w"

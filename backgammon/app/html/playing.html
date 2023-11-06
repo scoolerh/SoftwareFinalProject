@@ -11,53 +11,63 @@
             <div class = "board">
                 <div class="left-side">
                     <div class="top-row">
-                        <div class="space-down odd"></div>
-                        <div class="space-down even"></div>
-                        <div class="space-down odd"></div>
-                        <div class="space-down even"></div>
-                        <div class="space-down odd"></div>
-                        <div class="space-down even"></div>
+                        <div class="space-down odd" id="twelve">{{ .twelve }}</div>
+                        <div class="space-down even" id="eleven">{{ .eleven }}</div>
+                        <div class="space-down odd" id="ten">{{ .ten }}</div>
+                        <div class="space-down even" id="nine">{{ .nine }}</div>
+                        <div class="space-down odd" id="eight">{{ .eight }}</div>
+                        <div class="space-down even" id="seven">{{ .seven }}</div>
                     </div>
                     <div class="bottom-row"> 
-                        <div class="space-up odd"></div>
-                        <div class="space-up even"></div>
-                        <div class="space-up odd"></div>
-                        <div class="space-up even"></div>
-                        <div class="space-up odd"></div>
-                        <div class="space-up even"></div>
+                        <div class="space-up odd" id="thirteen">{{ .thirteen }}</div>
+                        <div class="space-up even" id="fourteen">{{ .fourteen }}</div>
+                        <div class="space-up odd" id="fifteen">{{ .fifteen }}</div>
+                        <div class="space-up even" id="sixteen">{{ .sixteen }}</div>
+                        <div class="space-up odd" id="seventeen">{{ .seventeen }}</div>
+                        <div class="space-up even" id="eighteen">{{ .eighteen }}</div>
                     </div>
                 </div> 
                 <div class = "divider"></div>
                 <div class = "right-side">
                     <div class="top-row">
-                        <div class="space-down odd"></div>
-                        <div class="space-down even"></div>
-                        <div class="space-down odd"></div>
-                        <div class="space-down even"></div>
-                        <div class="space-down odd"></div>
-                        <div class="space-down even"></div>
+                        <div class="space-down odd" id="six">{{ .six }}</div>
+                        <div class="space-down even" id="five">{{ .five }}</div>
+                        <div class="space-down odd" id="four">{{ .four }}</div>
+                        <div class="space-down even" id="three">{{ .three }}</div>
+                        <div class="space-down odd" id="two">{{ .two }}</div>
+                        <div class="space-down even" id="one">{{ .one }}</div>
                     </div>
                     <div class="bottom-row"> 
-                        <div class="space-up odd"></div>
-                        <div class="space-up even"></div>
-                        <div class="space-up odd"></div>
-                        <div class="space-up even"></div>
-                        <div class="space-up odd"></div>
-                        <div class="space-up even"></div>
+                        <div class="space-up odd" id="nineteen">{{ .nineteen }}</div>
+                        <div class="space-up even" id="twenty">{{ .twenty }}</div>
+                        <div class="space-up odd" id="twentyone">{{ .twentyone }}</div>
+                        <div class="space-up even" id="twentytwo">{{ .twentytwo }}</div>
+                        <div class="space-up odd" id="twentythree">{{ .twentythree }}</div>
+                        <div class="space-up even" id="twentyfour">{{ .twentyfour }}</div>
                     </div>
                 </div>  
                 <div class="mini-divider"></div>
                 <div class="home-bins">
                     <div class="side-divider"></div> 
                 </div>
-                <div class="white-piece"></div>
             </div>
             <section>
-                <h5 id="state">{{ .state }}</h5>
-                <p>Now it's {{ .player }}'s turn.</p>
+                <h4>Now it's {{ .player }}'s turn.</h4>
                 <h5 id="captured">{{ .captured }}</h5>
-                <a href="/play"><button class="button" onclick="setPiece(document.getElementById('state').textContent, document.getElementById('captured').textContent)">Next Move</button></a>
+                <a href="/play"><button class="button">Next Move</button></a>
             </section>
+            <script>
+                const map = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twentyone", "twentytwo", "twentythree", "twentyfour"];
+                for(let i = 0; i < 25; i++) {
+                    
+                    if (document.getElementById(map[i]).textContent.includes("w")) {
+                        document.getElementByClassName('space-up')[i].innerHTML += "<div class=\"white-piece\"></div>"
+                    }
+                    if (document.getElementByClassName('space-up')[i].textContent.includes("b")) {
+                        document.getElementByClassName('space-up')[i].innerHTML += "<div class=\"black-piece\"></div>"
+                    }
+                }
+            </script>
         </main>
  
         <footer>

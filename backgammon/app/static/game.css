@@ -1,20 +1,8 @@
-:root 
-{
-    --top: 0px;
-    --left: 15px;
-}
 html
 {
     background: url(./bg.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
     background-size: cover;
     z-index: -1;
-}
-p
-{
-    font-size: 120%;
 }
 h5 
 {
@@ -110,6 +98,7 @@ section
     border-bottom: 0px solid;
     display: inline;
     float: left;
+    position: relative;
 }
 .space-up 
 {
