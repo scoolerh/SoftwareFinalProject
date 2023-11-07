@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -22,6 +21,7 @@ const (
 )
 
 var games []game.Game
+var g game.Game
 var db *sql.DB
 var currentUser string
 
@@ -103,30 +103,67 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 }
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
-	g := game.CreateGame(games)
+	var initialState [26]string
+	g, initialState = game.CreateGame(games)
+
+	var white string
+	var black string
+	var state string
+	if g.Player1.Color == "w" {
+		white = g.Player1.Id
+		black = g.Player2.Id
+	} else {
+		white = g.Player2.Id
+		black = g.Player1.Id
+	}
+
+	for index, slot := range initialState {
+		_ = index
+		state += slot + "o"
+	}
+
+	query := "INSERT INTO games (white, black, status, boardstate) VALUES ('" + white + "', '" + black + "', 'new', '" + state + "') RETURNING gameId"
+	//might do something like this instead to prevent injection
+	//func buildSql(email string) string {
+	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	var gameid string
+	for rows.Next() {
+		rows.Scan(&gameid)
+	}
+	//is this actually inserting into the struct?
+	g.Gameid = gameid
 	games = append(games, g)
+
 	urlParams := url.Values{}
-	strGameid := strconv.Itoa(g.Gameid)
-	urlParams.Add("gameid", strGameid)
+	urlParams.Add("gameid", g.Gameid)
+	log.Printf("Gameid in urlParams: %v", urlParams["gameid"][0])
 	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
+	log.Printf("startGameURL: %v", startGameURL)
 	variables := map[string]interface{}{"id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL}
 	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
 func play(writer http.ResponseWriter, req *http.Request) {
 	urlVars := req.URL.Query()
-	varGameid := urlVars["gameid"][0]
+	log.Printf("url: %v", req.URL)
+	log.Printf("urlVars: %v", urlVars)
+	gameid := urlVars["gameid"][0]
 	var outputVars map[string]interface{}
 	var human bool
 	// g := games[gameid] // This needs to be changed to work with database
 	var noPossibleMoves bool
-	var gameid, _ = strconv.Atoi(varGameid)
-	g := games[gameid]
+	// var intGameid, _ = strconv.Atoi(gameid)
+	// g := games[intGameid]
 
-	player := urlVars["Slot"][0]
 	//if there is a move
-	if player != "JOE" && player != "STEVE" {
+	if urlVars["Slot"][0] != "-1" {
 		slot, die, dieIndex, capturePiece := game.ParseVariables(urlVars)
 		move := game.MoveType{Slot: slot,
 			Die:          die,
@@ -183,7 +220,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		if len(possibleMoves) == 0 {
 			urlParams := url.Values{}
 			strValues := game.ConvertParams(-1, 0, 0, false)
-			urlParams.Add("gameid", varGameid)
+			urlParams.Add("gameid", gameid)
 			urlParams.Add("Slot", strValues[0])
 			var urlString string = "/play?" + urlParams.Encode()
 			urlList = append(urlList, urlString)
@@ -192,7 +229,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 				_ = index
 				urlParams := url.Values{}
 				strValues := game.ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
-				urlParams.Add("gameid", varGameid)
+				urlParams.Add("gameid", gameid)
 				urlParams = game.AddUrlParams(urlParams, strValues)
 				var urlString string = "/play?" + urlParams.Encode()
 				urlList = append(urlList, urlString)
@@ -203,7 +240,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		fmt.Println("ai move now")
 		human = false
 		urlParams := url.Values{}
-		urlParams.Add("gameid", varGameid)
+		urlParams.Add("gameid", gameid)
 		if len(possibleMoves) != 0 {
 			move := game.GetAIMove(possibleMoves, g.CurrTurn.Color)
 			strValues := game.ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
@@ -214,7 +251,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		url := "/play?" + urlParams.Encode()
 		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
 	}
-	games[gameid] = g
+	// games[intGameid] = g
 	outputHTML(writer, "app/html/playing.html", outputVars)
 }
 

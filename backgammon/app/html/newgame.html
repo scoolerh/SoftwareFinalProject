@@ -3,7 +3,7 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <link rel="stylesheet" href="/static/styles.css">
+        <link rel="stylesheet" href="app/static/styles.css">
     </head>
     <body>
         <header>
@@ -23,7 +23,7 @@
                 <p>Game ID: {{ .id }}</p>
                 <p>White: {{ .p1 }}</p>
                 <p>Black: {{ .p2 }}</p>
-                <a href="/play"><button class="button">START GAME</button></a>
+                <a href="{{.startGameURL}}"><button class="button">Start the game...</button></a>
             </section>
         </main>
 

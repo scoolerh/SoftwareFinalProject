@@ -1,6 +1,7 @@
 package game
 
 import (
+	"log"
 	"math/rand"
 	"net/url"
 	"strconv"
@@ -13,6 +14,30 @@ type Gameplay interface {
 	UpdateState()                 //updates the state of the game to reflect the recent move
 	IsWon() bool
 	isBearingOffAllowed(playerColor string) bool //make capital if needed outside of package
+}
+
+type Game struct {
+	Gameid   string
+	Player1  Player
+	Player2  Player
+	CurrTurn Player
+	State    [26]string
+	Captured map[string]int
+	Pips     map[string]int
+	Dice     []int
+
+	//only for testing purposes, can be removed later
+	currMove MoveType
+}
+
+type MoveType struct {
+	Slot, Die, DieIndex int
+	CapturePiece        bool
+}
+
+type Player struct {
+	Id    string //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
+	Color string
 }
 
 func (g Game) IsWon() string {
@@ -245,30 +270,6 @@ func RollDice(numDice int) []int {
 	return dice
 }
 
-type Game struct {
-	Gameid   int
-	Player1  Player
-	Player2  Player
-	CurrTurn Player
-	State    [26]string
-	Captured map[string]int
-	Pips     map[string]int
-	Dice     []int
-
-	//only for testing purposes, can be removed later
-	currMove MoveType
-}
-
-type MoveType struct {
-	Slot, Die, DieIndex int
-	CapturePiece        bool
-}
-
-type Player struct {
-	Id    string //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
-	Color string
-}
-
 func GetMove(possibleMoves []MoveType, player Player, game Game) MoveType {
 	//prompts either the player or the AI to pick a move
 	var move MoveType
@@ -324,18 +325,18 @@ func initializeCapturedMap() map[string]int {
 }
 
 // the player set as currturn here will play second, not first
-func CreateGame(games []Game) Game {
+func CreateGame(games []Game) (Game, [26]string) {
 	p1, p2 := Player{Id: "JOE", Color: "w"}, Player{Id: "user1", Color: "b"} //will need to be an input in the future
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 	// testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
 	capturedMap := initializeCapturedMap()
-	gameid := len(games)
-	testGame := Game{Gameid: gameid, Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap}
-	return testGame
+	testGame := Game{Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap}
+	return testGame, initialState
 }
 
 func ParseVariables(urlVariables url.Values) (int, int, int, bool) {
 	varSlot := urlVariables["Slot"][0]
+	log.Printf("the slot is: %v", varSlot)
 	varDie := urlVariables["Die"][0]
 	varDieIndex := urlVariables["DieIndex"][0]
 	varCapturePiece := urlVariables["CapturePiece"][0]
