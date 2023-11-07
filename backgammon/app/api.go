@@ -259,6 +259,42 @@ func play(writer http.ResponseWriter, req *http.Request) {
 func won(writer http.ResponseWriter, req *http.Request) {
 	winner := req.URL.Query().Get("winner")
 	variables := map[string]interface{}{"winner": winner}
+
+	var err error
+	var query string
+	var loser string
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed +1 WHERE username = " + g.Player1.Id + ";"
+	//exec here
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed +1 WHERE username = " + g.Player2.Id + ";"
+	//might do something like this instead to prevent injection
+	//func buildSql(email string) string {
+	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
+
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	query = "UPDATE userstats SET wins = wins + 1 WHERE username = " + winner + ";"
+
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	if g.Player1.Id == winner {
+		loser = g.Player2.Id
+	} else {
+		loser = g.Player1.Id
+	}
+
+	query = "UPDATE userstats SET losses = losses + 1 WHERE username = " + loser + ";"
+
 	outputHTML(writer, "app/html/won.html", variables)
 }
 
