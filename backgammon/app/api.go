@@ -24,7 +24,7 @@ const (
 var games []game.Game
 var g game.Game
 var db *sql.DB
-var currentUser string
+var currentUser = "Guest"
 
 //TODO: probably need a user variable here
 //how does it look when two users are logged in? If two people play on different computers?
@@ -42,9 +42,10 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
-// Print the rules and how to use the tool for the user
-func help(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/index.html")
+// Open the home page
+func home(writer http.ResponseWriter, req *http.Request) {
+	variables := map[string]interface{}{"username": currentUser}
+	outputHTML(writer, "app/html/index.html", variables)
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
@@ -152,7 +153,12 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
-	g, initialState = game.CreateGame(games)
+
+	urlVars := req.URL.Query()
+	p2 := urlVars["player2"][0]
+	p1 := urlVars["player1"][0]
+
+	g, initialState = game.CreateGame(games, p1, p2)
 
 	var white string
 	var black string
@@ -178,8 +184,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	rows, err := db.Query(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} else {
-		log.Println("New game posted to db")
 	}
 
 	var gameid string
@@ -309,7 +313,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 func won(writer http.ResponseWriter, req *http.Request) {
 	winner := req.URL.Query().Get("winner")
 	variables := map[string]interface{}{"winner": winner}
-
 	var err error
 	var query string
 	var loser string
@@ -364,7 +367,6 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "app/html/won.html", variables)
 }
 
-// just for fun (?), we try to establish a connection to the database here
 func dbHandler(writer http.ResponseWriter, req *http.Request) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -400,22 +402,22 @@ func initDB() {
 		panic(err)
 	}
 	log.Print("successfully connected to database")
+
 }
 
 func main() {
 	initDB()
 	defer db.Close()
 
-	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
+	http.HandleFunc("/", home)
+	//http.HandleFunc("/selectPlayers", selectPlayers)
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
-	//http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/registered", register)
 	http.HandleFunc("/loggedin", loggedin)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
-	//http.HandleFunc("/scoreboard", scoreboard)
 	fs := http.FileServer(http.Dir("app/static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping

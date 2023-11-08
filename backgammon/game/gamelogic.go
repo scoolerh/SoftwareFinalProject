@@ -322,10 +322,10 @@ func initializeCapturedMap() map[string]int {
 }
 
 // the player set as currturn here will play second, not first
-func CreateGame(games []Game) (Game, [26]string) {
-	p1, p2 := Player{Id: "user1", Color: "w"}, Player{Id: "steve", Color: "b"} //will need to be an input in the future
+func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
+	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"} //will need to be an input in the future
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-	//testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
+	// testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
 	capturedMap := initializeCapturedMap()
 	testGame := Game{Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap}
 	return testGame, initialState
@@ -355,8 +355,6 @@ func AddUrlParams(urlParams url.Values, valuesToAdd [4]string) url.Values {
 
 // deletes the die that was just played
 func (g *Game) UpdateDice(dieIndex int) {
-	log.Printf("dice:%v ", g.Dice)
-	log.Printf("dice: %v", dieIndex)
 	g.Dice = DeleteElement(g.Dice, dieIndex)
 }
 
