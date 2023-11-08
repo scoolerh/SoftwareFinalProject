@@ -12,15 +12,33 @@
 
         <main>
             <section>
-                <form action="/newgame">
+                <form id="form" action="/newgame">
                     <h2>Who will be Player 1?</h2>
-                    {% if {{ .username }} != "Guest" %}
-                        <input type="radio" id="player1" name="loggedUser">
-                        <label for="loggedUser">{{ .username }}</label>
-                    {% end if %} 
-                    <input type="radio" id="guest" name="guest">
+                    <script>
+                        var user = "{{.}}";
+                        if (user != "Guest") {
+                            const input = document.createElement("input");
+                            const type = document.createAttribute("type");
+                            type.value = "radio";
+                            input.setAttributeNode(type);
+                            const id = document.createAttribute("id");
+                            id.value = "player1";
+                            input.setAttributeNode(id);
+                            const name = document.createAttribute("name");
+                            name.value = "loggedUser";
+                            input.setAttributeNode(name);
+                            document.getElementById("form").appendChild(input);
+                            const label = document.createElement("label");
+                            label.innerText = "{{.}}";
+                            const fors = document.createAttribute("for");
+                            fors.value = "loggedUser";
+                            label.setAttributeNode(fors);
+                            document.getElementById("form").appendChild(label);
+                        }
+                    </script>
+                    <input type="radio" id="player1" name="guest">
                     <label for="guest">Guest</label>
-                    <input type="radio" id="steve" name="steve">
+                    <input type="radio" id="player1" name="steve">
                     <label for="steve">Steve AI (Easy Mode)</label>
                     <input type="radio" id="player1" name="joe">
                     <label for="joe">Joe AI (Hard Mode)</label>

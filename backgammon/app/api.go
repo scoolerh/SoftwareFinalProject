@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
-	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -41,10 +41,9 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
-// Open the home page 
+// Open the home page
 func home(writer http.ResponseWriter, req *http.Request) {
-	variables := map[string]interface{}{"username": currentUser}
-	outputHTML(writer, "app/html/index.html", variables)
+	outputHTML(writer, "app/html/index.html", currentUser)
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
@@ -71,8 +70,7 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	currentUser = username
-	variables := map[string]interface{}{"username": currentUser}
-	outputHTML(writer, "app/html/index.html", variables)
+	outputHTML(writer, "app/html/index.html", currentUser)
 }
 
 func loggedin(writer http.ResponseWriter, req *http.Request) {
@@ -101,22 +99,19 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	currentUser = username
-	log.Printf("Welcome %s!", currentUser)
-	variables := map[string]interface{}{"username": currentUser}
-	outputHTML(writer, "app/html/index.html", variables)
+	outputHTML(writer, "app/html/index.html", currentUser)
 }
 
 func selectPlayers(writer http.ResponseWriter, req *http.Request) {
-	variables := map[string]interface{}{"username": currentUser}
-	outputHTML(writer, "app/html/index.html", variables)
+	outputHTML(writer, "app/html/selectPlayers.html", currentUser)
 }
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
-	
+
 	urlVars := req.URL.Query()
-	p2 := urlVars["player2"][0]
 	p1 := urlVars["player1"][0]
+	p2 := urlVars["player2"][0]
 
 	g, initialState = game.CreateGame(games, p1, p2)
 
@@ -317,8 +312,8 @@ func main() {
 	initDB()
 	defer db.Close()
 
-	http.HandleFunc("/", home) 
-	http.HandleFunc("/selectPlayers", selectPlayers) 
+	http.HandleFunc("/", home)
+	http.HandleFunc("/selectPlayers", selectPlayers)
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)

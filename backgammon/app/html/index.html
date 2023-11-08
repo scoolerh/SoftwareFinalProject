@@ -13,11 +13,16 @@
         <nav>
             <ul>
                 <li><a href="/">Home</a></li>
-                {% if {{ .username }} != "" %}
-                    <li>{{ .username }}</li>
-                {% else %}
-                    <li><a href="/login">Login</a></li>
-                {% endif %}
+                <li><a id="user" href="/login"></a></li>
+                <script>
+                    var user = "{{.}}";
+                    if (user != "Guest") {
+                        document.getElementById("user").innerHTML = "Login";
+                    } else {
+                        document.getElementById("user").innerHTML = "{{.}}";
+                    }   
+                </script>
+                
                 <li><a href="/selectPlayers">New Game</a></li>
             </ul>
         </nav>
