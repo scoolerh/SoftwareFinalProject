@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -57,17 +58,31 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	var password string
 
 	if req.Method == http.MethodPost {
-		username = req.FormValue("username")
-		password = req.FormValue("password")
+		username = strings.ToLower(req.FormValue("username"))
+		password = strings.ToLower(req.FormValue("password"))
 	}
 
-	query := "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
-
+	var query string
 	var err error
+
+	query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
 	_, err = db.Exec(query)
 	if err != nil {
+		log.Printf("Error with query %v. Error: %v", query, err)
 		panic(err) //might want to change this later
+	} else {
+		log.Println("Successful user registration")
 	}
+
+	query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
+	_, err = db.Exec(query)
+	if err != nil {
+		log.Printf("Error with query %v. Error: %v", query, err)
+		panic(err) //might want to change this later
+	} else {
+		log.Println("Successfully created userstat row")
+	}
+
 	http.ServeFile(writer, req, "app/html/index.html") //indicate somehow that registration was successful
 }
 
@@ -76,8 +91,8 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	var password string
 
 	if req.Method == http.MethodPost {
-		username = req.FormValue("username")
-		password = req.FormValue("password")
+		username = strings.ToLower(req.FormValue("username"))
+		password = strings.ToLower(req.FormValue("password"))
 	}
 
 	query := "SELECT password FROM users WHERE username='" + username + "'"
@@ -130,6 +145,8 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	rows, err := db.Query(query)
 	if err != nil {
 		panic(err) //might want to change this later
+	} else {
+		log.Println("New game posted to db")
 	}
 
 	var gameid string
@@ -213,7 +230,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		noPossibleMoves = true
 	}
 
-	if g.CurrTurn.Id != "JOE" && g.CurrTurn.Id != "STEVE" {
+	if g.CurrTurn.Id != "joe" && g.CurrTurn.Id != "steve" {
 		fmt.Println("human move now")
 		human = true
 		var urlList []string
@@ -263,28 +280,30 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	var err error
 	var query string
 	var loser string
-	query = "UPDATE userstats SET gamesPlayed = gamesPlayed +1 WHERE username = " + g.Player1.Id + ";"
+
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player1.Id + "';"
 	//exec here
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
+	} else {
+		log.Println("player 1 stats updated")
 	}
 
-	query = "UPDATE userstats SET gamesPlayed = gamesPlayed +1 WHERE username = " + g.Player2.Id + ";"
-	//might do something like this instead to prevent injection
-	//func buildSql(email string) string {
-	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
-
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player2.Id + "';"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
+	} else {
+		log.Println("player 2 stats updated")
 	}
 
-	query = "UPDATE userstats SET wins = wins + 1 WHERE username = " + winner + ";"
-
+	query = "UPDATE userstats SET wins = wins + 1 WHERE username = '" + winner + "';"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
+	} else {
+		log.Println("winner stats updated")
 	}
 
 	if g.Player1.Id == winner {
@@ -293,7 +312,21 @@ func won(writer http.ResponseWriter, req *http.Request) {
 		loser = g.Player1.Id
 	}
 
-	query = "UPDATE userstats SET losses = losses + 1 WHERE username = " + loser + ";"
+	query = "UPDATE userstats SET losses = losses + 1 WHERE username = '" + loser + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("loser stats updated")
+	}
+
+	query = "UPDATE games SET status = 'finished', winner = '" + winner + "' WHERE gameId = " + g.Gameid + ";"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("game set to finished")
+	}
 
 	outputHTML(writer, "app/html/won.html", variables)
 }
@@ -350,7 +383,7 @@ func main() {
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
 	//http.HandleFunc("/scoreboard", scoreboard)
-	fs := http.FileServer(http.Dir("static"))
+	fs := http.FileServer(http.Dir("app/static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping
 }
