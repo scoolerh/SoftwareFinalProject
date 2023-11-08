@@ -65,6 +65,18 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	var query string
 	var err error
 
+	query = "SELECT COUNT(*) FROM users WHERE username='" + username + "'"
+
+	var count int
+	err = db.QueryRow(query).Scan(&count)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	if count != 0 {
+		fmt.Print(writer, "username taken")
+	}
+
 	query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
 	_, err = db.Exec(query)
 	if err != nil {
