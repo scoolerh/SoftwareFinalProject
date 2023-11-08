@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -46,7 +47,6 @@ func home(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "app/html/index.html", currentUser)
 }
 
-// todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
 func login(writer http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Connecting to login endpoint")
 	http.ServeFile(writer, req, "app/html/login.html")
@@ -57,20 +57,51 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	var password string
 
 	if req.Method == http.MethodPost {
-		username = req.FormValue("username")
-		password = req.FormValue("password")
+		username = strings.ToLower(req.FormValue("username"))
+		password = strings.ToLower(req.FormValue("password"))
 	}
 
-	query := "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
-
+	var query string
 	var err error
-	_, err = db.Exec(query)
+
+	query = "SELECT COUNT(*) FROM users WHERE username='" + username + "'"
+
+	var count int
+	err = db.QueryRow(query).Scan(&count)
 	if err != nil {
 		panic(err) //might want to change this later
 	}
 
-	currentUser = username
-	outputHTML(writer, "app/html/index.html", currentUser)
+	if count != 0 {
+
+		log.Print("Username taken")
+		message := map[string]interface{}{"message": "username taken"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+		return
+
+	} else {
+
+		query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Printf("Error with query %v. Error: %v", query, err)
+			panic(err) //might want to change this later
+		} else {
+			log.Println("Successful user registration")
+		}
+
+		query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Printf("Error with query %v. Error: %v", query, err)
+			panic(err) //might want to change this later
+		} else {
+			log.Println("Successfully created userstat row")
+		}
+
+		currentUser = username
+		outputHTML(writer, "app/html/index.html", currentUser)
+	}
 }
 
 func loggedin(writer http.ResponseWriter, req *http.Request) {
@@ -78,8 +109,8 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	var password string
 
 	if req.Method == http.MethodPost {
-		username = req.FormValue("username")
-		password = req.FormValue("password")
+		username = strings.ToLower(req.FormValue("username"))
+		password = strings.ToLower(req.FormValue("password"))
 	}
 
 	query := "SELECT password FROM users WHERE username='" + username + "'"
@@ -90,16 +121,32 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	var refPassword string
-	for rows.Next() {
-		rows.Scan(&refPassword)
-	}
 
-	if password != refPassword {
-		http.ServeFile(writer, req, "app/html/loginfailed.html")
-	}
+	if rows.Next() {
+		err = rows.Scan(&refPassword)
+		if err != nil {
+			panic(err)
+		}
 
-	currentUser = username
-	outputHTML(writer, "app/html/index.html", currentUser)
+		if username == "steve" || username == "joe" {
+			log.Print("invalid user")
+			message := map[string]interface{}{"message": "invalid user"}
+			outputHTML(writer, "app/html/loginfailed.html", message)
+		} else if password != refPassword {
+			log.Print("wrong password")
+			message := map[string]interface{}{"message": "wrong password"}
+			outputHTML(writer, "app/html/loginfailed.html", message)
+		} else {
+			currentUser = username
+			log.Printf("Welcome %s!", currentUser)
+			outputHTML(writer, "app/html/index.html", currentUser)
+		}
+
+	} else {
+		log.Print("invalid user")
+		message := map[string]interface{}{"message": "wrong password"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+	}
 }
 
 func selectPlayers(writer http.ResponseWriter, req *http.Request) {
@@ -213,6 +260,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		g.Dice = game.RollDice(2)
 		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
+
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
 
 	//deletes all dice if no possible moves
@@ -221,7 +269,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		noPossibleMoves = true
 	}
 
-	if g.CurrTurn.Id != "JOE" && g.CurrTurn.Id != "STEVE" {
+	if g.CurrTurn.Id != "joe" && g.CurrTurn.Id != "steve" {
 		fmt.Println("human move now")
 		human = true
 		var urlList []string
@@ -267,10 +315,60 @@ func play(writer http.ResponseWriter, req *http.Request) {
 func won(writer http.ResponseWriter, req *http.Request) {
 	winner := req.URL.Query().Get("winner")
 	variables := map[string]interface{}{"winner": winner}
+	var err error
+	var query string
+	var loser string
+
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player1.Id + "';"
+	//exec here
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("player 1 stats updated")
+	}
+
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player2.Id + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("player 2 stats updated")
+	}
+
+	query = "UPDATE userstats SET wins = wins + 1 WHERE username = '" + winner + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("winner stats updated")
+	}
+
+	if g.Player1.Id == winner {
+		loser = g.Player2.Id
+	} else {
+		loser = g.Player1.Id
+	}
+
+	query = "UPDATE userstats SET losses = losses + 1 WHERE username = '" + loser + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("loser stats updated")
+	}
+
+	query = "UPDATE games SET status = 'finished', winner = '" + winner + "' WHERE gameId = " + g.Gameid + ";"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("game set to finished")
+	}
+
 	outputHTML(writer, "app/html/won.html", variables)
 }
 
-// just for fun (?), we try to establish a connection to the database here
 func dbHandler(writer http.ResponseWriter, req *http.Request) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -306,6 +404,7 @@ func initDB() {
 		panic(err)
 	}
 	log.Print("successfully connected to database")
+
 }
 
 func main() {
