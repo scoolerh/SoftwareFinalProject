@@ -66,3 +66,24 @@ section
 {
     box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
+.wrapper 
+{
+    display: flex;
+    align-items: center;
+}
+.block 
+{
+    display: block;
+}
+.form-submit-button
+{
+    background-color: green;
+    color: white;
+    border-style: solid;
+    border-color: green;
+    border-width: medium;
+    border-radius: 15px;
+    text-decoration: none;
+    padding: 15px 30px 15px 30px;
+    font-size: 150%;
+}

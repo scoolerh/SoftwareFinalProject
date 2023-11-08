@@ -16,7 +16,7 @@
                 <li><a id="user" href="/login"></a></li>
                 <script>
                     var user = "{{.}}";
-                    if (user != "Guest") {
+                    if (user == "Guest") {
                         document.getElementById("user").innerHTML = "Login";
                     } else {
                         document.getElementById("user").innerHTML = "{{.}}";
