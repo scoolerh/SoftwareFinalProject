@@ -314,7 +314,7 @@ func main() {
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
 	//http.HandleFunc("/scoreboard", scoreboard)
-	fs := http.FileServer(http.Dir("static"))
+	fs := http.FileServer(http.Dir("app/static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping
 }
