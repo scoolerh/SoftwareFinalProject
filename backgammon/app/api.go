@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -204,7 +203,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		g.Dice = game.RollDice(2)
 		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
-
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
 
 	//deletes all dice if no possible moves
