@@ -13,8 +13,12 @@
         <nav>
             <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/newgame">New Game</a></li>
+                {% if {{ .username }} != "" %}
+                    <li>{{ .username }}</li>
+                {% else %}
+                    <li><a href="/login">Login</a></li>
+                {% endif %}
+                <li><a href="/selectOpponent">New Game</a></li>
             </ul>
         </nav>
 

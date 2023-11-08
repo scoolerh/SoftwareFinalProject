@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -40,9 +41,10 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
-// Print the rules and how to use the tool for the user
-func help(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/index.html")
+// Open the home page 
+func home(writer http.ResponseWriter, req *http.Request) {
+	variables := map[string]interface{}{"username": ""}
+	outputHTML(writer, "app/html/index.html", variables)
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
@@ -67,7 +69,8 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err) //might want to change this later
 	}
-	http.ServeFile(writer, req, "app/html/index.html") //indicate somehow that registration was successful
+	variables := map[string]interface{}{"username": username}
+	outputHTML(writer, "app/html/index.html", variables)
 }
 
 func loggedin(writer http.ResponseWriter, req *http.Request) {
@@ -97,8 +100,20 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 
 	currentUser = username
 	log.Printf("Welcome %s!", currentUser)
-	http.ServeFile(writer, req, "app/html/index.html") //pass in user here if it is not nil, so that it can say welcome user!
+	variables := map[string]interface{}{"username": currentUser}
+	outputHTML(writer, "app/html/index.html", variables)
+}
 
+func selectOpponent(writer http.ResponseWriter, req *http.Request) {
+	http.ServeFile(writer, req, "app/html/selectOpponent.html")
+}
+
+func selectAI(writer http.ResponseWriter, req *http.Request) {
+	http.ServeFile(writer, req, "app/html/selectAI.html")
+}
+
+func selectHuman(writer http.ResponseWriter, req *http.Request) {
+	http.ServeFile(writer, req, "app/html/selectHuman.html")
 }
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
@@ -302,16 +317,17 @@ func main() {
 	initDB()
 	defer db.Close()
 
-	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
+	http.HandleFunc("/", home) 
+	http.HandleFunc("/selectOpponent", selectOpponent) 
+	http.HandleFunc("/selectAI", selectAI) 
+	http.HandleFunc("/selectHuman", selectHuman) 
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
-	//http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/registered", register)
 	http.HandleFunc("/loggedin", loggedin)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
-	//http.HandleFunc("/scoreboard", scoreboard)
 	fs := http.FileServer(http.Dir("app/static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping

@@ -3,23 +3,14 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <link rel="stylesheet" href="/static/styles.css">
+        <link rel="stylesheet" href="/static/game.css">
     </head>
     <body>
         <header>
             <h1>BACKGAMMON</h1> 
         </header>
 
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/newgame">New Game</a></li>
-            </ul>
-        </nav>
-
         <main>
-            <script src="../static/pieces.js"></script>
             <div class = "board">
                 <div class="left-side">
                     <div class="top-row">
@@ -64,8 +55,6 @@
                 </div>
             </div>
             <section>
-            <h2>Here is the current board: </h2>
-                <p>{{ .state }}</p>
                 <p>Now it's {{ .player }}'s turn.</p>
                 <p>Captured Pieces: {{ .captured }}</p>
                 <p>
@@ -82,18 +71,6 @@
                 {{ end }}
                 </p>
             </section>
-            <script>
-                const map = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twentyone", "twentytwo", "twentythree", "twentyfour"];
-                for(let i = 0; i < 25; i++) {
-                    
-                    if (document.getElementById(map[i]).textContent.includes("w")) {
-                        document.getElementByClassName('space-up')[i].innerHTML += "<div class=\"white-piece\"></div>"
-                    }
-                    if (document.getElementByClassName('space-up')[i].textContent.includes("b")) {
-                        document.getElementByClassName('space-up')[i].innerHTML += "<div class=\"black-piece\"></div>"
-                    }
-                }
-            </script>
         </main>
  
         <footer>
