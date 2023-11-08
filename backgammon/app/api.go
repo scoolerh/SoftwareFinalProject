@@ -74,28 +74,34 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	if count != 0 {
-		fmt.Print(writer, "username taken")
-	}
 
-	query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
-	_, err = db.Exec(query)
-	if err != nil {
-		log.Printf("Error with query %v. Error: %v", query, err)
-		panic(err) //might want to change this later
+		log.Print("Username taken")
+		message := map[string]interface{}{"message": "username taken"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+		return
+
 	} else {
-		log.Println("Successful user registration")
-	}
 
-	query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
-	_, err = db.Exec(query)
-	if err != nil {
-		log.Printf("Error with query %v. Error: %v", query, err)
-		panic(err) //might want to change this later
-	} else {
-		log.Println("Successfully created userstat row")
-	}
+		query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Printf("Error with query %v. Error: %v", query, err)
+			panic(err) //might want to change this later
+		} else {
+			log.Println("Successful user registration")
+		}
 
-	http.ServeFile(writer, req, "app/html/index.html") //indicate somehow that registration was successful
+		query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Printf("Error with query %v. Error: %v", query, err)
+			panic(err) //might want to change this later
+		} else {
+			log.Println("Successfully created userstat row")
+		}
+
+		http.ServeFile(writer, req, "app/html/index.html") //indicate somehow that registration was successful
+	}
 }
 
 func loggedin(writer http.ResponseWriter, req *http.Request) {
@@ -115,17 +121,32 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	var refPassword string
-	for rows.Next() {
-		rows.Scan(&refPassword)
-	}
 
-	if password != refPassword {
-		http.ServeFile(writer, req, "app/html/loginfailed.html")
-	}
+	if rows.Next() {
+		err = rows.Scan(&refPassword)
+		if err != nil {
+			panic(err)
+		}
 
-	currentUser = username
-	log.Printf("Welcome %s!", currentUser)
-	http.ServeFile(writer, req, "app/html/index.html") //pass in user here if it is not nil, so that it can say welcome user!
+		if username == "steve" || username == "joe" {
+			log.Print("invalid user")
+			message := map[string]interface{}{"message": "invalid user"}
+			outputHTML(writer, "app/html/loginfailed.html", message)
+		} else if password != refPassword {
+			log.Print("wrong password")
+			message := map[string]interface{}{"message": "wrong password"}
+			outputHTML(writer, "app/html/loginfailed.html", message)
+		} else {
+			currentUser = username
+			log.Printf("Welcome %s!", currentUser)
+			http.ServeFile(writer, req, "app/html/index.html") //pass in user here if it is not nil, so that it can say welcome user!
+		}
+
+	} else {
+		log.Print("invalid user")
+		message := map[string]interface{}{"message": "wrong password"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+	}
 
 }
 
