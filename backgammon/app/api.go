@@ -2,19 +2,31 @@ package main
 
 import (
 	"backgammon/game"
+	"database/sql"
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
+
+	_ "github.com/lib/pq"
+)
+
+const (
+	host     = "db"
+	port     = 5432
+	user     = "postgres"
+	password = "collective"
+	dbname   = "backgammon"
 )
 
 var games []game.Game
-var initialState = [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-var testState = [26]string{"", "ww", "bb", "w", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "", "", "", "", "b", "ww", "bb", "w", "b", "ww", "bb", "w", "b", ""}
-var p1 game.Player
-var p2 game.Player
-var whoseTurn string = "first"
-var gameid int
-var winner string
+var g game.Game
+var db *sql.DB
+var currentUser string
+
+//TODO: probably need a user variable here
+//how does it look when two users are logged in? If two people play on different computers?
+//and how does it look if two users play on the same computer? Is one or both going to log in?
 
 func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	t, err := template.ParseFiles(filename)
@@ -30,121 +42,277 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 
 // Print the rules and how to use the tool for the user
 func help(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "./html/index.html")
+	http.ServeFile(writer, req, "app/html/index.html")
 }
 
 // todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
 func login(writer http.ResponseWriter, req *http.Request) {
-	//username := req.URL.Query().Get("user")
-	http.ServeFile(writer, req, "./html/login.html")
+	fmt.Printf("Connecting to login endpoint")
+	http.ServeFile(writer, req, "app/html/login.html")
 }
 
-// Starts a new game for the user and displays the initial board
+func register(writer http.ResponseWriter, req *http.Request) {
+	var username string
+	var password string
+
+	if req.Method == http.MethodPost {
+		username = req.FormValue("username")
+		password = req.FormValue("password")
+	}
+
+	query := "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
+
+	var err error
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+	http.ServeFile(writer, req, "app/html/index.html") //indicate somehow that registration was successful
+}
+
+func loggedin(writer http.ResponseWriter, req *http.Request) {
+	var username string
+	var password string
+
+	if req.Method == http.MethodPost {
+		username = req.FormValue("username")
+		password = req.FormValue("password")
+	}
+
+	query := "SELECT password FROM users WHERE username='" + username + "'"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	var refPassword string
+	for rows.Next() {
+		rows.Scan(&refPassword)
+	}
+
+	if password != refPassword {
+		http.ServeFile(writer, req, "app/html/loginfailed.html")
+	}
+
+	currentUser = username
+	log.Printf("Welcome %s!", currentUser)
+	http.ServeFile(writer, req, "app/html/index.html") //pass in user here if it is not nil, so that it can say welcome user!
+
+}
+
 func newgame(writer http.ResponseWriter, req *http.Request) {
-	p1, p2 = game.Player{Id: "STEVE", Color: "w"}, game.Player{Id: "JOE", Color: "b"} //will need to be an input in the future
-	gameid = len(games)
-	capturedMap := initializeCapturedMap()
-	g := game.Game{Gameid: gameid, Player1: p1, Player2: p2, State: initialState, Captured: capturedMap}
-	games = append(games, g)
-	variables := map[string]interface{}{"id": gameid, "p1": p1.Id, "p2": p2.Id}
-	outputHTML(writer, "./html/newgame.html", variables)
-}
+	var initialState [26]string
+	g, initialState = game.CreateGame(games)
 
-func initializeCapturedMap() map[string]int {
-	m := make(map[string]int)
-	m["w"] = 0
-	m["b"] = 0
-	return m
-}
-
-func testplay(writer http.ResponseWriter, req *http.Request) {
-
-	//for testing purposes
-	p1, p2 := game.Player{Id: "STEVE", Color: "w"}, game.Player{Id: "JOE", Color: "b"} //will need to be an input in the future
-	gameid := len(games)
-	capturedMap := initializeCapturedMap()
-	g := game.Game{Gameid: gameid, Player1: p1, Player2: p2, State: testState, Captured: capturedMap}
-	games = append(games, g)
-	fmt.Fprint(writer, "TIME TO PLAY \n")
-
-	fmt.Fprintf(writer, "%v \n", g.State)
-	for i := 0; i < 100; i++ {
-		if g.IsWon() != "" {
-			fmt.Fprint(writer, "WINNER")
-			return
-		}
-
-		/* // returning and printing boardState for testing purposes
-		log.Printf("\n move nr %v: \n", i)
-		fmt.Fprintf(writer, "move nr %v: \n", i)
-		g.Move(g.Player1)
-		//fmt.Fprintf(writer, "player 1 made a move: %v", g.currMove)
-		fmt.Fprintf(writer, "%v", g.State)
-		fmt.Fprintf(writer, "captured pieces: %v \n", g.Captured)
-		g.Move(g.Player2)
-		//fmt.Fprintf(writer, "player 2 made a move: %v", g.currMove)
-		fmt.Fprintf(writer, "%v", g.State)
-		fmt.Fprintf(writer, "captured pieces: %v \n", g.Captured) */
-	}
-}
-
-// Check whose turn it is and if the game is won, then have the player make a move
-func play(writer http.ResponseWriter, req *http.Request) {
-	g := games[gameid]
-	if g.IsWon() != "" {
-		if whoseTurn == "w" {
-			winner = p2.Id
-		}
-		if whoseTurn == "b" {
-			winner = p1.Id
-		}
-		won(writer, req)
-		return
-	}
-	if whoseTurn == "first" {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "captured": g.Captured, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "twentyfive": g.State[24], "twentysix": g.State[25]}
-		outputHTML(writer, "./html/playing.html", variables)
-		whoseTurn = "w"
-		games[gameid] = g
-	} else if whoseTurn == "w" {
-		variables := map[string]interface{}{"id": gameid, "player": p2.Id, "captured": g.Captured, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "twentyfive": g.State[24], "twentysix": g.State[25]}
-		g.Move(g.Player1)
-		outputHTML(writer, "./html/playing.html", variables)
-		whoseTurn = "b"
-		games[gameid] = g
+	var white string
+	var black string
+	var state string
+	if g.Player1.Color == "w" {
+		white = g.Player1.Id
+		black = g.Player2.Id
 	} else {
-		variables := map[string]interface{}{"id": gameid, "player": p1.Id, "captured": g.Captured, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "twentyfive": g.State[24], "twentysix": g.State[25]}
-		g.Move(g.Player2)
-		outputHTML(writer, "./html/playing.html", variables)
-		whoseTurn = "w"
-		games[gameid] = g
+		white = g.Player2.Id
+		black = g.Player1.Id
 	}
+
+	for index, slot := range initialState {
+		_ = index
+		state += slot + "o"
+	}
+
+	query := "INSERT INTO games (white, black, status, boardstate) VALUES ('" + white + "', '" + black + "', 'new', '" + state + "') RETURNING gameId"
+	//might do something like this instead to prevent injection
+	//func buildSql(email string) string {
+	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
+
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	var gameid string
+	for rows.Next() {
+		rows.Scan(&gameid)
+	}
+	//is this actually inserting into the struct?
+	g.Gameid = gameid
+	games = append(games, g)
+
+	urlParams := url.Values{}
+	urlParams.Add("gameid", g.Gameid)
+	log.Printf("Gameid in urlParams: %v", urlParams["gameid"][0])
+	urlParams.Add("Slot", "-1")
+	startGameURL := "/play?" + urlParams.Encode()
+	log.Printf("startGameURL: %v", startGameURL)
+	variables := map[string]interface{}{"id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL}
+	outputHTML(writer, "app/html/newgame.html", variables)
+}
+
+func play(writer http.ResponseWriter, req *http.Request) {
+	urlVars := req.URL.Query()
+	log.Printf("url: %v", req.URL)
+	log.Printf("urlVars: %v", urlVars)
+	gameid := urlVars["gameid"][0]
+	var outputVars map[string]interface{}
+	var human bool
+	// g := games[gameid] // This needs to be changed to work with database
+	var noPossibleMoves bool
+	// var intGameid, _ = strconv.Atoi(gameid)
+	// g := games[intGameid]
+
+	//if there is a move
+	if urlVars["Slot"][0] != "-1" {
+		slot, die, dieIndex, capturePiece := game.ParseVariables(urlVars)
+		move := game.MoveType{Slot: slot,
+			Die:          die,
+			DieIndex:     dieIndex,
+			CapturePiece: capturePiece,
+		}
+
+		endSlot := move.Slot + move.Die
+		endSlotState := g.State[endSlot]
+		if game.WillCapturePiece(endSlotState, g.CurrTurn.Color) {
+			move.CapturePiece = true
+			g.Captured[endSlotState] += 1
+		}
+		fmt.Printf("player %s chose move %v \n", g.CurrTurn.Color, move)
+
+		g.UpdateDice(dieIndex)
+		if g.CurrTurn.Color == "w" && move.Slot == 0 {
+			g.Captured["w"] -= 1
+		} else if g.CurrTurn.Color == "b" && move.Slot == 25 {
+			g.Captured["b"] -= 1
+		}
+		g.UpdateState(g.CurrTurn.Color, move)
+		fmt.Printf("Board updated to: %v \n", g.State)
+		fmt.Printf("dice left: %v \n", g.Dice)
+		if g.IsWon() != "" {
+			winner := g.CurrTurn.Id
+			http.Redirect(writer, req, "/won?winner="+winner, http.StatusSeeOther)
+		}
+	} else {
+		fmt.Println("no move")
+	}
+
+	//think about this logic for first turn
+	g.UpdateTurn()
+
+	//rolls the dice if the dice list is empty
+	if len(g.Dice) == 0 {
+		g.Dice = game.RollDice(2)
+		fmt.Printf("diceroll: %v \n", g.Dice)
+	}
+	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
+
+	//deletes all dice if no possible moves
+	if len(possibleMoves) == 0 {
+		g.Dice = nil
+		noPossibleMoves = true
+	}
+
+	if g.CurrTurn.Id != "JOE" && g.CurrTurn.Id != "STEVE" {
+		fmt.Println("human move now")
+		human = true
+		var urlList []string
+		if len(possibleMoves) == 0 {
+			urlParams := url.Values{}
+			strValues := game.ConvertParams(-1, 0, 0, false)
+			urlParams.Add("gameid", gameid)
+			urlParams.Add("Slot", strValues[0])
+			var urlString string = "/play?" + urlParams.Encode()
+			urlList = append(urlList, urlString)
+		} else {
+			for index, move := range possibleMoves {
+				_ = index
+				urlParams := url.Values{}
+				strValues := game.ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
+				urlParams.Add("gameid", gameid)
+				urlParams = game.AddUrlParams(urlParams, strValues)
+				var urlString string = "/play?" + urlParams.Encode()
+				urlList = append(urlList, urlString)
+			}
+		}
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
+	} else {
+		fmt.Println("ai move now")
+		human = false
+		urlParams := url.Values{}
+		urlParams.Add("gameid", gameid)
+		if len(possibleMoves) != 0 {
+			move := game.GetAIMove(possibleMoves, g.CurrTurn.Color)
+			strValues := game.ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
+			urlParams = game.AddUrlParams(urlParams, strValues)
+		} else {
+			urlParams.Add("Slot", "-1")
+		}
+		url := "/play?" + urlParams.Encode()
+		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
+	}
+	// games[intGameid] = g
+	outputHTML(writer, "app/html/playing.html", outputVars)
 }
 
 // todo: if someone has won, update the database with wins/losses for each player. Print final board.
 func won(writer http.ResponseWriter, req *http.Request) {
+	winner := req.URL.Query().Get("winner")
 	variables := map[string]interface{}{"winner": winner}
-	outputHTML(writer, "./html/won.html", variables)
+	outputHTML(writer, "app/html/won.html", variables)
 }
 
-// todo: set up SQL database, check if the user is an actual user in the db, then return their win/loss ratio.”'
-func scoreboard(writer http.ResponseWriter, req *http.Request) {
-	//display player's win/loss ratio
-	user := "Hannah"
-	request := "http://db:5000/getprofile/" + user //currently in Flask
-	fmt.Fprint(writer, request)
-	//fmt.Fprint(writer, requests.get(request).text)
+// just for fun (?), we try to establish a connection to the database here
+func dbHandler(writer http.ResponseWriter, req *http.Request) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
+	var err error
+	db, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	log.Print("successfully connected to database")
+}
+
+func initDB() {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
+
+	var err error
+	db, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	log.Print("successfully connected to database")
 }
 
 func main() {
+	initDB()
+	defer db.Close()
+
 	http.HandleFunc("/", help) //this makes an endpoint that calls the help function
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
-	http.HandleFunc("/testplay", testplay)
+	//http.HandleFunc("/testplay", testplay)
 	http.HandleFunc("/login", login)
+	http.HandleFunc("/registered", register)
+	http.HandleFunc("/loggedin", loggedin)
 	http.HandleFunc("/won", won)
-	http.HandleFunc("/scoreboard", scoreboard)
-	fs := http.FileServer(http.Dir("static"))
+	http.HandleFunc("/db", dbHandler)
+	//http.HandleFunc("/scoreboard", scoreboard)
+	fs := http.FileServer(http.Dir("app/static"))
 	http.Handle("/static/", http.StripPrefix("/static", fs))
 	http.ListenAndServe(":5555", nil) //listens for HTTP on port 9000, with standard mapping
 }

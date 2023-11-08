@@ -1,16 +1,29 @@
 services:
-  ai:
-    build: ./ai
-    expose: 
-      - "7555"
+  # ai:
+  #   build: ./backgammon/game
+  #   expose: 
+  #     - "7555"
   db:
-    build: ./db
+    image: postgres
     expose: 
       - "7788"
+    environment:
+      - POSTGRES_PASSWORD=collective
+      - POSTGRES_DB=backgammon
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    restart: on-failure
+
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+      - ./pgdata:/var/lib/postgresql/data
+
+
   app:
-    build: ./app
+    build: ./backgammon
     ports: 
       - "9000:5555"
+    depends_on:
+      - "db"
     links: 
       - "db"
-      - "ai"
+    # - "ai"

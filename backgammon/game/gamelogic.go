@@ -3,6 +3,8 @@ package game
 import (
 	"log"
 	"math/rand"
+	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -12,6 +14,30 @@ type Gameplay interface {
 	UpdateState()                 //updates the state of the game to reflect the recent move
 	IsWon() bool
 	isBearingOffAllowed(playerColor string) bool //make capital if needed outside of package
+}
+
+type Game struct {
+	Gameid   string
+	Player1  Player
+	Player2  Player
+	CurrTurn Player
+	State    [26]string
+	Captured map[string]int
+	Pips     map[string]int
+	Dice     []int
+
+	//only for testing purposes, can be removed later
+	currMove MoveType
+}
+
+type MoveType struct {
+	Slot, Die, DieIndex int
+	CapturePiece        bool
+}
+
+type Player struct {
+	Id    string //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
+	Color string
 }
 
 func (g Game) IsWon() string {
@@ -53,56 +79,6 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 		} else {
 			return false
 		}
-	}
-}
-
-// currently returning nothing. originally returned game state but i don't think we need to
-func (g *Game) Move(player Player) {
-	//administers everything that is needed to identify and execute move.
-	//Changes done here lately might have to be reflected in changes to updateBoard
-	dice := RollDice(2) //change to input?
-	log.Printf("diceroll: %v \n", dice)
-	numDice := len(dice)
-
-	for i := 0; i < numDice; i++ {
-		log.Printf("Using dice %v", i+1)
-
-		possibleMoves := g.GetPossibleMoves(dice, player.Color)
-		if len(possibleMoves) == 0 {
-			log.Println("no possible moves")
-			return
-		}
-		mockGame := *g
-		move := GetMove(possibleMoves, player, mockGame)
-
-		if player.Color == "b" {
-			dice[move.DieIndex] = -move.Die
-		} else if player.Color == "w" {
-			dice[move.DieIndex] = move.Die
-		}
-
-		endSlot := move.Slot + move.Die
-		endSlotState := g.State[endSlot]
-
-		if willCapturePiece(endSlotState, player.Color) {
-			move.CapturePiece = true
-			g.Captured[endSlotState] += 1
-		}
-		log.Printf("player %s chose move %v", player.Color, move)
-		//only for testing purposes
-		g.currMove = move
-
-		g.UpdateState(player.Color, move)
-		log.Printf("state updated to: %v", g.State)
-		g.Pips = countPips(g.State, g.Captured)
-
-		if player.Color == "w" && move.Slot == 0 {
-			g.Captured["w"] -= 1
-		} else if player.Color == "b" && move.Slot == 25 {
-			g.Captured["b"] -= 1
-		}
-
-		dice = DeleteElement(dice, move.DieIndex)
 	}
 }
 
@@ -275,7 +251,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	return possibleMoves
 }
 
-func willCapturePiece(endSlotState string, playerColor string) bool {
+func WillCapturePiece(endSlotState string, playerColor string) bool {
 	//checks if there is a piece thats captured if move is made
 	return len(endSlotState) == 1 && endSlotState != playerColor
 	//so if the length of state is 1 and the color is not the same as the moving piece, it is captured
@@ -292,29 +268,6 @@ func RollDice(numDice int) []int {
 		dice = append(dice, dice...)
 	}
 	return dice
-}
-
-type Game struct {
-	Gameid   int
-	Player1  Player
-	Player2  Player
-	CurrTurn Player
-	State    [26]string
-	Captured map[string]int
-	Pips     map[string]int
-
-	//only for testing purposes, can be removed later
-	currMove MoveType
-}
-
-type MoveType struct {
-	Slot, Die, DieIndex int
-	CapturePiece        bool
-}
-
-type Player struct {
-	Id    string //check if it best if this is string or int. Note that we might need to use a stringToInt fcn to convert
-	Color string
 }
 
 func GetMove(possibleMoves []MoveType, player Player, game Game) MoveType {
@@ -354,3 +307,117 @@ func GetAIMove(possibleMoves []MoveType, color string) MoveType {
 func DeleteElement(slice []int, index int) []int {
 	return append(slice[:index], slice[index+1:]...)
 }
+
+func ConvertParams(slot int, die int, index int, capture bool) [4]string {
+	strSlot := strconv.Itoa(slot)
+	strDie := strconv.Itoa(die)
+	strDieIndex := strconv.Itoa(index)
+	strCapturePiece := strconv.FormatBool(capture)
+	returns := [4]string{strSlot, strDie, strDieIndex, strCapturePiece}
+	return returns
+}
+
+func initializeCapturedMap() map[string]int {
+	m := make(map[string]int)
+	m["w"] = 0
+	m["b"] = 0
+	return m
+}
+
+// the player set as currturn here will play second, not first
+func CreateGame(games []Game) (Game, [26]string) {
+	p1, p2 := Player{Id: "JOE", Color: "w"}, Player{Id: "user1", Color: "b"} //will need to be an input in the future
+	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
+	// testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
+	capturedMap := initializeCapturedMap()
+	testGame := Game{Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap}
+	return testGame, initialState
+}
+
+func ParseVariables(urlVariables url.Values) (int, int, int, bool) {
+	varSlot := urlVariables["Slot"][0]
+	log.Printf("the slot is: %v", varSlot)
+	varDie := urlVariables["Die"][0]
+	varDieIndex := urlVariables["DieIndex"][0]
+	varCapturePiece := urlVariables["CapturePiece"][0]
+
+	slot, _ := strconv.Atoi(varSlot)
+	die, _ := strconv.Atoi(varDie)
+	dieIndex, _ := strconv.Atoi(varDieIndex)
+	capturePiece, _ := strconv.ParseBool(varCapturePiece)
+	return slot, die, dieIndex, capturePiece
+}
+
+func AddUrlParams(urlParams url.Values, valuesToAdd [4]string) url.Values {
+	urlParams.Add("Slot", valuesToAdd[0])
+	urlParams.Add("Die", valuesToAdd[1])
+	urlParams.Add("DieIndex", valuesToAdd[2])
+	urlParams.Add("CapturePiece", valuesToAdd[3])
+	return urlParams
+}
+
+// deletes the die that was just played
+func (g *Game) UpdateDice(dieIndex int) {
+	g.Dice = DeleteElement(g.Dice, dieIndex)
+}
+
+// switch turns if necesesary
+func (g *Game) UpdateTurn() {
+	if len(g.Dice) == 0 {
+		if g.CurrTurn == g.Player1 {
+			g.CurrTurn = g.Player2
+		} else {
+			g.CurrTurn = g.Player1
+		}
+	}
+}
+
+// currently returning nothing. originally returned game state but i don't think we need to
+// func (g *Game) Move(player Player) {
+// 	//administers everything that is needed to identify and execute move.
+// 	//Changes done here lately might have to be reflected in changes to updateBoard
+// 	dice := RollDice(2) //change to input?
+// 	log.Printf("diceroll: %v \n", dice)
+// 	numDice := len(dice)
+
+// 	for i := 0; i < numDice; i++ {
+// 		log.Printf("Using dice %v", i+1)
+
+// 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
+// 		if len(possibleMoves) == 0 {
+// 			log.Println("no possible moves")
+// 			return
+// 		}
+// 		mockGame := *g
+// 		move := GetMove(possibleMoves, player, mockGame)
+
+// 		if player.Color == "b" {
+// 			dice[move.DieIndex] = -move.Die
+// 		} else if player.Color == "w" {
+// 			dice[move.DieIndex] = move.Die
+// 		}
+
+// 		endSlot := move.Slot + move.Die
+// 		endSlotState := g.State[endSlot]
+
+// 		if willCapturePiece(endSlotState, player.Color) {
+// 			move.CapturePiece = true
+// 			g.Captured[endSlotState] += 1
+// 		}
+// 		log.Printf("player %s chose move %v", player.Color, move)
+// 		//only for testing purposes
+// 		g.currMove = move
+
+// 		g.UpdateState(player.Color, move)
+// 		log.Printf("state updated to: %v", g.State)
+// 		g.Pips = countPips(g.State, g.Captured)
+
+// 		if player.Color == "w" && move.Slot == 0 {
+// 			g.Captured["w"] -= 1
+// 		} else if player.Color == "b" && move.Slot == 25 {
+// 			g.Captured["b"] -= 1
+// 		}
+
+// 		dice = DeleteElement(dice, move.DieIndex)
+// 	}
+// }
