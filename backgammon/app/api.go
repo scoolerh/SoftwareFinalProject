@@ -151,6 +151,11 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 
 }
 
+func selectPlayers(writer http.ResponseWriter, req *http.Request) {
+	variables := map[string]interface{}{"username": currentUser}
+	outputHTML(writer, "app/html/index.html", variables)
+}
+
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
 
@@ -410,7 +415,7 @@ func main() {
 	defer db.Close()
 
 	http.HandleFunc("/", home)
-	//http.HandleFunc("/selectPlayers", selectPlayers)
+	http.HandleFunc("/selectPlayers", selectPlayers)
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
