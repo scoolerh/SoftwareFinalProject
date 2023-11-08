@@ -23,7 +23,7 @@ const (
 var games []game.Game
 var g game.Game
 var db *sql.DB
-var currentUser string
+var currentUser = "Guest"
 
 //TODO: probably need a user variable here
 //how does it look when two users are logged in? If two people play on different computers?
@@ -43,7 +43,7 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 
 // Open the home page 
 func home(writer http.ResponseWriter, req *http.Request) {
-	variables := map[string]interface{}{"username": ""}
+	variables := map[string]interface{}{"username": currentUser}
 	outputHTML(writer, "app/html/index.html", variables)
 }
 
@@ -69,7 +69,9 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err) //might want to change this later
 	}
-	variables := map[string]interface{}{"username": username}
+
+	currentUser = username
+	variables := map[string]interface{}{"username": currentUser}
 	outputHTML(writer, "app/html/index.html", variables)
 }
 
@@ -104,21 +106,19 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "app/html/index.html", variables)
 }
 
-func selectOpponent(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/selectOpponent.html")
-}
-
-func selectAI(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/selectAI.html")
-}
-
-func selectHuman(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/selectHuman.html")
+func selectPlayers(writer http.ResponseWriter, req *http.Request) {
+	variables := map[string]interface{}{"username": currentUser}
+	outputHTML(writer, "app/html/index.html", variables)
 }
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
-	g, initialState = game.CreateGame(games)
+	
+	urlVars := req.URL.Query()
+	p2 := urlVars["player2"][0]
+	p1 := urlVars["player1"][0]
+
+	g, initialState = game.CreateGame(games, p1, p2)
 
 	var white string
 	var black string
@@ -318,9 +318,7 @@ func main() {
 	defer db.Close()
 
 	http.HandleFunc("/", home) 
-	http.HandleFunc("/selectOpponent", selectOpponent) 
-	http.HandleFunc("/selectAI", selectAI) 
-	http.HandleFunc("/selectHuman", selectHuman) 
+	http.HandleFunc("/selectPlayers", selectPlayers) 
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
