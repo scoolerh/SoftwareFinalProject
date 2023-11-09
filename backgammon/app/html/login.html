@@ -12,29 +12,28 @@
 
         <main>
             <section>
-                <p>REGISTER:</p>
+                <h2>Register:</h2>
                 <form action="/registered" method="post">
-                    <label for="username">Username:</label><br>
-                    <input type="text" id="username" name="username" required><br>
-                    <label for="password">Password:</label><br>
-                    <input type="text" id="password" name="password" required>
-                    <input type="submit" value="Submit">
-                  </form>
+                    <div>
+                        <label for="username">Username:</label><input type="text" id="username" name="username" required><br>
+                        <label for="password">Password:</label><input type="text" id="password" name="password" required><br>
+                    </div>
+                    <br>
+                    <input class="button" type="submit">
+                </form>
             </section>
             <section>
-                <p>LOGIN:</p>
+                <h2>Login:</h2>
                 <form action="/loggedin" method="post">
-                    <label for="username">Username:</label><br>
-                    <input type="text" id="username" name="username" required><br>
-                    <label for="password">Password:</label><br>
-                    <input type="text" id="password" name="password" required>
-                    <input type="submit" value="Submit">
+                    <div>
+                        <label for="username">Username:</label><input type="text" id="username" name="username" required><br>
+                        <label for="password">Password:</label><input type="text" id="password" name="password" required><br>
+                    </div>
+                    <br>
+                    <input class="button" type="submit">
                   </form>
             </section>
         </main>
 
-        <footer>
-
-        </footer>
     </body>
 </html>
