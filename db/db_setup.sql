@@ -25,12 +25,14 @@ CREATE TABLE IF NOT EXISTS games(
     FOREIGN KEY (white) REFERENCES Users(username),
     FOREIGN KEY (black) REFERENCES Users(username),
     boardState varchar(1024),
-    turn varchar(4),
-    winner varchar(4)
+    turn varchar(50),
+    winner varchar(50)
 );
 
 INSERT INTO users VALUES('STEVE', 'ai');
 INSERT INTO users VALUES('JOE', 'ai');
+INSERT INTO users VALUES('guest', 'password');
+INSERT INTO users VALUES('user1', 'password');
 
 CREATE ROLE readaccess;
 GRANT CONNECT ON DATABASE Backgammon to readaccess;
