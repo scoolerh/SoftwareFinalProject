@@ -113,6 +113,23 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 		password = strings.ToLower(req.FormValue("password"))
 	}
 
+	validation := validateLogin(username, password)
+
+	if validation == "invalid user" {
+		message := map[string]interface{}{"message": "invalid user"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+	} else if validation == "wrong password" {
+		message := map[string]interface{}{"message": "wrong password"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+	} else if validation == "valid" {
+		currentUser = username
+		log.Printf("Welcome %s!", currentUser)
+		outputHTML(writer, "app/html/index.html", currentUser)
+	}
+
+}
+
+func validateLogin(username string, password string) string {
 	query := "SELECT password FROM users WHERE username='" + username + "'"
 
 	rows, err := db.Query(query)
@@ -130,22 +147,17 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 
 		if username == "steve" || username == "joe" {
 			log.Print("invalid user")
-			message := map[string]interface{}{"message": "invalid user"}
-			outputHTML(writer, "app/html/loginfailed.html", message)
+			return "invalid user"
 		} else if password != refPassword {
 			log.Print("wrong password")
-			message := map[string]interface{}{"message": "wrong password"}
-			outputHTML(writer, "app/html/loginfailed.html", message)
+			return "wrong password"
 		} else {
-			currentUser = username
-			log.Printf("Welcome %s!", currentUser)
-			outputHTML(writer, "app/html/index.html", currentUser)
+			return "valid"
 		}
 
 	} else {
 		log.Print("invalid user")
-		message := map[string]interface{}{"message": "wrong password"}
-		outputHTML(writer, "app/html/loginfailed.html", message)
+		return "invalid user"
 	}
 }
 
@@ -157,13 +169,37 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
 
 	urlVars := req.URL.Query()
+	log.Printf("urlVars: %v", urlVars)
 	p1 := urlVars["player1"][0]
 	p2 := urlVars["player2"][0]
+
 	if p1 == "loggedUser" {
 		p1 = currentUser
 	}
 	if p2 == "loggedUser" {
 		p2 = currentUser
+	}
+
+	loginmessage := ""
+	if p2 == "friend" {
+		password := urlVars["password"][0]
+		username := urlVars["username"][0]
+		if p1 == username {
+			loginmessage = "self login"
+			p2 = "guest"
+		} else {
+			validation := validateLogin(username, password)
+			log.Printf("validation: x%vx", validation)
+
+			if validation == "valid" {
+				log.Print("Valid login")
+				p2 = username
+			} else {
+				log.Print("Invalid login")
+				loginmessage = "invalid login"
+				p2 = "guest"
+			}
+		}
 	}
 
 	g, initialState = game.CreateGame(games, p1, p2)
@@ -185,9 +221,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	query := "INSERT INTO games (white, black, status, boardstate) VALUES ('" + white + "', '" + black + "', 'new', '" + state + "') RETURNING gameId"
-	//might do something like this instead to prevent injection
-	//func buildSql(email string) string {
-	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -208,7 +241,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
 	log.Printf("startGameURL: %v", startGameURL)
-	variables := map[string]interface{}{"id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
+	variables := map[string]interface{}{"login": loginmessage, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
 	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
