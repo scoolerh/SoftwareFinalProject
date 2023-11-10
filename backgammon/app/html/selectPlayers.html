@@ -15,27 +15,74 @@
                 <form id="form" action="/newgame">
                     <div class="wrapper">
                         <h2>Who will be Player 1?</h2>
-                        <div>   
-                            {{ if eq . "Guest" }}
-                            {{ else }}
-                                <label for="loggedUser"><input type="radio" value="loggedUser" name="player1">{{.}}</label>
-                            {{ end }}
-                            <label for="guest"><input type="radio" value="guest" name="player1">Guest</label>
-                            <label for="steve"><input type="radio" value="steve" name="player1">Easy AI</label>
-                            <label for="joe"><input type="radio" value="joe" name="player1">Hard AI</label>
+                        <div class="block" id="one">
+                            <script>
+                                var user = "{{.}}";
+                                if (user != "Guest") {
+                                    const input = document.createElement("input");
+                                    const type = document.createAttribute("type");
+                                    type.value = "radio";
+                                    input.setAttributeNode(type);
+                                    const value = document.createAttribute("value");
+                                    value.value = "loggedUser";
+                                    input.setAttributeNode(value);
+                                    const classs = document.createAttribute("class");
+                                    classs.value = "block";
+                                    input.setAttributeNode(classs);
+                                    const name = document.createAttribute("name");
+                                    name.value = "player1";
+                                    input.setAttributeNode(name);
+                                    document.getElementById("one").appendChild(input);
+                                    const label = document.createElement("label");
+                                    label.innerText = "{{.}}";
+                                    const fors = document.createAttribute("for");
+                                    fors.value = "loggedUser";
+                                    label.setAttributeNode(fors);
+                                    document.getElementById("one").appendChild(label);
+                                }
+                            </script>
+                            <input class="block"  type="radio" value="guest" name="player1">
+                            <label for="guest">Guest</label>
+                            <input class="block"  type="radio" value="steve" name="player1">
+                            <label for="steve">Steve AI (Easy Mode)</label>
+                            <input class="block"  type="radio" value="joe" name="player1">
+                            <label for="joe">Joe AI (Hard Mode)</label>
                         </div>
                         <h2>Who will be Player 2?</h2>
-                        <div id="two">
-                            {{ if eq . "Guest" }}
-                            {{ else }}
-                                <label for="loggedUser"><input type="radio" value="loggedUser" name="player2">{{.}}</label>
-                            {{ end }}
-                            <label class="block" for="guest"><input type="radio" value="guest" name="player2">Guest</label>
-                            <label class="block" for="steve"><input type="radio" value="steve" name="player2">Easy AI</label>
-                            <label for="joe" class="block"><input type="radio" value="joe" name="player2">Hard AI</label>
+                        <div class="block" id="two">
+                            <script>
+                                var user = "{{.}}";
+                                if (user != "Guest") {
+                                    const input = document.createElement("input");
+                                    const type = document.createAttribute("type");
+                                    type.value = "radio";
+                                    input.setAttributeNode(type);
+                                    const classs = document.createAttribute("class");
+                                    classs.value = "block";
+                                    input.setAttributeNode(classs);
+                                    const value = document.createAttribute("value");
+                                    value.value = "loggedUser";
+                                    input.setAttributeNode(value);
+                                    const name = document.createAttribute("name");
+                                    name.value = "player2";
+                                    input.setAttributeNode(name);
+                                    document.getElementById("two").appendChild(input);
+                                    const label = document.createElement("label");
+                                    label.innerText = "{{.}}";
+                                    const fors = document.createAttribute("for");
+                                    fors.value = "loggedUser";
+                                    label.setAttributeNode(fors);
+                                    document.getElementById("two").appendChild(label);
+                                }
+                            </script>
+                            <input class="block" type="radio" value="guest" name="player2">
+                            <label for="guest">Guest</label>
+                            <input class="block"  type="radio" value="steve" name="player2">
+                            <label for="steve">Steve AI (Easy Mode)</label>
+                            <input class="block"  type="radio" value="joe" name="player2">
+                            <label for="joe">Joe AI (Hard Mode)</label>
+                            <input type="submit">
                         </div>
-                        <br>
-                        <input class="button" type="submit">
                     </div>
                 </form>
             </section>

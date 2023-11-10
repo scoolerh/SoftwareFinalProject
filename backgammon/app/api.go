@@ -159,12 +159,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	urlVars := req.URL.Query()
 	p1 := urlVars["player1"][0]
 	p2 := urlVars["player2"][0]
-	if p1 == "loggedUser" {
-		p1 = currentUser
-	}
-	if p2 == "loggedUser" {
-		p2 = currentUser
-	}
 
 	g, initialState = game.CreateGame(games, p1, p2)
 

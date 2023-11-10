@@ -3,15 +3,20 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <link rel="stylesheet" href="/static/won.css">
+        <link rel="stylesheet" href="/static/game.css">
     </head>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="/newgame">New Game</a></li>
+        </ul>
+    </nav>
     <body>
         <main>
-            <section>
-                <h2>{{ .winner }} won!</h2>
-                <a href="\selectPlayers"><button class="button">Play Again</button></a>
-                <a href="\"><button class="button">Return Home</button></a>
-            </section>
-        </main>    
+            <h2>{{ .winner }} won!!!!</h2>
+            <a href="\selectPlayers"><button class="button">Play Again</button></a>
+        </main>
+
     </body>
 </html>
