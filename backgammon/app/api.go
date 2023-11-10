@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
-	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -41,7 +41,7 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
-// Open the home page 
+// Open the home page
 func home(writer http.ResponseWriter, req *http.Request) {
 	variables := map[string]interface{}{"username": ""}
 	outputHTML(writer, "app/html/index.html", variables)
@@ -165,6 +165,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 }
 
 func play(writer http.ResponseWriter, req *http.Request) {
+	newRoll := false
 	urlVars := req.URL.Query()
 	log.Printf("url: %v", req.URL)
 	log.Printf("urlVars: %v", urlVars)
@@ -215,6 +216,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 
 	//rolls the dice if the dice list is empty
 	if len(g.Dice) == 0 {
+		newRoll = true
 		g.Dice = game.RollDice(2)
 		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
@@ -248,7 +250,14 @@ func play(writer http.ResponseWriter, req *http.Request) {
 				urlList = append(urlList, urlString)
 			}
 		}
-		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
+		if newRoll {
+			urlParams := url.Values{}
+			urlParams.Add("gameid", g.Gameid)
+			urlParams.Add("Slot", "-1")
+			newRollURL := "/play?" + urlParams.Encode()
+			outputVars = map[string]interface{}{"newRollURL": newRollURL, "game": g, "newRoll": newRoll}
+		}
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "newRoll": newRoll}
 	} else {
 		fmt.Println("ai move now")
 		human = false
@@ -317,10 +326,10 @@ func main() {
 	initDB()
 	defer db.Close()
 
-	http.HandleFunc("/", home) 
-	http.HandleFunc("/selectOpponent", selectOpponent) 
-	http.HandleFunc("/selectAI", selectAI) 
-	http.HandleFunc("/selectHuman", selectHuman) 
+	http.HandleFunc("/", home)
+	http.HandleFunc("/selectOpponent", selectOpponent)
+	http.HandleFunc("/selectAI", selectAI)
+	http.HandleFunc("/selectHuman", selectHuman)
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
