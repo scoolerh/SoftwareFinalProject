@@ -184,16 +184,21 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	if p2 == "friend" {
 		password := urlVars["password"][0]
 		username := urlVars["username"][0]
-		validation := validateLogin(username, password)
-		log.Printf("validation: x%vx", validation)
-
-		if validation == "valid" {
-			log.Print("Valid login")
-			p2 = username
-		} else {
-			log.Print("Invalid login")
-			loginmessage = "invalid login. Playing as guest."
+		if p1 == username {
+			loginmessage = "self login"
 			p2 = "guest"
+		} else {
+			validation := validateLogin(username, password)
+			log.Printf("validation: x%vx", validation)
+
+			if validation == "valid" {
+				log.Print("Valid login")
+				p2 = username
+			} else {
+				log.Print("Invalid login")
+				loginmessage = "invalid login"
+				p2 = "guest"
+			}
 		}
 	}
 
