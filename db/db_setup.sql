@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS games(
     winner varchar(50)
 );
 
-INSERT INTO users VALUES('STEVE', 'ai');
-INSERT INTO users VALUES('JOE', 'ai');
+INSERT INTO users VALUES('steve', 'ai');
+INSERT INTO users VALUES('joe', 'ai');
 INSERT INTO users VALUES('guest', 'password');
 INSERT INTO users VALUES('user1', 'password');
 
