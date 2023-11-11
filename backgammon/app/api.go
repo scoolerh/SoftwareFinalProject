@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -23,7 +24,7 @@ const (
 var games []game.Game
 var g game.Game
 var db *sql.DB
-var currentUser string
+var currentUser = "Guest"
 
 //TODO: probably need a user variable here
 //how does it look when two users are logged in? If two people play on different computers?
@@ -43,11 +44,9 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 
 // Open the home page
 func home(writer http.ResponseWriter, req *http.Request) {
-	variables := map[string]interface{}{"username": ""}
-	outputHTML(writer, "app/html/index.html", variables)
+	outputHTML(writer, "app/html/index.html", currentUser)
 }
 
-// todo: Create a database for users, allow a user to log in (or sign up if they do not have a username)
 func login(writer http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Connecting to login endpoint")
 	http.ServeFile(writer, req, "app/html/login.html")
@@ -58,19 +57,51 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	var password string
 
 	if req.Method == http.MethodPost {
-		username = req.FormValue("username")
-		password = req.FormValue("password")
+		username = strings.ToLower(req.FormValue("username"))
+		password = strings.ToLower(req.FormValue("password"))
 	}
 
-	query := "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
-
+	var query string
 	var err error
-	_, err = db.Exec(query)
+
+	query = "SELECT COUNT(*) FROM users WHERE username='" + username + "'"
+
+	var count int
+	err = db.QueryRow(query).Scan(&count)
 	if err != nil {
 		panic(err) //might want to change this later
 	}
-	variables := map[string]interface{}{"username": username}
-	outputHTML(writer, "app/html/index.html", variables)
+
+	if count != 0 {
+
+		log.Print("Username taken")
+		message := map[string]interface{}{"message": "username taken"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+		return
+
+	} else {
+
+		query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Printf("Error with query %v. Error: %v", query, err)
+			panic(err) //might want to change this later
+		} else {
+			log.Println("Successful user registration")
+		}
+
+		query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
+		_, err = db.Exec(query)
+		if err != nil {
+			log.Printf("Error with query %v. Error: %v", query, err)
+			panic(err) //might want to change this later
+		} else {
+			log.Println("Successfully created userstat row")
+		}
+
+		currentUser = username
+		outputHTML(writer, "app/html/index.html", currentUser)
+	}
 }
 
 func loggedin(writer http.ResponseWriter, req *http.Request) {
@@ -78,10 +109,27 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	var password string
 
 	if req.Method == http.MethodPost {
-		username = req.FormValue("username")
-		password = req.FormValue("password")
+		username = strings.ToLower(req.FormValue("username"))
+		password = strings.ToLower(req.FormValue("password"))
 	}
 
+	validation := validateLogin(username, password)
+
+	if validation == "invalid user" {
+		message := map[string]interface{}{"message": "invalid user"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+	} else if validation == "wrong password" {
+		message := map[string]interface{}{"message": "wrong password"}
+		outputHTML(writer, "app/html/loginfailed.html", message)
+	} else if validation == "valid" {
+		currentUser = username
+		log.Printf("Welcome %s!", currentUser)
+		outputHTML(writer, "app/html/index.html", currentUser)
+	}
+
+}
+
+func validateLogin(username string, password string) string {
 	query := "SELECT password FROM users WHERE username='" + username + "'"
 
 	rows, err := db.Query(query)
@@ -90,35 +138,71 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	var refPassword string
-	for rows.Next() {
-		rows.Scan(&refPassword)
+
+	if rows.Next() {
+		err = rows.Scan(&refPassword)
+		if err != nil {
+			panic(err)
+		}
+
+		if username == "steve" || username == "joe" {
+			log.Print("invalid user")
+			return "invalid user"
+		} else if password != refPassword {
+			log.Print("wrong password")
+			return "wrong password"
+		} else {
+			return "valid"
+		}
+
+	} else {
+		log.Print("invalid user")
+		return "invalid user"
 	}
-
-	if password != refPassword {
-		http.ServeFile(writer, req, "app/html/loginfailed.html")
-	}
-
-	currentUser = username
-	log.Printf("Welcome %s!", currentUser)
-	variables := map[string]interface{}{"username": currentUser}
-	outputHTML(writer, "app/html/index.html", variables)
 }
 
-func selectOpponent(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/selectOpponent.html")
-}
-
-func selectAI(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/selectAI.html")
-}
-
-func selectHuman(writer http.ResponseWriter, req *http.Request) {
-	http.ServeFile(writer, req, "app/html/selectHuman.html")
+func selectPlayers(writer http.ResponseWriter, req *http.Request) {
+	outputHTML(writer, "app/html/selectPlayers.html", currentUser)
 }
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
-	g, initialState = game.CreateGame(games)
+
+	urlVars := req.URL.Query()
+	log.Printf("urlVars: %v", urlVars)
+	p1 := urlVars["player1"][0]
+	p2 := urlVars["player2"][0]
+
+	if p1 == "loggedUser" {
+		p1 = currentUser
+	}
+	if p2 == "loggedUser" {
+		p2 = currentUser
+	}
+
+	loginmessage := ""
+	if p2 == "friend" {
+		password := urlVars["password"][0]
+		username := urlVars["username"][0]
+		if p1 == username {
+			loginmessage = "self login"
+			p2 = "guest"
+		} else {
+			validation := validateLogin(username, password)
+			log.Printf("validation: x%vx", validation)
+
+			if validation == "valid" {
+				log.Print("Valid login")
+				p2 = username
+			} else {
+				log.Print("Invalid login")
+				loginmessage = "invalid login"
+				p2 = "guest"
+			}
+		}
+	}
+
+	g, initialState = game.CreateGame(games, p1, p2)
 
 	var white string
 	var black string
@@ -137,9 +221,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	query := "INSERT INTO games (white, black, status, boardstate) VALUES ('" + white + "', '" + black + "', 'new', '" + state + "') RETURNING gameId"
-	//might do something like this instead to prevent injection
-	//func buildSql(email string) string {
-	//return fmt.Sprintf("SELECT * FROM users WHERE email='%s';", email)
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -160,7 +241,7 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
 	log.Printf("startGameURL: %v", startGameURL)
-	variables := map[string]interface{}{"id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL}
+	variables := map[string]interface{}{"login": loginmessage, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
 	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
@@ -220,6 +301,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		g.Dice = game.RollDice(2)
 		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
+
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
 
 	//deletes all dice if no possible moves
@@ -228,7 +310,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 		noPossibleMoves = true
 	}
 
-	if g.CurrTurn.Id != "JOE" && g.CurrTurn.Id != "STEVE" {
+	if g.CurrTurn.Id != "joe" && g.CurrTurn.Id != "steve" {
 		fmt.Println("human move now")
 		human = true
 		var urlList []string
@@ -271,7 +353,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			urlParams.Add("Slot", "-1")
 		}
 		url := "/play?" + urlParams.Encode()
-		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id}
+		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
 	}
 	// games[intGameid] = g
 	outputHTML(writer, "app/html/playing.html", outputVars)
@@ -281,10 +363,60 @@ func play(writer http.ResponseWriter, req *http.Request) {
 func won(writer http.ResponseWriter, req *http.Request) {
 	winner := req.URL.Query().Get("winner")
 	variables := map[string]interface{}{"winner": winner}
+	var err error
+	var query string
+	var loser string
+
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player1.Id + "';"
+	//exec here
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("player 1 stats updated")
+	}
+
+	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player2.Id + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("player 2 stats updated")
+	}
+
+	query = "UPDATE userstats SET wins = wins + 1 WHERE username = '" + winner + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("winner stats updated")
+	}
+
+	if g.Player1.Id == winner {
+		loser = g.Player2.Id
+	} else {
+		loser = g.Player1.Id
+	}
+
+	query = "UPDATE userstats SET losses = losses + 1 WHERE username = '" + loser + "';"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("loser stats updated")
+	}
+
+	query = "UPDATE games SET status = 'finished', winner = '" + winner + "' WHERE gameId = " + g.Gameid + ";"
+	_, err = db.Exec(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	} else {
+		log.Println("game set to finished")
+	}
+
 	outputHTML(writer, "app/html/won.html", variables)
 }
 
-// just for fun (?), we try to establish a connection to the database here
 func dbHandler(writer http.ResponseWriter, req *http.Request) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -320,6 +452,7 @@ func initDB() {
 		panic(err)
 	}
 	log.Print("successfully connected to database")
+
 }
 
 func main() {
@@ -327,9 +460,7 @@ func main() {
 	defer db.Close()
 
 	http.HandleFunc("/", home)
-	http.HandleFunc("/selectOpponent", selectOpponent)
-	http.HandleFunc("/selectAI", selectAI)
-	http.HandleFunc("/selectHuman", selectHuman)
+	http.HandleFunc("/selectPlayers", selectPlayers)
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)

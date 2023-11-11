@@ -12,6 +12,13 @@ h1
     margin: 0px;
     font-family: 'Blippo', 'Lucida Sans', fantasy;
 }
+h2
+{
+    text-align: center;
+    font-size: x-large;
+    color: black;
+    text-emphasis: none;
+}
 p
 {
     font-size: 120%;
@@ -24,7 +31,7 @@ section
     background-color: white;
     border-style: solid;
     border-width: medium;
-    border-color:black;
+    border-color: rgba(0, 128, 0, 0.504);
     text-align: center;
     padding: 10px;
     margin-top: 20px;

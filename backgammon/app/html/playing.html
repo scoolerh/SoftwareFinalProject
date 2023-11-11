@@ -5,10 +5,8 @@
         <title>Backgammon</title>
         <link rel="stylesheet" href="/static/game.css">
     </head>
+
     <body>
-        <header>
-            <h1>BACKGAMMON</h1> 
-        </header>
 
         <main>
             <div class = "board">
@@ -56,7 +54,6 @@
             </div>
             <section>
                 <p>Now it's {{ .player }}'s turn.</p>
-                <p>Captured Pieces: {{ .captured }}</p>
                 <p>
                 {{ if eq true .newRoll}}
                     <a href="{{ .newRollURL }}"><button>ROLL</button></a>
@@ -66,10 +63,10 @@
                     {{ end }}
                     <!-- {{ $urllist := .urlList}} -->
                     {{ range $index, $urllist := .urlList}}
-                        <a href="{{$urllist}}"><button class="button">{{$urllist}}</button></a>
+                        <a href="{{$urllist}}"><button class="button">Move</button></a>
                     {{ end }}
                 {{ else }}
-                    <a href="{{.url}}"><button class="button">{{ .url}}</button></p></a>
+                    <a href="{{.url}}"><button class="button">Move</button></p></a>
                 {{ end }}
                 </p>
             </section>

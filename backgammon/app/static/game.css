@@ -148,13 +148,24 @@ section
     position: absolute;
     bottom: 230px;
 }
-.white-piece
+.wrapper 
 {
-    height: 40px;
-    width: 40px;
-    background-color: white;
-    border-radius: 50%;
-    position: absolute;
-    left: var(--left);
-    top: var(--top);
+    display: flex;
+    align-items: center;
+}
+.block 
+{
+    display: block;
+}
+input[type=submit]
+{
+    background-color: green;
+    color: white;
+    border-style: solid;
+    border-color: green;
+    border-width: medium;
+    border-radius: 15px;
+    text-decoration: none;
+    padding: 15px 30px 15px 30px;
+    font-size: 150%;
 }

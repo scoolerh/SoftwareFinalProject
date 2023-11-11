@@ -2,8 +2,12 @@
 <html lang="en"> 
     <head> 
         <meta charset="utf-8">
+        <meta http-equiv="Cache-control" content="no-cache, no-store">
+        <meta http-equiv="Pragma" content="no-cache">
+        <add name="Expires" content="0" />
         <title>Backgammon</title>
         <link rel="stylesheet" href="/static/styles.css">
+
     </head>
     <body>
         <header>
@@ -12,30 +16,28 @@
 
         <main>
             <section>
-                <p>CURRENTLY UNDER CONSTRUCTION</p>
-                <p>REGISTER:</p>
-                <form action="/registered" method="post">
-                    <label for="username">Username:</label><br>
-                    <input type="text" id="username" name="username"><br>
-                    <label for="password">Password:</label><br>
-                    <input type="text" id="password" name="password">
-                    <input type="submit" value="Submit">
+                <h2>Login:</h2>
+                <form action="/loggedin" method="post">
+                    <div>
+                        <label for="username">Username:</label><input type="text" id="username" name="username" autocomplete = "off" required><br>
+                        <label for="password">Password:</label><input type="text" id="password" name="password" autocomplete = "off" required><br>
+                    </div>
+                    <br>
+                    <input class="button" type="submit">
                   </form>
             </section>
             <section>
-                <p>LOGIN:</p>
-                <form action="/loggedin" method="post">
-                    <label for="username">Username:</label><br>
-                    <input type="text" id="username" name="username"><br>
-                    <label for="password">Password:</label><br>
-                    <input type="text" id="password" name="password">
-                    <input type="submit" value="Submit">
-                  </form>
+                <h2>Register:</h2>
+                <form action="/registered" method="post">
+                    <div>
+                        <label for="username">Username:</label><input type="text" id="username" name="username" autocomplete = "off" required><br>
+                        <label for="password">Password:</label><input type="text" id="password" name="password" autocomplete = "off" required><br>
+                    </div>
+                    <br>
+                    <input class="button" type="submit">
+                </form>
             </section>
         </main>
 
-        <footer>
-
-        </footer>
     </body>
 </html>

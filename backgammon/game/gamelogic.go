@@ -25,9 +25,6 @@ type Game struct {
 	Captured map[string]int
 	Pips     map[string]int
 	Dice     []int
-
-	//only for testing purposes, can be removed later
-	currMove MoveType
 }
 
 type MoveType struct {
@@ -273,9 +270,9 @@ func RollDice(numDice int) []int {
 func GetMove(possibleMoves []MoveType, player Player, game Game) MoveType {
 	//prompts either the player or the AI to pick a move
 	var move MoveType
-	if player.Id == "STEVE" { //AI
+	if player.Id == "steve" { //AI
 		move = Steve(possibleMoves, player.Color) //only one now, implement Joe later
-	} else if player.Id == "JOE" {
+	} else if player.Id == "joe" {
 		move = Joe(possibleMoves, player.Color, game)
 	} else { //human
 		move = GetHumanMove(possibleMoves, player.Color)
@@ -325,8 +322,8 @@ func initializeCapturedMap() map[string]int {
 }
 
 // the player set as currturn here will play second, not first
-func CreateGame(games []Game) (Game, [26]string) {
-	p1, p2 := Player{Id: "JOE", Color: "w"}, Player{Id: "user1", Color: "b"} //will need to be an input in the future
+func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
+	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"} //will need to be an input in the future
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 	// testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
 	capturedMap := initializeCapturedMap()

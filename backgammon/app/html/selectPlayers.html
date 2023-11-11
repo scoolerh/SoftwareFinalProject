@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head> 
+        <meta charset="utf-8">
+        <title>Backgammon</title>
+        <link rel="stylesheet" href="/static/styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>BACKGAMMON</h1>
+        </header>
+
+        <main>
+            <section>
+                <form id="form" action="/newgame">
+                    <div class="wrapper">
+                        <h2>Who will be Player 1?</h2>
+                        <div>   
+                            {{ if eq . "Guest" }}
+                            {{ else }}
+                                <label for="loggedUser"><input type="radio" value="loggedUser" name="player1">{{.}}</label>
+                            {{ end }}
+                            <label for="guest"><input type="radio" value="guest" name="player1" required>Guest</label>
+                            <label for="steve"><input type="radio" value="steve" name="player1" required>Easy AI</label>
+                            <label for="joe"><input type="radio" value="joe" name="player1" required>Hard AI</label>
+                        </div>
+                        <h2>Who will be Player 2?</h2>
+                        <div id="two">
+                            <!-- {{ if eq . "Guest" }}
+                            {{ else }}
+                                <label for="loggedUser"><input type="radio" value="loggedUser" name="player2">{{.}}</label>
+                            {{ end }} -->
+                            <!-- <label class="block" for="friend"><input type="radio" value="friend" name="player2">Friend</label> -->
+                            <label class="block" for="guest"><input type="radio" value="guest" name="player2" required>Guest</label>
+                            <label class="block" for="steve"><input type="radio" value="steve" name="player2" required>Easy AI</label>
+                            <label for="joe" class="block"><input type="radio" value="joe" name="player2" required>Hard AI</label>
+                            <br> <br>
+                            <label class="block" for="friend"><input type="radio" value="friend" name="player2" required>Play a friend:</label>
+                            <label for="username">Username:</label><input type="text" id="username" name="username" autocomplete = "off">
+                            <label for="password">Password:</label><input type="text" id="password" name="password" autocomplete = "off">
+                        </div>
+                        <br>
+                        <input class="button" type="submit">
+                    </div>
+                </form>
+            </section>
+        </main>
+
+    </body>
+</html>
