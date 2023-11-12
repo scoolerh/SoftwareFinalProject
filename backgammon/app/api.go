@@ -26,10 +26,6 @@ var g game.Game
 var db *sql.DB
 var currentUser = "Guest"
 
-//TODO: probably need a user variable here
-//how does it look when two users are logged in? If two people play on different computers?
-//and how does it look if two users play on the same computer? Is one or both going to log in?
-
 func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	t, err := template.ParseFiles(filename)
 	if err != nil {
@@ -49,7 +45,7 @@ func home(writer http.ResponseWriter, req *http.Request) {
 
 func login(writer http.ResponseWriter, req *http.Request) {
 	fmt.Printf("Connecting to login endpoint")
-	http.ServeFile(writer, req, "app/html/login.html")
+	outputHTML(writer, "app/html/login.html", currentUser)
 }
 
 func register(writer http.ResponseWriter, req *http.Request) {
@@ -73,12 +69,9 @@ func register(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	if count != 0 {
-
-		log.Print("Username taken")
 		message := map[string]interface{}{"message": "username taken"}
 		outputHTML(writer, "app/html/loginfailed.html", message)
 		return
-
 	} else {
 
 		query = "INSERT INTO users VALUES ('" + username + "', '" + password + "')"
@@ -86,18 +79,14 @@ func register(writer http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Printf("Error with query %v. Error: %v", query, err)
 			panic(err) //might want to change this later
-		} else {
-			log.Println("Successful user registration")
-		}
+		} 
 
 		query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
 		_, err = db.Exec(query)
 		if err != nil {
 			log.Printf("Error with query %v. Error: %v", query, err)
 			panic(err) //might want to change this later
-		} else {
-			log.Println("Successfully created userstat row")
-		}
+		} 
 
 		currentUser = username
 		outputHTML(writer, "app/html/index.html", currentUser)
@@ -123,10 +112,8 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 		outputHTML(writer, "app/html/loginfailed.html", message)
 	} else if validation == "valid" {
 		currentUser = username
-		log.Printf("Welcome %s!", currentUser)
 		outputHTML(writer, "app/html/index.html", currentUser)
 	}
-
 }
 
 func validateLogin(username string, password string) string {
@@ -146,17 +133,13 @@ func validateLogin(username string, password string) string {
 		}
 
 		if username == "steve" || username == "joe" {
-			log.Print("invalid user")
 			return "invalid user"
 		} else if password != refPassword {
-			log.Print("wrong password")
 			return "wrong password"
 		} else {
 			return "valid"
 		}
-
 	} else {
-		log.Print("invalid user")
 		return "invalid user"
 	}
 }
@@ -169,7 +152,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
 
 	urlVars := req.URL.Query()
-	log.Printf("urlVars: %v", urlVars)
 	p1 := urlVars["player1"][0]
 	p2 := urlVars["player2"][0]
 
@@ -189,13 +171,9 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 			p2 = "guest"
 		} else {
 			validation := validateLogin(username, password)
-			log.Printf("validation: x%vx", validation)
-
 			if validation == "valid" {
-				log.Print("Valid login")
 				p2 = username
 			} else {
-				log.Print("Invalid login")
 				loginmessage = "invalid login"
 				p2 = "guest"
 			}
@@ -237,18 +215,14 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 
 	urlParams := url.Values{}
 	urlParams.Add("gameid", g.Gameid)
-	log.Printf("Gameid in urlParams: %v", urlParams["gameid"][0])
 	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
-	log.Printf("startGameURL: %v", startGameURL)
-	variables := map[string]interface{}{"login": loginmessage, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
+	variables := map[string]interface{}{"login": loginmessage, "currentUser": currentUser, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
 	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
 func play(writer http.ResponseWriter, req *http.Request) {
 	urlVars := req.URL.Query()
-	log.Printf("url: %v", req.URL)
-	log.Printf("urlVars: %v", urlVars)
 	gameid := urlVars["gameid"][0]
 	var outputVars map[string]interface{}
 	var human bool
@@ -330,7 +304,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 				urlList = append(urlList, urlString)
 			}
 		}
-		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
+		outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "blackhome": g.State[24], "whitehome": g.State[25]}
 	} else {
 		fmt.Println("ai move now")
 		human = false
@@ -344,13 +318,12 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			urlParams.Add("Slot", "-1")
 		}
 		url := "/play?" + urlParams.Encode()
-		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23]}
+		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[0], "two": g.State[1], "three": g.State[2], "four": g.State[3], "five": g.State[4], "six": g.State[5], "seven": g.State[6], "eight": g.State[7], "nine": g.State[8], "ten": g.State[9], "eleven": g.State[10], "twelve": g.State[11], "thirteen": g.State[12], "fourteen": g.State[13], "fifteen": g.State[14], "sixteen": g.State[15], "seventeen": g.State[16], "eighteen": g.State[17], "nineteen": g.State[18], "twenty": g.State[19], "twentyone": g.State[20], "twentytwo": g.State[21], "twentythree": g.State[22], "twentyfour": g.State[23], "blackhome": g.State[24], "whitehome": g.State[25]}
 	}
 	// games[intGameid] = g
 	outputHTML(writer, "app/html/playing.html", outputVars)
 }
 
-// todo: if someone has won, update the database with wins/losses for each player. Print final board.
 func won(writer http.ResponseWriter, req *http.Request) {
 	winner := req.URL.Query().Get("winner")
 	variables := map[string]interface{}{"winner": winner}

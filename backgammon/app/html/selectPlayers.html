@@ -10,6 +10,23 @@
             <h1>BACKGAMMON</h1>
         </header>
 
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a id="user" href="/login"></a></li>
+                <script>
+                    var user = "{{.}}";
+                    if (user == "Guest") {
+                        document.getElementById("user").innerHTML = "Login";
+                    } else {
+                        document.getElementById("user").innerHTML = "Welcome, {{.}}!";
+                    }   
+                </script>
+                
+                <li><a href="/selectPlayers">New Game</a></li>
+            </ul>
+        </nav>
+
         <main>
             <section>
                 <form id="form" action="/newgame">
@@ -18,24 +35,20 @@
                         <div>   
                             {{ if eq . "Guest" }}
                             {{ else }}
-                                <label for="loggedUser"><input type="radio" value="loggedUser" name="player1">{{.}}</label>
+                                <label for="loggedUser"><input type="radio" id="loggedUser" value="loggedUser" name="player1">{{.}}</label>
                             {{ end }}
-                            <label for="guest"><input type="radio" value="guest" name="player1" required>Guest</label>
-                            <label for="steve"><input type="radio" value="steve" name="player1" required>Easy AI</label>
-                            <label for="joe"><input type="radio" value="joe" name="player1" required>Hard AI</label>
+                            <label for="guest"><input type="radio" id="guest" value="guest" name="player1" required>Guest</label>
+                            <label for="steve"><input type="radio" id="steve" value="steve" name="player1" required>Easy AI</label>
+                            <label for="joe"><input type="radio" id="joe" value="joe" name="player1" required>Hard AI</label>
                         </div>
                         <h2>Who will be Player 2?</h2>
                         <div id="two">
-                            <!-- {{ if eq . "Guest" }}
-                            {{ else }}
-                                <label for="loggedUser"><input type="radio" value="loggedUser" name="player2">{{.}}</label>
-                            {{ end }} -->
-                            <!-- <label class="block" for="friend"><input type="radio" value="friend" name="player2">Friend</label> -->
-                            <label class="block" for="guest"><input type="radio" value="guest" name="player2" required>Guest</label>
-                            <label class="block" for="steve"><input type="radio" value="steve" name="player2" required>Easy AI</label>
-                            <label for="joe" class="block"><input type="radio" value="joe" name="player2" required>Hard AI</label>
+
+                            <label for="guest1"><input type="radio" id="guest1" value="guest" name="player2" required>Guest</label>
+                            <label for="steve1"><input type="radio" id="steve1" value="steve" name="player2" required>Easy AI</label>
+                            <label for="joe1"><input type="radio" id="joe1" value="joe" name="player2" required>Hard AI</label>
                             <br> <br>
-                            <label class="block" for="friend"><input type="radio" value="friend" name="player2" required>Play a friend:</label>
+                            <label for="friend"><input type="radio" id="friend" value="friend" name="player2" required>Play a friend:</label>
                             <label for="username">Username:</label><input type="text" id="username" name="username" autocomplete = "off">
                             <label for="password">Password:</label><input type="text" id="password" name="password" autocomplete = "off">
                         </div>

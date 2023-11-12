@@ -4,13 +4,12 @@ html
     background-size: cover;
     z-index: -1;
 }
-h5 
+h2 
 {
-    margin: 0px;
-    padding: 0px;
-    color: white;
-    size: 0px;
-    font-size: 0%;
+    text-emphasis: normal;
+    font-size: x-large;
+    text-align: center;
+    color: black;
 }
 section
 {   
@@ -21,9 +20,8 @@ section
     border-style: solid;
     border-width: medium;
     border-color:black;
-    padding: 5px;
-    margin: auto;
     align-content: center;
+    margin: auto;
     margin-top: 50px;
     margin-bottom: 50px;
     border-radius: 15px; 
@@ -32,6 +30,7 @@ section
 {
     background-color: green;
     color: white;
+    font-size: large;
     border-style: solid;
     border-color: green;
     border-width: medium;
@@ -48,22 +47,13 @@ section
 {
     width: 700px;
     height: 480px;
+    float: center;
     position: relative;
     box-sizing: border-box;
     background-color: #335533;
     border: 10px solid black;
     border-radius: 10px;
-    float: center;
     margin: auto;
-}
-.home-bins
-{
-    background-color: burlywood;
-    width: 80px;
-    height: 460px;
-    position: absolute;
-    left: 600px;
-    top: 0px;
 }
 .left-side 
 {
@@ -144,18 +134,11 @@ section
     width: 80px;
     height: 5px;
     padding: 5px;
+    margin: 0px;
     background-color: black;
     position: absolute;
+    left: 600px;
     bottom: 230px;
-}
-.wrapper 
-{
-    display: flex;
-    align-items: center;
-}
-.block 
-{
-    display: block;
 }
 input[type=submit]
 {
@@ -168,4 +151,52 @@ input[type=submit]
     text-decoration: none;
     padding: 15px 30px 15px 30px;
     font-size: 150%;
+}
+.white-piece
+{
+    width: 36px;
+    height: 36px;
+    background-color: white;
+    position: absolute;
+    z-index: 1;
+    border-radius: 18px;
+}
+.black-piece
+{
+    width: 36px;
+    height: 36px;
+    background-color: black;
+    position: absolute;
+    z-index: 1;
+    border-radius: 18px;
+}
+.blackhome
+{
+    background-color: burlywood;
+    font-size: xx-large;
+    text-align: center;
+    justify-content: center;
+    width: 80px;
+    height: 225px;
+    position: absolute;
+    left: 600px;
+    top: 0px;
+}
+.whitehome
+{
+    background-color: burlywood;
+    font-size: xx-large;
+    text-align: center;
+    justify-content: center;
+    width: 80px;
+    height: 230px;
+    position: absolute;
+    left: 600px;
+    top: 230px;
+}
+.jail
+{
+    position: absolute;
+    left: -1px;
+    top: 230px;
 }

@@ -12,66 +12,141 @@
             <div class = "board">
                 <div class="left-side">
                     <div class="top-row">
-                        <div class="space-down odd" id="twelve">{{ .twelve }}</div>
-                        <div class="space-down even" id="eleven">{{ .eleven }}</div>
-                        <div class="space-down odd" id="ten">{{ .ten }}</div>
-                        <div class="space-down even" id="nine">{{ .nine }}</div>
-                        <div class="space-down odd" id="eight">{{ .eight }}</div>
-                        <div class="space-down even" id="seven">{{ .seven }}</div>
+                        <div class="space-down odd" id="twelve"></div>
+                        <div class="space-down even" id="eleven"></div>
+                        <div class="space-down odd" id="ten"></div>
+                        <div class="space-down even" id="nine"></div>
+                        <div class="space-down odd" id="eight"></div>
+                        <div class="space-down even" id="seven"></div>
                     </div>
                     <div class="bottom-row"> 
-                        <div class="space-up odd" id="thirteen">{{ .thirteen }}</div>
-                        <div class="space-up even" id="fourteen">{{ .fourteen }}</div>
-                        <div class="space-up odd" id="fifteen">{{ .fifteen }}</div>
-                        <div class="space-up even" id="sixteen">{{ .sixteen }}</div>
-                        <div class="space-up odd" id="seventeen">{{ .seventeen }}</div>
-                        <div class="space-up even" id="eighteen">{{ .eighteen }}</div>
+                        <div class="space-up odd" id="thirteen"></div>
+                        <div class="space-up even" id="fourteen"></div>
+                        <div class="space-up odd" id="fifteen"></div>
+                        <div class="space-up even" id="sixteen"></div>
+                        <div class="space-up odd" id="seventeen"></div>
+                        <div class="space-up even" id="eighteen"></div>
                     </div>
                 </div> 
-                <div class = "divider"></div>
+                <div class = "divider">
+                    <div class="jail" id="jail"></div>
+                </div>
                 <div class = "right-side">
                     <div class="top-row">
-                        <div class="space-down odd" id="six">{{ .six }}</div>
-                        <div class="space-down even" id="five">{{ .five }}</div>
-                        <div class="space-down odd" id="four">{{ .four }}</div>
-                        <div class="space-down even" id="three">{{ .three }}</div>
-                        <div class="space-down odd" id="two">{{ .two }}</div>
-                        <div class="space-down even" id="one">{{ .one }}</div>
+                        <div class="space-down odd" id="six"></div>
+                        <div class="space-down even" id="five"></div>
+                        <div class="space-down odd" id="four"></div>
+                        <div class="space-down even" id="three"></div>
+                        <div class="space-down odd" id="two"></div>
+                        <div class="space-down even" id="one"></div>
                     </div>
                     <div class="bottom-row"> 
-                        <div class="space-up odd" id="nineteen">{{ .nineteen }}</div>
-                        <div class="space-up even" id="twenty">{{ .twenty }}</div>
-                        <div class="space-up odd" id="twentyone">{{ .twentyone }}</div>
-                        <div class="space-up even" id="twentytwo">{{ .twentytwo }}</div>
-                        <div class="space-up odd" id="twentythree">{{ .twentythree }}</div>
-                        <div class="space-up even" id="twentyfour">{{ .twentyfour }}</div>
+                        <div class="space-up odd" id="nineteen"></div>
+                        <div class="space-up even" id="twenty"></div>
+                        <div class="space-up odd" id="twentyone"></div>
+                        <div class="space-up even" id="twentytwo"></div>
+                        <div class="space-up odd" id="twentythree"></div>
+                        <div class="space-up even" id="twentyfour"></div>
                     </div>
                 </div>  
                 <div class="mini-divider"></div>
                 <div class="home-bins">
+                    <div id="blackhome" class="blackhome"></div>
                     <div class="side-divider"></div> 
+                    <div id="whitehome" class="whitehome"></div>
                 </div>
             </div>
             <section>
                 <p>Now it's {{ .player }}'s turn.</p>
-                <p>
                 {{ if eq true .isHuman }}
                     {{ if eq true .noPossibleMoves}}
                         <p>No possible moves.</p>
                     {{ end }}
-                    <!-- {{ $urllist := .urlList}} -->
                     {{ range $index, $urllist := .urlList}}
                         <a href="{{$urllist}}"><button class="button">Move</button></a>
                     {{ end }}
                 {{ else }}
-                    <a href="{{.url}}"><button class="button">Move</button></p></a>
+                    <a href="{{.url}}"><button class="button">Move</button></a>
                 {{ end }}
-                </p>
             </section>
         </main>
  
-        <footer>
-
-        </footer>
+        <script>
+            const strValsDown = ["{{ .one }}","{{ .two }}","{{ .three }}","{{ .four }}","{{ .five }}","{{ .six }}","{{ .seven }}","{{ .eight }}","{{ .nine }}","{{ .ten }}","{{ .eleven }}","{{ .twelve }}"];
+            const strValsUp = ["{{ .thirteen }}","{{ .fourteen }}","{{ .fifteen }}","{{ .sixteen }}","{{ .seventeen }}","{{ .eighteen }}","{{ .nineteen }}","{{ .twenty }}","{{ .twentyone }}","{{ .twentytwo }}","{{ .twentythree }}","{{ .twentyfour }}"];
+            const indicesDown = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+            const indicesUp = ["thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twentyone", "twentytwo", "twentythree", "twentyfour"];
+            for (let j = 0; j < 12; j++) {
+                const str = strValsDown[j];
+                for (let i = 0; i < str.length; i++) {
+                    var newPiece = document.createElement("div");
+                    if (i <= 5) {
+                        var topVal = String(-195 + (38 * i)) + "px";
+                        newPiece.style.top = topVal;
+                    }
+                    newPiece.style.left = "-19px"; 
+                    var classs = document.createAttribute("class");
+                    if (str[i] == "w") {
+                        classs.value = "white-piece";
+                    }
+                    if (str[i] == "b") {
+                        classs.value = "black-piece";
+                    }
+                    newPiece.setAttributeNode(classs);
+                    var index = indicesDown[j];
+                    document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
+                }
+            }
+            for (let k = 0; k < 12; k++) {
+                const str = strValsUp[k];
+                for (let i = 0; i < str.length; i++) {
+                    var newPiece = document.createElement("div");
+                    if (i <= 5) {
+                        var bottomVal = String(-195 + (38 * i)) + "px";
+                        newPiece.style.bottom = bottomVal;
+                    }
+                    if (k < 6) {
+                        var leftVal = String(k * 40) + "px";
+                        newPiece.style.left = leftVal;
+                    }
+                    else {
+                        var leftVal = String((k - 6) * 40) + "px";
+                        newPiece.style.left = leftVal;
+                    }
+                    var classs = document.createAttribute("class");
+                    if (str[i] == "w") {
+                        classs.value = "white-piece";
+                    }
+                    if (str[i] == "b") {
+                        classs.value = "black-piece";
+                    }
+                    newPiece.setAttributeNode(classs);
+                    var index = indicesUp[k];
+                    document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
+                }
+            }
+            var captured = "{{ .captured }}";
+            captured = captured.split(":");
+            var blackCaptured = captured[1][0];
+            var whiteCaptured = captured[2][0];
+            if (blackCaptured > 0) {
+                document.getElementById("jail").innerHTML = "<div class=\"black-piece\"></div>"
+            }
+            if (whiteCaptured > 0) {
+                document.getElementById("jail").innerHTML = "<div class=\"white-piece\"></div>"
+            }
+            var whitehome = "{{ .whitehome}}";
+            var whitecount = 0;
+            for (let i = 0; i<whitehome.length; i++) {
+                whitecount += 1;
+            }
+            document.getElementById("whitehome").innerHTML = whitecount;
+            var blackhome = "{{ .blackhome}}";
+            var blackcount = 0;
+            for (let i = 0; i< blackhome.length; i++) {
+                blackcount += 1;
+            }
+            document.getElementById("blackhome").innerHTML = blackcount;
+        </script>
     </body>
 </html>

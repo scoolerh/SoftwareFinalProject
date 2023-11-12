@@ -10,6 +10,22 @@
             <h1>BACKGAMMON</h1> 
         </header>
 
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a id="user" href="/login"></a></li>
+                <script>
+                    var user = "{{ .currentUser }}";
+                    if (user == "Guest") {
+                        document.getElementById("user").innerHTML = "Login";
+                    } else {
+                        document.getElementById("user").innerHTML = "Welcome, {{ .currentUser }}!";
+                    }   
+                </script>
+                <li><a href="/selectPlayers">New Game</a></li>
+            </ul>
+        </nav>
+
         <main>
             <section>
                 {{ if eq .login "invalid login" }}
