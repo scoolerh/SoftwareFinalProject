@@ -38,6 +38,7 @@ section
     text-decoration: none;
     padding: 15px 30px 15px 30px;
     font-size: 150%;
+    margin: 5px;
 }
 .button:hover 
 {
@@ -51,7 +52,7 @@ section
     position: relative;
     box-sizing: border-box;
     background-color: #335533;
-    border: 10px solid black;
+    border: 10px solid rgb(89, 22, 22);
     border-radius: 10px;
     margin: auto;
 }
@@ -114,7 +115,7 @@ section
     width: 20px;
     height: 450px;
     padding: 5px;
-    background-color: black;
+    background-color: rgb(89, 22, 22);
     position: absolute;
     left: 280px;
     top: 0px;
@@ -124,7 +125,7 @@ section
     width: 5px;
     height: 450px;
     padding: 5px;
-    background-color: black;
+    background-color: rgb(89, 22, 22);
     position: absolute;
     left: 585px;
     top: 0px;
@@ -135,7 +136,7 @@ section
     height: 5px;
     padding: 5px;
     margin: 0px;
-    background-color: black;
+    background-color: rgb(119, 29, 29);
     position: absolute;
     left: 600px;
     bottom: 230px;
@@ -197,6 +198,6 @@ input[type=submit]
 .jail
 {
     position: absolute;
-    left: -1px;
+    left: -2px;
     top: 230px;
 }

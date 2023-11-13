@@ -57,17 +57,21 @@
                 </div>
             </div>
             <section>
-                <p>Now it's {{ .player }}'s turn.</p>
-                {{ if eq true .isHuman }}
-                    {{ if eq true .noPossibleMoves}}
-                        <p>No possible moves.</p>
+                <div>
+                    <p>Now it's {{ .player }}'s turn.</p>
+                </div>
+                <div class="buttons">
+                    {{ if eq true .isHuman }}
+                        {{ if eq true .noPossibleMoves}}
+                            <p>No possible moves.</p>
+                        {{ end }}
+                        {{ range $index, $urllist := .urlList}}
+                            <a href="{{$urllist}}"><button class="button">Move</button></a>
+                        {{ end }}
+                    {{ else }}
+                        <a href="{{.url}}"><button class="button">Move</button></a>
                     {{ end }}
-                    {{ range $index, $urllist := .urlList}}
-                        <a href="{{$urllist}}"><button class="button">Move</button></a>
-                    {{ end }}
-                {{ else }}
-                    <a href="{{.url}}"><button class="button">Move</button></a>
-                {{ end }}
+                </div>
             </section>
         </main>
  
