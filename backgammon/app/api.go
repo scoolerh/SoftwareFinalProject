@@ -79,14 +79,14 @@ func register(writer http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Printf("Error with query %v. Error: %v", query, err)
 			panic(err) //might want to change this later
-		} 
+		}
 
 		query = "INSERT INTO userstats (username, gamesPlayed, wins, losses) VALUES ('" + username + "', 0, 0, 0);"
 		_, err = db.Exec(query)
 		if err != nil {
 			log.Printf("Error with query %v. Error: %v", query, err)
 			panic(err) //might want to change this later
-		} 
+		}
 
 		currentUser = username
 		outputHTML(writer, "app/html/index.html", currentUser)
@@ -132,7 +132,7 @@ func validateLogin(username string, password string) string {
 			panic(err)
 		}
 
-		if username == "steve" || username == "joe" {
+		if username == "steve" || username == "joe" || username == "guest" {
 			return "invalid user"
 		} else if password != refPassword {
 			return "wrong password"

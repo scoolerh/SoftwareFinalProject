@@ -3,3 +3,25 @@ Wait for "successfully connected to database" before using the app
 If you love to cheat, this is the site for you! If you want to fabricate your own moves or give yourself more wins, 
     you can try to figure out how to manipulate the html. We would love it if you didn't do that though, to be considerate towards your competitors.
 If you want to play another player: we do not accept sloppy login. If you fail to successfully log in, you are just assigned as a guest. Keep track of your usernames and passwords, it is an important lesson.
+Have docker open while running it
+
+
+Hi, and welcome to our implementation of backgammon.
+
+Description:
+This an application built using go, postgreSQL, HTML, CSS and javascript.
+The app is built with a hope of giving the user a smooth and joyful Backgammon experience. We have the following functions to ensure this:
+- On the home page we give the option to register or log in. These forms should make sure that 
+- To increase competitiveness wins and losses, we store wins and losses to each user, giving them the option to view their personal stats and the competitive leaderboard (if the other group did their job).
+This is what it does, its strengths and limitations.
+
+Instructions:
+Our app should hopefully be easy to use. Follow these steps and you should be in for a joyful experience!
+1. Clone the repo and make sure you are on main
+2. Make sure you have the docker engine running
+3. Do docker compose build and docker compose up
+4. Go to localhost:9000 to get to our home page
+5. Here, you can choose to freshen up on the game rules, register a new account, or go straight to new game to play as a guest
+6. On this page, you choose who will play the game. You can play another guest (or just keep the computer to yourself and play alone), you can let a friend or enemy log in, you can play an AI, or you can watch the two AI's play each other.
+7. After submitting your choices, click start to begin your joyful Backgammon experience!
+(. roll to decide who starts (?) . The move-buttons show you what moves are possible with your dice roll. Chose one of them to make your first move! When you have used all the dice, the turn is passed to the opponent. Bear off all your pieces before your opponent to win the game!)
