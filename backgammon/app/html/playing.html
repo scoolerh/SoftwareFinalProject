@@ -58,7 +58,9 @@
             </div>
             <section>
                 <p>Now it's {{ .player }}'s turn.</p>
-                {{ if eq true .isHuman }}
+                {{ if eq true .newRoll}}
+                    <a href="{{ .newRollURL }}"><button>ROLL</button></a>
+                {{ else if eq true .isHuman }}
                     {{ if eq true .noPossibleMoves}}
                         <p>No possible moves.</p>
                     {{ end }}
