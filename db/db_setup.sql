@@ -1,4 +1,4 @@
-\c Backgammon;
+\c backgammon;
 
 -- all of this does not run when the docker container starts. I had to do it manually.
 -- might be a volumes issue, but I don't know
