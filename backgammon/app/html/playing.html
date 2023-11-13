@@ -7,7 +7,6 @@
     </head>
 
     <body>
-
         <main>
             <div class = "board">
                 <div class="left-side">
@@ -54,6 +53,7 @@
             </div>
             <section>
                 <p>Now it's {{ .player }}'s turn.</p>
+                <p>Captured Pieces: {{ .captured }}</p>
                 <p>
                 {{ if eq true .newRoll}}
                     <a href="{{ .newRollURL }}"><button>ROLL</button></a>
