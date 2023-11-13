@@ -132,7 +132,7 @@ func validateLogin(username string, password string) string {
 			panic(err)
 		}
 
-		if username == "steve" || username == "joe" || username == "guest" {
+		if username == "steve" || username == "joe" || username == "guest" || username == "guest2" {
 			return "invalid user"
 		} else if password != refPassword {
 			return "wrong password"
@@ -154,6 +154,11 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	urlVars := req.URL.Query()
 	p1 := urlVars["player1"][0]
 	p2 := urlVars["player2"][0]
+
+	if p1 == "guest" && p2 == "guest" {
+		p1 = "guest"
+		p2 = "guest2"
+	}
 
 	if p1 == "loggedUser" {
 		p1 = currentUser
