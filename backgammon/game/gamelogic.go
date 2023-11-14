@@ -133,6 +133,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	if currPlayer == "w" {
 		//checks if the player is allowed to bear off pieces. Uses this information later.
 		canBearOff := g.isBearingOffAllowed("w")
+		log.Printf("Bearing off status: %v", canBearOff)
 		//finds all possible moves when there are no captured pieces
 		if g.Captured["w"] == 0 {
 			//loops through all slots of board
@@ -145,7 +146,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 							goalSlot := i + die
 							goalState := currState[i+die]
 							//checks that either bearing off is legal, or that we are not planning on bearing off
-							if canBearOff || goalSlot != 0 {
+							if canBearOff || goalSlot != 25 {
 								//checks that the goal slot is not occupied by tower of opposite color
 								if !(strings.Contains(goalState, "b") && len(goalState) >= 2) {
 									//gets necessary numbers and adds move to list
@@ -196,6 +197,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 		//Note that black moves in opposite direction of white, so bearing of slot, home board and direction of dice are all different
 	} else if currPlayer == "b" {
 		canBearOff := g.isBearingOffAllowed("b")
+		log.Printf("Bearing off status: %v", canBearOff)
 		if g.Captured["b"] == 0 {
 			for i := 1; i <= 24; i++ {
 				if strings.Contains(currState[i], "b") {
@@ -203,7 +205,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 						if i >= die {
 							goalSlot := i - die
 							goalState := currState[i-die]
-							if canBearOff || goalSlot != 0 {
+							if canBearOff || goalSlot != 0 { //could add prints for further ebugging
 								if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
 									move.Slot = i
 									move.Die = -die
@@ -327,8 +329,8 @@ func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 	// testState := [26]string{"bbbbbbbbbbbbbb", "b", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "ww", "wwwwwwwwwwwww"}
 	capturedMap := initializeCapturedMap()
-	testGame := Game{Player1: p1, Player2: p2, CurrTurn: p1, State: initialState, Captured: capturedMap}
-	return testGame, initialState
+	game := Game{Player1: p1, Player2: p2, CurrTurn: p2, State: initialState, Captured: capturedMap}
+	return game, initialState
 }
 
 func ParseVariables(urlVariables url.Values) (int, int, int, bool) {
