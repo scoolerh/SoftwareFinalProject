@@ -226,6 +226,8 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
+//func rollToStart
+
 func play(writer http.ResponseWriter, req *http.Request) {
 	newRoll := false
 	urlVars := req.URL.Query()
@@ -320,7 +322,7 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			newRollURL := "/play?" + urlParams.Encode()
 			outputVars = map[string]interface{}{"newRollURL": newRollURL, "game": g, "newRoll": newRoll, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 		} else {
-			outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList,  "movelist": moveList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
+			outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "movelist": moveList, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 		}
 	} else {
 		fmt.Println("ai move now")
