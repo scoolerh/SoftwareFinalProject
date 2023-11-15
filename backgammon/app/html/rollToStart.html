@@ -28,18 +28,10 @@
 
         <main>
             <section>
-                {{ if eq .login "invalid login" }}
-                    <p>Invalid login. Player 2 is now a guest.</p>
-                {{ end }}
-                {{ if eq .login "self login" }}
-                    <p>You cannot play yourself. Player 2 is now a guest.</p>
-                {{ end }}
-                <p>Game ID: {{ .id }}</p>
-                <p>White: {{ .p1 }}</p>
-                <p>Black: {{ .p2 }}</p>
-                <p>Roll to decide who starts the game</p>
-                <!-- <a href="{{.startGameURL}}"><button class="button">Start the game...</button></a> -->
-                <a href="/rollToStart"><button class="button">Roll</button></a>
+                <p>Roll for {{ .p1 }}: {{ .die1 }}</p>
+                <p>Roll for {{ .p2 }}: {{ .die2 }}</p>
+                <p> {{ .starter }} starts the game</p>
+                <a href="{{.startGameURL}}"><button class="button">Start the game...</button></a>
                 <!-- Plan:
                 - make a roll to start function
                 - this will roll the dice - one for each Player
