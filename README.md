@@ -20,7 +20,7 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 
 ## Project File structure
 ├── backgammon _(contains code associated with frontend, frontend API, and game logic)_  
-|&emsp;├── app  
+&nbsp;|&emsp;├── app  
 |&emsp;|&emsp;├── html _(directory containing all html files/templates)_  
 |&emsp;|&emsp;├── api_finctions.go _(contains helper functions for api.go)_  
 |&emsp;|&emsp;└── api.go _(api to interface with a frontend)_  
