@@ -150,6 +150,7 @@ func selectPlayers(writer http.ResponseWriter, req *http.Request) {
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
+	fmt.Println("newgame is called")
 
 	urlVars := req.URL.Query()
 	p1 := urlVars["player1"][0]
@@ -218,12 +219,39 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	g.Gameid = gameid
 	games = append(games, g)
 
+	// urlParams := url.Values{}
+	// urlParams.Add("gameid", g.Gameid)
+	// urlParams.Add("Slot", "-1")
+	// startGameURL := "/play?" + urlParams.Encode()
+	//variables := map[string]interface{}{"login": loginmessage, "currentUser": currentUser, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
+	variables := map[string]interface{}{"login": loginmessage, "currentUser": currentUser, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id}
+	fmt.Println("outputHTML for newgame is called")
+	outputHTML(writer, "app/html/newgame.html", variables)
+}
+
+func rollToStart(writer http.ResponseWriter, req *http.Request) {
+	fmt.Println("rolltostart is called")
+	var starter string
+	g.Dice = game.RollDice(2)
+	for g.Dice[0] == g.Dice[1] {
+		g.Dice = game.RollDice(2)
+	}
+
+	if g.Dice[0] > g.Dice[1] {
+		g.CurrTurn = g.Player2
+		starter = g.Player1.Id
+
+	} else {
+		g.CurrTurn = g.Player1
+		starter = g.Player2.Id
+	}
 	urlParams := url.Values{}
 	urlParams.Add("gameid", g.Gameid)
 	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
-	variables := map[string]interface{}{"login": loginmessage, "currentUser": currentUser, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
-	outputHTML(writer, "app/html/newgame.html", variables)
+	fmt.Printf("URL: %v", startGameURL)
+	variables := map[string]interface{}{"currentUser": currentUser, "starter": starter, "die1": g.Dice[0], "die2": g.Dice[1], "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
+	outputHTML(writer, "app/html/rollToStart.html", variables)
 }
 
 func play(writer http.ResponseWriter, req *http.Request) {
@@ -432,6 +460,7 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
+	log.Print("successfully connected to database")
 	log.Print("follow this link to play backgammon: http://localhost:9000/")
 
 }
@@ -443,6 +472,7 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/selectPlayers", selectPlayers)
 	http.HandleFunc("/newgame", newgame)
+	http.HandleFunc("/rollToStart", rollToStart)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/registered", register)
