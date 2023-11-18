@@ -57,27 +57,144 @@
                 </div>
             </div>
             <section>
-                <div>
+                <div id="info">
                     <p>Now it's {{ .player }}'s turn.</p>
                 </div>
-                <div class="buttons">
-                    {{ if eq true .newRoll}}
-                        <a href="{{ .newRollURL }}"><button>ROLL</button></a>
-                    {{ else if eq true .isHuman }}
-                            {{ if eq true .noPossibleMoves}}
-                                <p>No possible moves.</p>
-                            {{ end }}
-                            {{ range $index, $urllist := .urlList}}
-                                <a href="{{$urllist}}"><button class="button">Move</button></a>
-                            {{ end }}
-                    {{ else }}
-                        <a href="{{.url}}"><button class="button">Move</button></a>
-                    {{ end }}
+                <div id="buttons">
                 </div>
             </section>
         </main>
  
         <script>
+            // ------------ Display Dice Information ----------------------
+            var newRoll = "{{ .newRoll }}";
+            var isHuman = "{{ .isHuman }}";
+            var noMoves = "{{ .noPossibleMoves }}";
+            var urlList = "{{ .urlList }}";
+            urlList = urlList.slice(1,-1);
+            urlList = urlList.split(" ");
+            if (newRoll == "true") {
+                var button = 
+                document.getElementById("buttons").innerHTML = "<a href=\"{{ .newRollURL }}\"><button class=\"button\">ROLL DICE</button></a>";
+            }
+            else if (isHuman == "true") {
+                var dice = "{{ .dice }}";
+                dice = dice.slice(1, -1);
+                dice = dice.split(" ");
+                if (dice[0] < 0) {
+                    for (let d = 0; d < dice.length; d++) {
+                        var die = dice[d];
+                        die = -die;
+                        dice[d] = die;
+                    }
+                }
+                if (dice.length == 4) {
+                    document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You rolled double ${dice[0]}s! Way to go!</p>`);
+                } else if (dice.length == 1) {
+                    document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You have a ${dice[0]} left.</p>`);
+                } else if (dice.length == 2) {
+                    if (dice[1] == dice[0]) {
+                        document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You have two ${dice[0]}s left.</p>`);
+                    } else {
+                        document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You rolled a ${dice[0]} and a ${dice[1]}.</p>`);
+                    }
+                } else {
+                    document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You have three ${dice[0]}s left.</p>`);
+                }
+                if (noMoves == "true") {
+                    document.getElementById("info").innerHTML = "<p>No possible moves.<p>";
+                }
+                // -------------- Create Move Buttons ----------------
+                for (let index = 0; index < urlList.length; index++) {
+                    var index1 = index + 1; 
+                    var strindex = "button" + index.toString();
+                    document.getElementById("buttons").insertAdjacentHTML("beforeend", `<a href=\"${urlList[index]}\"><button id=\"${strindex}\" class=\"button\">Move ${index1}</button></a>`);
+                }
+            }    
+            else {
+                document.getElementById("buttons").insertAdjacentHTML("beforeend","<a href=\"{{ .url }}\"><button class=\"button\">Move AI</button></a>");
+            }                            
+
+            // ---------------- Color end and start slots on hover ----------------
+            const indices = ["blackhome", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twentyone", "twentytwo", "twentythree", "twentyfour", "whitehome"];
+            var movelist = "{{ .movelist }}";
+            if (movelist != "") {
+                movelist = movelist.replace("[","");
+                movelist = movelist.split("]");
+                for (let i = 0; i < movelist.length - 2; i++) {
+                    let move = movelist[i];
+                    move = move.replace("[", "");
+                    move = move.split(" ");
+                    if (move[0] == "") {
+                        move[0] = move[1];
+                        move[1] = move[2];
+                        move[2] = move[3];
+                    }
+                    const buttonindex = "button" + i.toString();
+                    let button = document.getElementById(buttonindex);
+                    let startSlot = document.getElementById(indices[move[0]]);
+                    let startPosition = "";
+                    let startOriginalColor = "";
+                    if (startSlot.classList.contains("space-down")) {
+                        startPosition = "down";
+                        if (startSlot.classList.contains("even")) {
+                            startOriginalColor = "burlywood";
+                        } else {
+                            startOriginalColor = "brown";
+                        }
+                    } else {
+                        startPosition = "up";
+                        if (startSlot.classList.contains("odd")) {
+                            startOriginalColor = "burlywood";
+                        } else {
+                            startOriginalColor = "brown";
+                        }
+                    }
+                    let endPosition = "";
+                    let endOriginalColor = "";
+                    let endSlot = document.getElementById(indices[move[1]]);
+                    if (endSlot.classList.contains("space-down")) {
+                        endPosition = "down";
+                        if (endSlot.classList.contains("even")) {
+                            endOriginalColor = "burlywood";
+                        } else {
+                            endOriginalColor = "brown";
+                        }
+                    } else {
+                        endPosition = "up";
+                        if (endSlot.classList.contains("odd")) {
+                            endOriginalColor = "burlywood";
+                        } else {
+                            endOriginalColor = "brown";
+                        }
+                    }
+                    button.addEventListener("mouseover", function() {
+                        if (startPosition == "down") {
+                            startSlot.style.borderTopColor = "lightgreen";
+                        } else {
+                            startSlot.style.borderBottomColor = "lightgreen";
+                        };
+                        if (endPosition == "down") {
+                            endSlot.style.borderTopColor = "yellow";
+                        } else {
+                            endSlot.style.borderBottomColor = "yellow";
+                        }; 
+                    })
+                    button.addEventListener("mouseout", function() {
+                        if (startPosition == "up") {
+                            startSlot.style.borderBottomColor = startOriginalColor;
+                        } else {
+                            startSlot.style.borderTopColor = startOriginalColor;
+                        };
+                        if (endPosition == "up") {
+                            endSlot.style.borderBottomColor = endOriginalColor; 
+                        } else {
+                            endSlot.style.borderTopColor = endOriginalColor;
+                        };
+                    })
+                }
+            }
+            // --------------- display pieces -------------------------
             const strValsDown = ["{{ .one }}","{{ .two }}","{{ .three }}","{{ .four }}","{{ .five }}","{{ .six }}","{{ .seven }}","{{ .eight }}","{{ .nine }}","{{ .ten }}","{{ .eleven }}","{{ .twelve }}"];
             const strValsUp = ["{{ .thirteen }}","{{ .fourteen }}","{{ .fifteen }}","{{ .sixteen }}","{{ .seventeen }}","{{ .eighteen }}","{{ .nineteen }}","{{ .twenty }}","{{ .twentyone }}","{{ .twentytwo }}","{{ .twentythree }}","{{ .twentyfour }}"];
             const indicesDown = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
@@ -130,7 +247,8 @@
                     var index = indicesUp[k];
                     document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
                 }
-            }
+            } 
+            // -------------- display jailed pieces -------------------------
             var captured = "{{ .captured }}";
             captured = captured.split(":");
             var blackCaptured = captured[1][0];
@@ -141,13 +259,14 @@
             if (whiteCaptured > 0) {
                 document.getElementById("jail").innerHTML = "<div class=\"white-piece\"></div>"
             }
-            var whitehome = "{{ .whitehome}}";
+            // -------------- display beared off pieces ----------------------
+            var whitehome = "{{ .whitehome }}";
             var whitecount = 0;
             for (let i = 0; i<whitehome.length; i++) {
                 whitecount += 1;
             }
             document.getElementById("whitehome").innerHTML = whitecount;
-            var blackhome = "{{ .blackhome}}";
+            var blackhome = "{{ .blackhome }}";
             var blackcount = 0;
             for (let i = 0; i< blackhome.length; i++) {
                 blackcount += 1;

@@ -1,7 +1,6 @@
 package game
 
 import (
-	"log"
 	"math/rand"
 	"net/url"
 	"strconv"
@@ -133,7 +132,6 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 	if currPlayer == "w" {
 		//checks if the player is allowed to bear off pieces. Uses this information later.
 		canBearOff := g.isBearingOffAllowed("w")
-		log.Printf("Bearing off status: %v", canBearOff)
 		//finds all possible moves when there are no captured pieces
 		if g.Captured["w"] == 0 {
 			//loops through all slots of board
@@ -155,6 +153,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 									move.DieIndex = index
 									move.CapturePiece = false
 									possibleMoves = append(possibleMoves, move)
+			
 								}
 							}
 						}
@@ -197,7 +196,6 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 		//Note that black moves in opposite direction of white, so bearing of slot, home board and direction of dice are all different
 	} else if currPlayer == "b" {
 		canBearOff := g.isBearingOffAllowed("b")
-		log.Printf("Bearing off status: %v", canBearOff)
 		if g.Captured["b"] == 0 {
 			for i := 1; i <= 24; i++ {
 				if strings.Contains(currState[i], "b") {
@@ -335,7 +333,6 @@ func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
 
 func ParseVariables(urlVariables url.Values) (int, int, int, bool) {
 	varSlot := urlVariables["Slot"][0]
-	log.Printf("the slot is: %v", varSlot)
 	varDie := urlVariables["Die"][0]
 	varDieIndex := urlVariables["DieIndex"][0]
 	varCapturePiece := urlVariables["CapturePiece"][0]
@@ -370,53 +367,3 @@ func (g *Game) UpdateTurn() {
 		}
 	}
 }
-
-// currently returning nothing. originally returned game state but i don't think we need to
-// func (g *Game) Move(player Player) {
-// 	//administers everything that is needed to identify and execute move.
-// 	//Changes done here lately might have to be reflected in changes to updateBoard
-// 	dice := RollDice(2) //change to input?
-// 	log.Printf("diceroll: %v \n", dice)
-// 	numDice := len(dice)
-
-// 	for i := 0; i < numDice; i++ {
-// 		log.Printf("Using dice %v", i+1)
-
-// 		possibleMoves := g.GetPossibleMoves(dice, player.Color)
-// 		if len(possibleMoves) == 0 {
-// 			log.Println("no possible moves")
-// 			return
-// 		}
-// 		mockGame := *g
-// 		move := GetMove(possibleMoves, player, mockGame)
-
-// 		if player.Color == "b" {
-// 			dice[move.DieIndex] = -move.Die
-// 		} else if player.Color == "w" {
-// 			dice[move.DieIndex] = move.Die
-// 		}
-
-// 		endSlot := move.Slot + move.Die
-// 		endSlotState := g.State[endSlot]
-
-// 		if willCapturePiece(endSlotState, player.Color) {
-// 			move.CapturePiece = true
-// 			g.Captured[endSlotState] += 1
-// 		}
-// 		log.Printf("player %s chose move %v", player.Color, move)
-// 		//only for testing purposes
-// 		g.currMove = move
-
-// 		g.UpdateState(player.Color, move)
-// 		log.Printf("state updated to: %v", g.State)
-// 		g.Pips = countPips(g.State, g.Captured)
-
-// 		if player.Color == "w" && move.Slot == 0 {
-// 			g.Captured["w"] -= 1
-// 		} else if player.Color == "b" && move.Slot == 25 {
-// 			g.Captured["b"] -= 1
-// 		}
-
-// 		dice = DeleteElement(dice, move.DieIndex)
-// 	}
-// }
