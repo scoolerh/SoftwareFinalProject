@@ -224,7 +224,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 }
 
 func rollToStart(writer http.ResponseWriter, req *http.Request) {
-	fmt.Println("rolltostart is called")
 	var starter string
 	g.Dice = game.RollDice(2)
 	for g.Dice[0] == g.Dice[1] {
@@ -232,13 +231,14 @@ func rollToStart(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	if g.Dice[0] > g.Dice[1] {
-		g.CurrTurn = g.Player2
+		g.CurrTurn = g.Player1
 		starter = g.Player1.Id
 
 	} else {
-		g.CurrTurn = g.Player1
+		g.CurrTurn = g.Player2
 		starter = g.Player2.Id
 	}
+
 	urlParams := url.Values{}
 	urlParams.Add("gameid", g.Gameid)
 	urlParams.Add("Slot", "-1")
@@ -435,7 +435,7 @@ func dbHandler(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	log.Print("follow this link to play backgammon: http://localhost:9000/")
+	log.Print("successfully connected to database")
 }
 
 func initDB() {

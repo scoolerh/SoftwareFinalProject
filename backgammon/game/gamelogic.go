@@ -1,6 +1,7 @@
 package game
 
 import (
+	"log"
 	"math/rand"
 	"net/url"
 	"strconv"
@@ -158,8 +159,31 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 	}
-
+	log.Printf("initial possibleMoves: %v", possibleMoves)
+	possibleMoves = removeDuplicateMoves(possibleMoves)
+	log.Printf("after duplicates are removed: %v", possibleMoves)
 	return possibleMoves
+}
+
+// not a perfect function for moving duplicates, but works for this use: either all the dice are the same, or they are all unique
+func removeDuplicateMoves(possibleMoves []MoveType) []MoveType {
+	//make checkedmap slot: die
+	//declare possibleMoves_no_dups list
+	//for each move
+	//check if map[slot] = die
+
+	checkedmap := make(map[int]int)
+	var newMoves []MoveType
+
+	for _, move := range possibleMoves {
+		val, status := checkedmap[move.Slot]
+		if !status || val != move.Die {
+			checkedmap[move.Slot] = move.Die
+			newMoves = append(newMoves, move)
+		}
+	}
+
+	return newMoves
 }
 
 // returns empty string if nobody has won. Else, returns "b" or "w"
@@ -248,7 +272,7 @@ func (g *Game) UpdateTurn() {
 // creates the game
 // the player set as currturn here will play second, not first
 func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
-	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"} //will need to be an input in the future
+	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"}
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
 	capturedMap := initializeCapturedMap()
 	game := Game{Player1: p1, Player2: p2, CurrTurn: p2, State: initialState, Captured: capturedMap}
