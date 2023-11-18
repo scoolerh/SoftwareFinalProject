@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head> 
+        <meta charset="utf-8">
+        <title>Backgammon</title>
+        <link rel="stylesheet" href="/static/styles.css">
+    </head>
+    <body>
+        <header>
+            <h1>BACKGAMMON</h1> 
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a id="user" href="/login"></a></li>
+                <script>
+                    var user = "{{ .currentUser }}";
+                    if (user == "Guest") {
+                        document.getElementById("user").innerHTML = "Login";
+                    } else {
+                        document.getElementById("user").innerHTML = "Welcome, {{ .currentUser }}!";
+                    }   
+                </script>
+                <li><a href="/selectPlayers">New Game</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section>
+                <p>Roll for {{ .p1 }}: {{ .die1 }}</p>
+                <p>Roll for {{ .p2 }}: {{ .die2 }}</p>
+                <p> {{ .starter }} starts the game</p>
+                <a href="{{.startGameURL}}"><button class="button">Start the game...</button></a>
+            </section>
+        </main>
+
+        <footer>
+
+        </footer>
+    </body>
+</html>

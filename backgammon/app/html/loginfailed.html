@@ -14,13 +14,14 @@
             <ul>
                 <li><a href="/">Home</a></li>
                 <li><a href="/login">Login</a></li>
-                <li><a href="/newgame">New Game</a></li>
+                <li><a href="/selectPlayers">New Game</a></li>
             </ul>
         </nav>
 
         <main>
             <section>
-                <p>LOGIN FAILED</p>
+                <p>{{ .message }}</p>
+                <a href="\login"><button class="button">Try again</button></a>
             </section>
         </main>
 

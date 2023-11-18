@@ -10,12 +10,35 @@
             <h1>BACKGAMMON</h1> 
         </header>
 
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a id="user" href="/login"></a></li>
+                <script>
+                    var user = "{{ .currentUser }}";
+                    if (user == "Guest") {
+                        document.getElementById("user").innerHTML = "Login";
+                    } else {
+                        document.getElementById("user").innerHTML = "Welcome, {{ .currentUser }}!";
+                    }   
+                </script>
+                <li><a href="/selectPlayers">New Game</a></li>
+            </ul>
+        </nav>
+
         <main>
             <section>
+                {{ if eq .login "invalid login" }}
+                    <p>Invalid login. Player 2 is now a guest.</p>
+                {{ end }}
+                {{ if eq .login "self login" }}
+                    <p>You cannot play yourself. Player 2 is now a guest.</p>
+                {{ end }}
                 <p>Game ID: {{ .id }}</p>
                 <p>White: {{ .p1 }}</p>
                 <p>Black: {{ .p2 }}</p>
-                <a href="{{.startGameURL}}"><button class="button">Start the game...</button></a>
+                <p>Roll to decide who starts the game</p>
+                <a href="/rollToStart"><button class="button">Roll</button></a>
             </section>
         </main>
 
