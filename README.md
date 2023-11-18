@@ -22,17 +22,21 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 Markdown:  
 ├── backgammon _(contains code associated with frontend, frontend API, and game logic)_  
 &nbsp;|&emsp;├── app  
-&nbsp;|&emsp;&nbsp;|&emsp;├── html _(directory containing all html files/templates)_  
-&nbsp;|&emsp;&nbsp;|&emsp;├── api_finctions.go _(contains helper functions for api.go)_  
+&nbsp;|&emsp;&nbsp;|&emsp;├── html _(directory containing html files/templates)_  
+&nbsp;|&emsp;&nbsp;|&emsp;├── static _(directory containing css/images)_
+&nbsp;|&emsp;&nbsp;|&emsp;├── api_functions.go _(contains helper functions for api.go)_  
 &nbsp;|&emsp;&nbsp;|&emsp;└── api.go _(api to interface with a frontend)_  
-&nbsp;|&emsp;└── game  
+&nbsp;|&emsp;├──  game  
 &nbsp;|&emsp;&nbsp;&emsp;├── ai.go _(logic for AI players)_  
-&nbsp;|&emsp;&nbsp;&emsp;└── gamelogic _(logic for rules and updating db)_  
+&nbsp;|&emsp;&nbsp;&emsp;└── gamelogic _(logic for rules and updating db)_ 
+&nbsp;|&emsp;└── Dockerfile 
 ├── db  
 &nbsp;|&emsp;├── db_setup.sql _(sets up db tables)_  
 &nbsp;|&emsp;├── psqlConfig_master.py _(db credentials with read/write access)_  
 &nbsp;|&emsp;└── psqlConfig_readaccess.py _(db credentials with read only access)_  
 ├── pgdata _(directory containing the postgresql db)_  
+├── xx-Deliverable-1 _(Directory containing first deliverable for class about team contracts/project ideas)_  
+├── pkg _(directory containing Go package objects)_    
 ├── compose.yaml _(Compose file to run all Dockerfiles. Sets up envionments/ports)_  
 └── README.md   
   
@@ -40,17 +44,21 @@ Markdown:
 Raw:   
 ├── backgammon (contains code associated with frontend, frontend API, and game logic)  
 |   ├── app  
-|   |   ├── html (directory containing all html files/templates)  
-|   |   ├── api_finctions.go (contains helper functions for api.go)  
+|   |   ├── html (directory containing html files/templates)  
+|   |   ├── static (directory containing css/images) 
+|   |   ├── api_functions.go (contains helper functions for api.go)  
 |   |   └── api.go (api to interface with a frontend)  
-|   └── game   
-|       ├── ai.go (logic for AI players)   
-|       └── gamelogic (logic for rules and updating db)    
+|   ├── game   
+|   |   ├── ai.go (logic for AI players)   
+|   |   └── gamelogic (logic for rules and updating db)  
+|   └── Dockerfile   
 ├── db  
 |   ├── db_setup.sql (sets up db tables)   
 |   ├── psqlConfig_master.py (db credentials with read/write access)  
 |   └── psqlConfig_readaccess.py (db credentials with read only access)    
-├── pgdata (directory containing the postgresql db)   
+├── pgdata (directory containing the postgresql db)
+├── xx-Deliverable-1 (Directory containing first deliverable for class about team contracts/project ideas)  
+├── pkg (directory containing Go package objects)   
 ├── compose.yaml (Compose file to run all Dockerfiles. Sets up envionments/ports)     
 └── README.md    
  
