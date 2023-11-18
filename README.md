@@ -20,17 +20,17 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 
 ## Project File structure
 ├── backgammon _(contains code associated with frontend, frontend API, and game logic)_  
-|   ├── app  
-|   |   ├── html _(directory containing all html files/templates)_  
-|   |   ├── api_finctions.go _(contains helper functions for api.go)_  
-|   |   └── api.go _(api to interface with a frontend)_  
-|   └── game  
-|       ├── ai.go _(logic for AI players)_  
-|       └── gamelogic _(logic for rules and updating db)_  
+|&emsp;├── app  
+|&emsp;|&emsp;├── html _(directory containing all html files/templates)_  
+|&emsp;|&emsp;├── api_finctions.go _(contains helper functions for api.go)_  
+|&emsp;|&emsp;└── api.go _(api to interface with a frontend)_  
+|&emsp;└── game  
+|&emsp;&emsp;├── ai.go _(logic for AI players)_  
+|&emsp;&emsp;└── gamelogic _(logic for rules and updating db)_  
 ├── db  
-|   ├── db_setup.sql _(sets up db tables)_  
-|   ├── psqlConfig_master.py _(db credentials with read/write access)_  
-|   └── psqlConfig_readaccess.py _(db credentials with read only access)_  
+|&emsp;├── db_setup.sql _(sets up db tables)_  
+|&emsp;├── psqlConfig_master.py _(db credentials with read/write access)_  
+|&emsp;└── psqlConfig_readaccess.py _(db credentials with read only access)_  
 ├── pgdata _(directory containing the postgresql db)_  
 ├── compose.yaml _(Compose file to run all Dockerfiles. Sets up envionments/ports)_  
 └── README.md  
