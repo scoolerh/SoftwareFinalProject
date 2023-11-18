@@ -24,7 +24,7 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 &nbsp;|&emsp;&nbsp;|&emsp;├── html _(directory containing all html files/templates)_  
 &nbsp;|&emsp;&nbsp;|&emsp;├── api_finctions.go _(contains helper functions for api.go)_  
 &nbsp;|&emsp;&nbsp;|&emsp;└── api.go _(api to interface with a frontend)_  
-&nbsp;|&emsp;&nbsp;└── game  
+&nbsp;|&emsp;└── game  
 &nbsp;|&emsp;&nbsp;&emsp;├── ai.go _(logic for AI players)_  
 &nbsp;|&emsp;&nbsp;&emsp;└── gamelogic _(logic for rules and updating db)_  
 ├── db  
