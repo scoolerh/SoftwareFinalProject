@@ -18,9 +18,6 @@ func Steve(possibleMoves []MoveType, color string) MoveType {
 	}
 }
 
-//need to be able to temporarily update state, then do countPips on that
-//so countPips should be separate from a game fcn
-
 func Joe(possibleMoves []MoveType, playerColor string, g Game) MoveType {
 	var opponentColor string
 	var bestMove MoveType = possibleMoves[0]
@@ -37,11 +34,9 @@ func Joe(possibleMoves []MoveType, playerColor string, g Game) MoveType {
 		tempCaptured := g.Captured
 		var score float32
 
-		tempState := g.UpdateState(playerColor, move) //this does not execute cature pieces to not change to map
-		g.State = originalState                       //need to do this because updatestate changes the game. Make sure this does not cause any issues.
-		//Maybe we dont need it? We dont have *game - test this
+		tempState := g.UpdateState(playerColor, move)
+		g.State = originalState
 
-		//check if the updatestate tried to capture piece
 		for i := 1; i <= 24; i++ {
 			slot := tempState[i]
 			if strings.Contains(slot, "w") && strings.Contains(slot, "b") {
@@ -59,18 +54,17 @@ func Joe(possibleMoves []MoveType, playerColor string, g Game) MoveType {
 		log.Printf("pips: %v", pips)
 
 		blots, blotsIndices := countBlots(tempState)
-		score += float32(blots[opponentColor] - blots[playerColor]) //add some weight
+		score += float32(blots[opponentColor] - blots[playerColor])
 		log.Printf("blots: %v", blots)
 		log.Printf("blotindices: %v", blotsIndices)
 
 		towers, towersIndices := countTowers(tempState)
-		score += float32(towers[playerColor] - towers[opponentColor]) //add some weight
+		score += float32(towers[playerColor] - towers[opponentColor])
 		log.Printf("towers: %v", towers)
 		log.Printf("towerindices: %v", towersIndices)
 
-		//could do checks for number of pieces in home board, do a strategy check to value leaving pieces behind etc, but this ai is fine for now
-
-		if score > bestScore { //so we chose the first move to achieve the best score
+		//chooses the first move to achieve the best score
+		if score > bestScore {
 			bestScore = score
 			bestMove = move
 			log.Printf("bestMove updated to %v", bestMove)
@@ -83,13 +77,11 @@ func countBlots(gameState [26]string) (map[string]int, []int) {
 	blots := make(map[string]int)
 	var blotsIndices []int
 	for index, slot := range gameState {
-		//_ = index
 		if len(slot) == 1 {
 			blots[slot] += 1
-			//log.Printf("blot found at %v", index)
 			blotsIndices = append(blotsIndices, index)
 		} else if len(slot) > 1 && slot[0:1] != slot[1:2] {
-			blots[slot[1:2]] += 1 //you are doing this to account for blots happening when piece is captured. Do similar for tower too
+			blots[slot[1:2]] += 1 //accounting for blots happening when piece is captured
 		}
 	}
 	return blots, blotsIndices

@@ -38,15 +38,7 @@
                 <p>White: {{ .p1 }}</p>
                 <p>Black: {{ .p2 }}</p>
                 <p>Roll to decide who starts the game</p>
-                <!-- <a href="{{.startGameURL}}"><button class="button">Start the game...</button></a> -->
                 <a href="/rollToStart"><button class="button">Roll</button></a>
-                <!-- Plan:
-                - make a roll to start function
-                - this will roll the dice - one for each Player
-                - send to new html - firstroll or smt
-                - use same template as this, but have an extra div that shows the dice
-                - make sure to send in all the same vars to this new html file
-                - send the dice roll to the newgame function too (or like set the dice to the game) - hopefully this will work fluently with /play, but maybe not -->
             </section>
         </main>
 
