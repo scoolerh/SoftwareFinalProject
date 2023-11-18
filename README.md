@@ -18,7 +18,8 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 - When a player is able to bear all their pieces off the board, the game is declared finished, and the players are taken to the "win" page, where the winner is clearly stated, and we present the options to play again or return to the home page
 - We have a database running in the background. We have a user table that handles registering and logins, it stores all usernames and passwords. This table is hidden from the group that only works with stats. A second table stores user stats: number of games, wins, and losses for each of the users, including the AIs. The third table store information about each game: the last saved gamestate, the current status of the game (for instance 'finished'), the white and black player, and the winner (if there is one). Currently we only update this when the game is created and when it is finished, however this can be changed in the future if there is a wish for that.
 
-## Project File structure
+## Project File Structure
+Markdown:  
 ├── backgammon _(contains code associated with frontend, frontend API, and game logic)_  
 &nbsp;|&emsp;├── app  
 &nbsp;|&emsp;&nbsp;|&emsp;├── html _(directory containing all html files/templates)_  
@@ -33,8 +34,26 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 &nbsp;|&emsp;└── psqlConfig_readaccess.py _(db credentials with read only access)_  
 ├── pgdata _(directory containing the postgresql db)_  
 ├── compose.yaml _(Compose file to run all Dockerfiles. Sets up envionments/ports)_  
-└── README.md  
-
+└── README.md   
+  
+    
+Raw:   
+├── backgammon (contains code associated with frontend, frontend API, and game logic)  
+|   ├── app  
+|   |   ├── html (directory containing all html files/templates)  
+|   |   ├── api_finctions.go (contains helper functions for api.go)  
+|   |   └── api.go (api to interface with a frontend)  
+|   └── game   
+|       ├── ai.go (logic for AI players)   
+|       └── gamelogic (logic for rules and updating db)    
+├── db  
+|   ├── db_setup.sql (sets up db tables)   
+|   ├── psqlConfig_master.py (db credentials with read/write access)  
+|   └── psqlConfig_readaccess.py (db credentials with read only access)    
+├── pgdata (directory containing the postgresql db)   
+├── compose.yaml (Compose file to run all Dockerfiles. Sets up envionments/ports)     
+└── README.md    
+ 
 
 ## How to Use 
 Our app should hopefully be easy to use. Follow these steps and you should be in for a joyful experience!
