@@ -308,7 +308,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	if len(g.Dice) == 0 {
 		newRoll = true
 		g.Dice = game.RollDice(2)
-		g.Dice = []int{5, 5, 5, 5}
 		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
 
