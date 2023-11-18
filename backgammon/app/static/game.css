@@ -4,13 +4,6 @@ html
     background-size: cover;
     z-index: -1;
 }
-h2 
-{
-    text-emphasis: normal;
-    font-size: x-large;
-    text-align: center;
-    color: black;
-}
 section
 {   
     position: relative;
@@ -20,24 +13,27 @@ section
     border-style: solid;
     border-width: medium;
     border-color:black;
-    align-content: center;
     margin: auto;
     margin-top: 50px;
     margin-bottom: 50px;
     border-radius: 15px; 
 }
+.homebutton
+{
+    position: relative;
+    float: left;
+}
 .button
 {
-    background-color: green;
+    background-color: yellow;
     color: white;
-    font-size: large;
     border-style: solid;
     border-color: green;
     border-width: medium;
     border-radius: 15px;
     text-decoration: none;
-    padding: 15px 30px 15px 30px;
-    font-size: 150%;
+    padding: 5px 10px 5px 10px;
+    font-size: small;
     margin: 5px;
 }
 .button:hover 
@@ -141,18 +137,6 @@ section
     left: 600px;
     bottom: 230px;
 }
-input[type=submit]
-{
-    background-color: green;
-    color: white;
-    border-style: solid;
-    border-color: green;
-    border-width: medium;
-    border-radius: 15px;
-    text-decoration: none;
-    padding: 15px 30px 15px 30px;
-    font-size: 150%;
-}
 .white-piece
 {
     width: 36px;
@@ -200,8 +184,4 @@ input[type=submit]
     position: absolute;
     left: -2px;
     top: 230px;
-}
-.buttons {
-    align-content: center;
-    float: inline-start;
 }
