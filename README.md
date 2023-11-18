@@ -19,7 +19,7 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 - We have a database running in the background. We have a user table that handles registering and logins, it stores all usernames and passwords. This table is hidden from the group that only works with stats. A second table stores user stats: number of games, wins, and losses for each of the users, including the AIs. The third table store information about each game: the last saved gamestate, the current status of the game (for instance 'finished'), the white and black player, and the winner (if there is one). Currently we only update this when the game is created and when it is finished, however this can be changed in the future if there is a wish for that.
 
 ## Project File Structure
-Markdown:
+Markdown:  
 ├── backgammon _(contains code associated with frontend, frontend API, and game logic)_  
 &nbsp;|&emsp;├── app  
 &nbsp;|&emsp;&nbsp;|&emsp;├── html _(directory containing all html files/templates)_  
@@ -34,9 +34,10 @@ Markdown:
 &nbsp;|&emsp;└── psqlConfig_readaccess.py _(db credentials with read only access)_  
 ├── pgdata _(directory containing the postgresql db)_  
 ├── compose.yaml _(Compose file to run all Dockerfiles. Sets up envionments/ports)_  
-└── README.md  
-
-Raw:
+└── README.md   
+  
+    
+Raw:   
 ├── backgammon (contains code associated with frontend, frontend API, and game logic)  
 |   ├── app  
 |   |   ├── html (directory containing all html files/templates)  
