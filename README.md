@@ -73,8 +73,10 @@ Our app should hopefully be easy to use. Follow these steps and you should be in
 4. Go to localhost:9000 to get to our home page
 5. Here, you can choose to freshen up on the game rules, register a new account, or go straight to new game to play as a guest
 6. On this page, you choose who will play the game. You can play another guest (or just keep the computer to yourself and play alone), you can let a friend or enemy log in, you can play an AI, or you can watch the two AI's play each other.
-7. After submitting your choices, click start to begin your joyful Backgammon experience!
-(. roll to decide who starts (?) . The move-buttons show you what moves are possible with your dice roll. Chose one of them to make your first move! When you have used all the dice, the turn is passed to the opponent. Bear off all your pieces before your opponent to win the game!)
+7. After submitting your choices, you roll the dice to decide who starts. Whoever get the highest dice roll gets the first turn. 
+8. click start to begin your joyful Backgammon experience!
+9. When you are playing, you get a button that allows you to roll the dice. After the roll, you get a list of buttons that represent the moves you are allowed to make. Hover over them to see what the move is. After you have used all of your dice, or if there are no valid moves, the turn is passed to the opponent.
+10. Bear off all you pieces before your opponent to win the game!
 
 ## A note on cheating
 Please don't. 

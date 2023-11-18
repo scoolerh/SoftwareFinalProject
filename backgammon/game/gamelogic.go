@@ -274,7 +274,11 @@ func (g *Game) UpdateTurn() {
 func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
 	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"}
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
+	//testState := [26]string{"", "bb", "bb", "bb", "bb", "bb", "bb", "", "", "", "", "", "", "", "ww", "", "bb", "wwww", "", "", "", "ww", "ww", "ww", "ww", ""}
 	capturedMap := initializeCapturedMap()
+	// testCaptured := make(map[string]int)
+	// testCaptured["w"] = 1
+	// testCaptured["b"] = 1
 	game := Game{Player1: p1, Player2: p2, CurrTurn: p2, State: initialState, Captured: capturedMap}
 	return game, initialState
 }
@@ -288,7 +292,7 @@ func countPips(gameState [26]string, capturedPieces map[string]int) map[string]i
 			//each piece of a slot must move i spots
 			pips["w"] += len(slot) * i
 		} else if strings.Contains(slot, "b") {
-			pips["w"] += len(slot) * (25 - i)
+			pips["b"] += len(slot) * (25 - i)
 		}
 	}
 	//each captured piece must move 25 pips
