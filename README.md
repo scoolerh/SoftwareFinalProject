@@ -19,21 +19,21 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 - We have a database running in the background. We have a user table that handles registering and logins, it stores all usernames and passwords. This table is hidden from the group that only works with stats. A second table stores user stats: number of games, wins, and losses for each of the users, including the AIs. The third table store information about each game: the last saved gamestate, the current status of the game (for instance 'finished'), the white and black player, and the winner (if there is one). Currently we only update this when the game is created and when it is finished, however this can be changed in the future if there is a wish for that.
 
 ## Project File structure
-├── backgammon _(contains code associated with frontend, frontend API, and game logic)_
-|   ├── app
-|   |   ├── html _(directory containing all html files/templates)_
-|   |   ├── api_finctions.go _(contains helper functions for api.go)_
-|   |   └── api.go _(api to interface with a frontend)_
-|   └── game
-|       ├── ai.go _(logic for AI players)_
-|       └── gamelogic _(logic for rules and updating db)_
-├── db
-|   ├── db_setup.sql _(sets up db tables)_
-|   ├── psqlConfig_master.py _(db credentials with read/write access)_
-|   └── psqlConfig_readaccess.py _(db credentials with read only access)_
-├── pgdata _(directory containing the postgresql db)_
-├── compose.yaml _(Compose file to run all Dockerfiles. Sets up envionments/ports)_
-└── README.md
+├── backgammon _(contains code associated with frontend, frontend API, and game logic)_  
+|   ├── app  
+|   |   ├── html _(directory containing all html files/templates)_  
+|   |   ├── api_finctions.go _(contains helper functions for api.go)_  
+|   |   └── api.go _(api to interface with a frontend)_  
+|   └── game  
+|       ├── ai.go _(logic for AI players)_  
+|       └── gamelogic _(logic for rules and updating db)_  
+├── db  
+|   ├── db_setup.sql _(sets up db tables)_  
+|   ├── psqlConfig_master.py _(db credentials with read/write access)_  
+|   └── psqlConfig_readaccess.py _(db credentials with read only access)_  
+├── pgdata _(directory containing the postgresql db)_  
+├── compose.yaml _(Compose file to run all Dockerfiles. Sets up envionments/ports)_  
+└── README.md  
 
 
 ## How to Use 
