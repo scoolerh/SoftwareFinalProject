@@ -14,18 +14,20 @@ section
     border-width: medium;
     border-color:black;
     margin: auto;
-    margin-top: 50px;
+    margin-top: 20px;
     margin-bottom: 50px;
     border-radius: 15px; 
 }
-.homebutton
+.buttons 
 {
-    position: relative;
-    float: left;
+    margin-top: 10px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%,0);
 }
 .button
 {
-    background-color: yellow;
+    background-color: green;
     color: white;
     border-style: solid;
     border-color: green;
@@ -33,7 +35,7 @@ section
     border-radius: 15px;
     text-decoration: none;
     padding: 5px 10px 5px 10px;
-    font-size: small;
+    font-size: large;
     margin: 5px;
 }
 .button:hover 

@@ -57,8 +57,8 @@
                 </div>
             </div>
             <section>
-                <div id="info">
-                    <p>Now it's {{ .player }}'s turn.</p>
+                <div id="infodiv">
+                    <p id="info">Now it's {{ .player }}'s turn.</p>
                 </div>
                 <div id="buttons">
                 </div>
@@ -69,6 +69,7 @@
             // ------------ Display Dice Information ----------------------
             var newRoll = "{{ .newRoll }}";
             var isHuman = "{{ .isHuman }}";
+            var player = "{{ .player }}";
             var noMoves = "{{ .noPossibleMoves }}";
             var urlList = "{{ .urlList }}";
             urlList = urlList.slice(1,-1);
@@ -89,17 +90,17 @@
                     }
                 }
                 if (dice.length == 4) {
-                    document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You rolled double ${dice[0]}s! Way to go!</p>`);
+                    document.getElementById("info").innerHTML = `<p>${player} rolled double ${dice[0]}s! Way to go!</p>`;
                 } else if (dice.length == 1) {
-                    document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You have a ${dice[0]} left.</p>`);
+                    document.getElementById("info").innerHTML = `<p>${player} has a ${dice[0]} left.</p>`;
                 } else if (dice.length == 2) {
                     if (dice[1] == dice[0]) {
-                        document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You have two ${dice[0]}s left.</p>`);
+                        document.getElementById("info").innerHTML = `<p>${player} has two ${dice[0]}s left.</p>`;
                     } else {
-                        document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You rolled a ${dice[0]} and a ${dice[1]}.</p>`);
+                        document.getElementById("info").innerHTML = `<p>${player} rolled a ${dice[0]} and a ${dice[1]}.</p>`;
                     }
                 } else {
-                    document.getElementById("info").insertAdjacentHTML("beforeend", `<p>You have three ${dice[0]}s left.</p>`);
+                    document.getElementById("info").innerHTML = `<p>${player} has three ${dice[0]}s left.</p>`;
                 }
                 if (noMoves == "true") {
                     document.getElementById("info").innerHTML = "<p>No possible moves.<p>";
@@ -256,7 +257,7 @@
             if (blackCaptured > 0) {
                 document.getElementById("jail").innerHTML = "<div class=\"black-piece\"></div>"
             }
-            if (whiteCaptured > 0) {
+            else if (whiteCaptured > 0) {
                 document.getElementById("jail").innerHTML = "<div class=\"white-piece\"></div>"
             }
             // -------------- display beared off pieces ----------------------
