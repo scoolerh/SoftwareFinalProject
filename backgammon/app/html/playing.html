@@ -103,7 +103,7 @@
                     document.getElementById("info").innerHTML = `<p>${player} has three ${dice[0]}s left.</p>`;
                 }
                 if (noMoves == "true") {
-                    document.getElementById("info").innerHTML = "<p>No possible moves.<p>";
+                    document.getElementById("info").innerHTML = `<p>${player} has no possible moves.<p>`;
                 }
                 // -------------- Create Move Buttons ----------------
                 for (let index = 0; index < urlList.length; index++) {
@@ -114,8 +114,8 @@
             }    
             else {
                 document.getElementById("buttons").insertAdjacentHTML("beforeend","<a href=\"{{ .url }}\"><button class=\"button\">Move AI</button></a>");
-            }                            
-
+            }         
+            
             // ---------------- Color end and start slots on hover ----------------
             const indices = ["blackhome", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twentyone", "twentytwo", "twentythree", "twentyfour", "whitehome"];
             var movelist = "{{ .movelist }}";
@@ -207,18 +207,18 @@
                     if (i <= 5) {
                         var topVal = String(-195 + (38 * i)) + "px";
                         newPiece.style.top = topVal;
+                        newPiece.style.left = "-19px"; 
+                        var classs = document.createAttribute("class");
+                        if (str[i] == "w") {
+                            classs.value = "white-piece";
+                        }
+                        if (str[i] == "b") {
+                            classs.value = "black-piece";
+                        }
+                        newPiece.setAttributeNode(classs);
+                        var index = indicesDown[j];
+                        document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
                     }
-                    newPiece.style.left = "-19px"; 
-                    var classs = document.createAttribute("class");
-                    if (str[i] == "w") {
-                        classs.value = "white-piece";
-                    }
-                    if (str[i] == "b") {
-                        classs.value = "black-piece";
-                    }
-                    newPiece.setAttributeNode(classs);
-                    var index = indicesDown[j];
-                    document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
                 }
             }
             for (let k = 0; k < 12; k++) {
@@ -228,37 +228,40 @@
                     if (i <= 5) {
                         var bottomVal = String(-195 + (38 * i)) + "px";
                         newPiece.style.bottom = bottomVal;
+                        if (k < 6) {
+                            var leftVal = String(k * 40) + "px";
+                            newPiece.style.left = leftVal;
+                        }
+                        else {
+                            var leftVal = String((k - 6) * 40) + "px";
+                            newPiece.style.left = leftVal;
+                        }
+                        var classs = document.createAttribute("class");
+                        if (str[i] == "w") {
+                            classs.value = "white-piece";
+                        }
+                        if (str[i] == "b") {
+                            classs.value = "black-piece";
+                        }
+                        newPiece.setAttributeNode(classs);
+                        var index = indicesUp[k];
+                        document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
                     }
-                    if (k < 6) {
-                        var leftVal = String(k * 40) + "px";
-                        newPiece.style.left = leftVal;
-                    }
-                    else {
-                        var leftVal = String((k - 6) * 40) + "px";
-                        newPiece.style.left = leftVal;
-                    }
-                    var classs = document.createAttribute("class");
-                    if (str[i] == "w") {
-                        classs.value = "white-piece";
-                    }
-                    if (str[i] == "b") {
-                        classs.value = "black-piece";
-                    }
-                    newPiece.setAttributeNode(classs);
-                    var index = indicesUp[k];
-                    document.getElementById(index).insertAdjacentElement("beforeend", newPiece);
                 }
             } 
             // -------------- display jailed pieces -------------------------
             var captured = "{{ .captured }}";
             captured = captured.split(":");
-            var blackCaptured = captured[1][0];
-            var whiteCaptured = captured[2][0];
-            if (blackCaptured > 0) {
-                document.getElementById("jail").innerHTML = "<div class=\"black-piece\"></div>"
+            var blackCaptured = parseInt(captured[1][0]);
+            var whiteCaptured = parseInt(captured[2][0]);
+            var totalCaptured = blackCaptured + whiteCaptured;
+            for (let i = 0; i < blackCaptured; i++) {
+                var topValue = String(38 * (i - 1)) + "px";
+                document.getElementById("jail").insertAdjacentHTML("beforeend",`<div class=\"black-piece\" style=\"top: ${topValue}\"></div>`);
             }
-            else if (whiteCaptured > 0) {
-                document.getElementById("jail").innerHTML = "<div class=\"white-piece\"></div>"
+            for (let j = 0; j < whiteCaptured; j++) {
+                var topValue = String(38 * ((j - 1)+(blackCaptured))) + "px";
+                document.getElementById("jail").insertAdjacentHTML("beforeend", `<div class=\"white-piece\" style=\"top: ${topValue}\"></div>`);
             }
             // -------------- display beared off pieces ----------------------
             var whitehome = "{{ .whitehome }}";
