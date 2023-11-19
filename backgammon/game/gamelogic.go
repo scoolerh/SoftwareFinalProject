@@ -1,7 +1,6 @@
 package game
 
 import (
-	"log"
 	"math/rand"
 	"strings"
 )
@@ -108,7 +107,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 						if i >= die {
 							goalSlot := i - die
 							goalState := currState[i-die]
-							if canBearOff || goalSlot != 0 { //could add prints for further ebugging
+							if canBearOff || goalSlot != 0 { 
 								if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
 									move.Slot = i
 									move.Die = -die
@@ -149,18 +148,13 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 	}
-	log.Printf("initial possibleMoves: %v", possibleMoves)
 	possibleMoves = removeDuplicateMoves(possibleMoves)
-	log.Printf("after duplicates are removed: %v", possibleMoves)
 	return possibleMoves
 }
 
-// not a perfect function for moving duplicates, but works for this use: either all the dice are the same, or they are all unique
+// not a perfect function for moving duplicates, but works for this use: 
+//either all the dice are the same, or they are all unique
 func removeDuplicateMoves(possibleMoves []MoveType) []MoveType {
-	//make checkedmap slot: die
-	//declare possibleMoves_no_dups list
-	//for each move
-	//check if map[slot] = die
 
 	checkedmap := make(map[int]int)
 	var newMoves []MoveType

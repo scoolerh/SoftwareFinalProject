@@ -44,7 +44,6 @@ func home(writer http.ResponseWriter, req *http.Request) {
 }
 
 func login(writer http.ResponseWriter, req *http.Request) {
-	fmt.Printf("Connecting to login endpoint")
 	outputHTML(writer, "app/html/login.html", currentUser)
 }
 
@@ -122,7 +121,6 @@ func selectPlayers(writer http.ResponseWriter, req *http.Request) {
 
 func newgame(writer http.ResponseWriter, req *http.Request) {
 	var initialState [26]string
-	fmt.Println("newgame is called")
 
 	urlVars := req.URL.Query()
 	p1 := urlVars["player1"][0]
@@ -191,7 +189,6 @@ func newgame(writer http.ResponseWriter, req *http.Request) {
 	games = append(games, g)
 
 	variables := map[string]interface{}{"login": loginmessage, "currentUser": currentUser, "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id}
-	fmt.Println("outputHTML for newgame is called")
 	outputHTML(writer, "app/html/newgame.html", variables)
 }
 
@@ -209,21 +206,17 @@ func rollToStart(writer http.ResponseWriter, req *http.Request) {
 	} else {
 		g.CurrTurn = g.Player2
 		starter = g.Player2.Id
-		log.Printf("%s is set as currturn", g.Player1.Id)
-		log.Printf("%s starts the game", g.Player2.Id)
 	}
 
 	urlParams := url.Values{}
 	urlParams.Add("gameid", g.Gameid)
 	urlParams.Add("Slot", "-1")
 	startGameURL := "/play?" + urlParams.Encode()
-	fmt.Printf("URL: %v", startGameURL)
 	variables := map[string]interface{}{"currentUser": currentUser, "starter": starter, "die1": g.Dice[0], "die2": g.Dice[1], "id": g.Gameid, "p1": g.Player1.Id, "p2": g.Player2.Id, "startGameURL": startGameURL, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 	outputHTML(writer, "app/html/rollToStart.html", variables)
 }
 
 func play(writer http.ResponseWriter, req *http.Request) {
-	fmt.Printf("1 Captured pieces: %v \n", g.Captured)
 	newRoll := false
 	urlVars := req.URL.Query()
 	gameid := urlVars["gameid"][0]
@@ -234,55 +227,41 @@ func play(writer http.ResponseWriter, req *http.Request) {
 	//if there is a move
 	if urlVars["Slot"][0] != "-1" {
 		move := parseVariables(urlVars)
-
-		fmt.Printf("2 Captured pieces: %v \n", g.Captured)
 		endSlot := move.Slot + move.Die
 		endSlotState := g.State[endSlot]
 		if game.WillCapturePiece(endSlotState, g.CurrTurn.Color) {
 			move.CapturePiece = true
 			g.Captured[endSlotState] += 1
-			fmt.Printf("%v will capture a piece in their move", g.CurrTurn.Id)
 		}
-		fmt.Printf("player %s chose move %v \n", g.CurrTurn.Color, move)
-
-		fmt.Printf("3 Captured pieces: %v \n", g.Captured)
 		g.UpdateDice(move.DieIndex)
 		g.UpdateCaptured(move)
-		fmt.Printf("4 Captured pieces: %v \n", g.Captured)
 		g.UpdateState(g.CurrTurn.Color, move)
-		fmt.Printf("Board updated to: %v \n", g.State)
-		fmt.Printf("Original Captured pieces: %v \n", g.Captured)
-		fmt.Printf("dice left: %v \n", g.Dice)
 		if g.IsWon() != "" {
 			winner := g.CurrTurn.Id
 			http.Redirect(writer, req, "/won?winner="+winner, http.StatusSeeOther)
 		}
+
 	}
 
+
 	//rolls the dice if the dice list is empty
-	fmt.Printf("5 Captured pieces: %v \n", g.Captured)
 	if len(g.Dice) == 0 {
 		g.UpdateTurn()
 		newRoll = true
 		g.Dice = game.RollDice(2)
-		fmt.Printf("diceroll: %v \n", g.Dice)
 	}
 
 	possibleMoves := g.GetPossibleMoves(g.Dice, g.CurrTurn.Color)
 
 	//deletes all dice if no possible moves
-	fmt.Printf("6 Captured pieces: %v \n", g.Captured)
 	if len(possibleMoves) == 0 {
 		g.Dice = nil
 		noPossibleMoves = true
 	}
 
-	fmt.Printf("7 Captured pieces: %v \n", g.Captured)
 	if g.CurrTurn.Id != "joe" && g.CurrTurn.Id != "steve" {
-		fmt.Println("human move now")
 		human = true
 		urlList, moveList := makeHumanURLs(possibleMoves, gameid)
-		fmt.Printf("8 Captured pieces: %v \n", g.Captured)
 		if newRoll {
 			newRollURL := makeNewRollURL(g.Gameid)
 			outputVars = map[string]interface{}{"newRollURL": newRollURL, "game": g, "newRoll": newRoll, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
@@ -290,13 +269,10 @@ func play(writer http.ResponseWriter, req *http.Request) {
 			outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "movelist": moveList, "dice": g.Dice, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 		}
 	} else {
-		fmt.Println("ai move now")
-		fmt.Printf("9 Captured pieces: %v \n", g.Captured)
 		human = false
 		url := makeAiURL(possibleMoves, gameid)
 		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 	}
-	fmt.Printf("10 Captured pieces: %v \n", g.Captured)
 	outputHTML(writer, "app/html/playing.html", outputVars)
 }
 
@@ -312,25 +288,19 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} else {
-		log.Println("player 1 stats updated")
-	}
+	} 
 
 	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player2.Id + "';"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} else {
-		log.Println("player 2 stats updated")
-	}
+	} 
 
 	query = "UPDATE userstats SET wins = wins + 1 WHERE username = '" + winner + "';"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} else {
-		log.Println("winner stats updated")
-	}
+	} 
 
 	if g.Player1.Id == winner {
 		loser = g.Player2.Id
@@ -342,17 +312,13 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} else {
-		log.Println("loser stats updated")
-	}
+	} 
 
 	query = "UPDATE games SET status = 'finished', winner = '" + winner + "' WHERE gameId = " + g.Gameid + ";"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} else {
-		log.Println("game set to finished")
-	}
+	} 
 
 	outputHTML(writer, "app/html/won.html", variables)
 }
@@ -373,7 +339,6 @@ func dbHandler(writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	log.Print("successfully connected to database")
 }
 
 func initDB() {
@@ -391,7 +356,6 @@ func initDB() {
 	if err != nil {
 		panic(err)
 	}
-	log.Print("successfully connected to database")
 	log.Print("follow this link to play backgammon: http://localhost:9000/")
 
 }

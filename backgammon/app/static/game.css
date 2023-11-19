@@ -6,21 +6,26 @@ html
 }
 section
 {   
-    position: relative;
+    position: absolute;
+    top: 550px;
+    left: 5%;
     width: 90%;
     color: black;
+    text-align: center;
     background-color: white;
     border-style: solid;
     border-width: medium;
     border-color:black;
     margin: auto;
-    margin-top: 20px;
     margin-bottom: 50px;
     border-radius: 15px; 
 }
 .buttons 
 {
-    margin: 10px auto;
+    position: absolute;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 .button
 {
