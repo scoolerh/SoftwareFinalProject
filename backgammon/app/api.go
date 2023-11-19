@@ -115,34 +115,6 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func validateLogin(username string, password string) string {
-	query := "SELECT password FROM users WHERE username='" + username + "'"
-
-	rows, err := db.Query(query)
-	if err != nil {
-		panic(err) //might want to change this later
-	}
-
-	var refPassword string
-
-	if rows.Next() {
-		err = rows.Scan(&refPassword)
-		if err != nil {
-			panic(err)
-		}
-
-		if username == "steve" || username == "joe" || username == "guest" || username == "guest2" {
-			return "invalid user"
-		} else if password != refPassword {
-			return "wrong password"
-		} else {
-			return "valid"
-		}
-	} else {
-		return "invalid user"
-	}
-}
-
 func selectPlayers(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "app/html/selectPlayers.html", currentUser)
 }
@@ -254,36 +226,27 @@ func play(writer http.ResponseWriter, req *http.Request) {
 
 	//if there is a move
 	if urlVars["Slot"][0] != "-1" {
-		slot, die, dieIndex, capturePiece := game.ParseVariables(urlVars)
-		move := game.MoveType{Slot: slot,
-			Die:          die,
-			DieIndex:     dieIndex,
-			CapturePiece: capturePiece,
-		}
+		move := parseVariables(urlVars)
 		endSlot := move.Slot + move.Die
 		endSlotState := g.State[endSlot]
 		if game.WillCapturePiece(endSlotState, g.CurrTurn.Color) {
 			move.CapturePiece = true
 			g.Captured[endSlotState] += 1
 		}
-		g.UpdateDice(dieIndex)
-		if g.CurrTurn.Color == "w" && move.Slot == 0 {
-			g.Captured["w"] -= 1
-		} else if g.CurrTurn.Color == "b" && move.Slot == 25 {
-			g.Captured["b"] -= 1
-		}
+		g.UpdateDice(move.DieIndex)
+		g.UpdateCaptured(move)
 		g.UpdateState(g.CurrTurn.Color, move)
 		if g.IsWon() != "" {
 			winner := g.CurrTurn.Id
 			http.Redirect(writer, req, "/won?winner="+winner, http.StatusSeeOther)
 		}
-	} 
 
-	//think about this logic for first turn
-	g.UpdateTurn()
+	}
+
 
 	//rolls the dice if the dice list is empty
 	if len(g.Dice) == 0 {
+		g.UpdateTurn()
 		newRoll = true
 		g.Dice = game.RollDice(2)
 	}
@@ -298,51 +261,16 @@ func play(writer http.ResponseWriter, req *http.Request) {
 
 	if g.CurrTurn.Id != "joe" && g.CurrTurn.Id != "steve" {
 		human = true
-		var urlList []string
-		var moveList [][3]int
-		if len(possibleMoves) == 0 {
-			urlParams := url.Values{}
-			strValues := game.ConvertParams(-1, 0, 0, false)
-			urlParams.Add("gameid", gameid)
-			urlParams.Add("Slot", strValues[0])
-			var urlString string = "/play?" + urlParams.Encode()
-			urlList = append(urlList, urlString)
-			move := [3]int{0, 0, 0}
-			moveList = append(moveList, move)
-		} else {
-			for index, move := range possibleMoves {
-				_ = index
-				urlParams := url.Values{}
-				strValues := game.ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
-				urlParams.Add("gameid", gameid)
-				urlParams = game.AddUrlParams(urlParams, strValues)
-				var urlString string = "/play?" + urlParams.Encode()
-				urlList = append(urlList, urlString)
-				move := [3]int{move.Slot, move.Slot + move.Die, move.Die}
-				moveList = append(moveList, move)
-			}
-		}
+		urlList, moveList := makeHumanURLs(possibleMoves, gameid)
 		if newRoll {
-			urlParams := url.Values{}
-			urlParams.Add("gameid", g.Gameid)
-			urlParams.Add("Slot", "-1")
-			newRollURL := "/play?" + urlParams.Encode()
+			newRollURL := makeNewRollURL(g.Gameid)
 			outputVars = map[string]interface{}{"newRollURL": newRollURL, "game": g, "newRoll": newRoll, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 		} else {
 			outputVars = map[string]interface{}{"possibleMoves": possibleMoves, "urlList": urlList, "movelist": moveList, "dice": g.Dice, "game": g, "isHuman": human, "noPossibleMoves": noPossibleMoves, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 		}
 	} else {
 		human = false
-		urlParams := url.Values{}
-		urlParams.Add("gameid", gameid)
-		if len(possibleMoves) != 0 {
-			move := game.GetAIMove(possibleMoves, g.CurrTurn, g)
-			strValues := game.ConvertParams(move.Slot, move.Die, move.DieIndex, move.CapturePiece)
-			urlParams = game.AddUrlParams(urlParams, strValues)
-		} else {
-			urlParams.Add("Slot", "-1")
-		}
-		url := "/play?" + urlParams.Encode()
+		url := makeAiURL(possibleMoves, gameid)
 		outputVars = map[string]interface{}{"url": url, "isHuman": human, "state": g.State, "captured": g.Captured, "player": g.CurrTurn.Id, "one": g.State[1], "two": g.State[2], "three": g.State[3], "four": g.State[4], "five": g.State[5], "six": g.State[6], "seven": g.State[7], "eight": g.State[8], "nine": g.State[9], "ten": g.State[10], "eleven": g.State[11], "twelve": g.State[12], "thirteen": g.State[13], "fourteen": g.State[14], "fifteen": g.State[15], "sixteen": g.State[16], "seventeen": g.State[17], "eighteen": g.State[18], "nineteen": g.State[19], "twenty": g.State[20], "twentyone": g.State[21], "twentytwo": g.State[22], "twentythree": g.State[23], "twentyfour": g.State[24], "whitehome": g.State[25], "blackhome": g.State[0]}
 	}
 	outputHTML(writer, "app/html/playing.html", outputVars)
