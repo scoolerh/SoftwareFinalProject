@@ -52,7 +52,6 @@ func Joe(possibleMoves []MoveType, playerColor string, g Game) MoveType {
 
 		pips := countPips(tempState, tempCaptured)
 		score = 0.01 * float32(pips[opponentColor]-pips[playerColor])
-		//log.Printf("pips: %v", pips)
 
 		blots, _ := countBlots(tempState)
 		score += float32(blots[opponentColor] - blots[playerColor])

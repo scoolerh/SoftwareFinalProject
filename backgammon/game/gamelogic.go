@@ -1,7 +1,6 @@
 package game
 
 import (
-	"log"
 	"math/rand"
 	"net/url"
 	"strconv"
@@ -118,7 +117,7 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 						if i >= die {
 							goalSlot := i - die
 							goalState := currState[i-die]
-							if canBearOff || goalSlot != 0 { //could add prints for further ebugging
+							if canBearOff || goalSlot != 0 { 
 								if !(strings.Contains(goalState, "w") && len(goalState) >= 2) {
 									move.Slot = i
 									move.Die = -die
@@ -159,18 +158,13 @@ func (g Game) GetPossibleMoves(dice []int, currPlayer string) []MoveType {
 			}
 		}
 	}
-	log.Printf("initial possibleMoves: %v", possibleMoves)
 	possibleMoves = removeDuplicateMoves(possibleMoves)
-	log.Printf("after duplicates are removed: %v", possibleMoves)
 	return possibleMoves
 }
 
-// not a perfect function for moving duplicates, but works for this use: either all the dice are the same, or they are all unique
+// not a perfect function for moving duplicates, but works for this use: 
+//either all the dice are the same, or they are all unique
 func removeDuplicateMoves(possibleMoves []MoveType) []MoveType {
-	//make checkedmap slot: die
-	//declare possibleMoves_no_dups list
-	//for each move
-	//check if map[slot] = die
 
 	checkedmap := make(map[int]int)
 	var newMoves []MoveType
@@ -274,11 +268,7 @@ func (g *Game) UpdateTurn() {
 func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
 	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"}
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-	//testState := [26]string{"", "bb", "bb", "bb", "bb", "bb", "bb", "", "", "", "", "", "", "", "ww", "", "bb", "wwww", "", "", "", "ww", "ww", "ww", "ww", ""}
 	capturedMap := initializeCapturedMap()
-	// testCaptured := make(map[string]int)
-	// testCaptured["w"] = 1
-	// testCaptured["b"] = 1
 	game := Game{Player1: p1, Player2: p2, CurrTurn: p2, State: initialState, Captured: capturedMap}
 	return game, initialState
 }

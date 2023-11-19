@@ -75,8 +75,12 @@
             urlList = urlList.slice(1,-1);
             urlList = urlList.split(" ");
             if (newRoll == "true") {
-                var button = 
-                document.getElementById("buttons").innerHTML = "<a href=\"{{ .newRollURL }}\"><button class=\"button\">ROLL DICE</button></a>";
+                var button = document.getElementById("buttons").innerHTML = "<a href=\"{{ .newRollURL }}\"><button class=\"button\">ROLL DICE</button></a>";
+            }
+            if (noMoves == "true") {
+                document.getElementById("info").innerHTML = `<p>${player} has no possible moves.<p>`;
+                var url = urlList[0];
+                document.getElementById("buttons").innerHTML = `<a href=\"${url}\"><button class=\"button\">Continue</button></a>`;
             }
             else if (isHuman == "true") {
                 var dice = "{{ .dice }}";
@@ -102,9 +106,6 @@
                 } else {
                     document.getElementById("info").innerHTML = `<p>${player} has three ${dice[0]}s left.</p>`;
                 }
-                if (noMoves == "true") {
-                    document.getElementById("info").innerHTML = `<p>${player} has no possible moves.<p>`;
-                }
                 // -------------- Create Move Buttons ----------------
                 for (let index = 0; index < urlList.length; index++) {
                     var index1 = index + 1; 
@@ -115,11 +116,11 @@
             else {
                 document.getElementById("buttons").insertAdjacentHTML("beforeend","<a href=\"{{ .url }}\"><button class=\"button\">Move AI</button></a>");
             }         
-            
+
             // ---------------- Color end and start slots on hover ----------------
             const indices = ["blackhome", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twentyone", "twentytwo", "twentythree", "twentyfour", "whitehome"];
             var movelist = "{{ .movelist }}";
-            if (movelist != "") {
+            if (movelist != "" && noMoves != "true") {
                 movelist = movelist.replace("[","");
                 movelist = movelist.split("]");
                 for (let i = 0; i < movelist.length - 2; i++) {
