@@ -115,6 +115,34 @@ func loggedin(writer http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func validateLogin(username string, password string) string {
+	query := "SELECT password FROM users WHERE username='" + username + "'"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		panic(err) //might want to change this later
+	}
+
+	var refPassword string
+
+	if rows.Next() {
+		err = rows.Scan(&refPassword)
+		if err != nil {
+			panic(err)
+		}
+
+		if username == "steve" || username == "joe" || username == "guest" || username == "guest2" {
+			return "invalid user"
+		} else if password != refPassword {
+			return "wrong password"
+		} else {
+			return "valid"
+		}
+	} else {
+		return "invalid user"
+	}
+}
+
 func selectPlayers(writer http.ResponseWriter, req *http.Request) {
 	outputHTML(writer, "app/html/selectPlayers.html", currentUser)
 }
@@ -243,7 +271,6 @@ func play(writer http.ResponseWriter, req *http.Request) {
 
 	}
 
-
 	//rolls the dice if the dice list is empty
 	if len(g.Dice) == 0 {
 		g.UpdateTurn()
@@ -288,19 +315,19 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} 
+	}
 
 	query = "UPDATE userstats SET gamesPlayed = gamesPlayed + 1 WHERE username = '" + g.Player2.Id + "';"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} 
+	}
 
 	query = "UPDATE userstats SET wins = wins + 1 WHERE username = '" + winner + "';"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} 
+	}
 
 	if g.Player1.Id == winner {
 		loser = g.Player2.Id
@@ -312,13 +339,13 @@ func won(writer http.ResponseWriter, req *http.Request) {
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} 
+	}
 
 	query = "UPDATE games SET status = 'finished', winner = '" + winner + "' WHERE gameId = " + g.Gameid + ";"
 	_, err = db.Exec(query)
 	if err != nil {
 		panic(err) //might want to change this later
-	} 
+	}
 
 	outputHTML(writer, "app/html/won.html", variables)
 }

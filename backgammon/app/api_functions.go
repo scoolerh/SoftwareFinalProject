@@ -110,31 +110,3 @@ func parseVariables(urlVariables url.Values) game.MoveType {
 	}
 	return move
 }
-
-func validateLogin(username string, password string) string {
-	query := "SELECT password FROM users WHERE username='" + username + "'"
-
-	rows, err := db.Query(query)
-	if err != nil {
-		panic(err) //might want to change this later
-	}
-
-	var refPassword string
-
-	if rows.Next() {
-		err = rows.Scan(&refPassword)
-		if err != nil {
-			panic(err)
-		}
-
-		if username == "steve" || username == "joe" || username == "guest" || username == "guest2" {
-			return "invalid user"
-		} else if password != refPassword {
-			return "wrong password"
-		} else {
-			return "valid"
-		}
-	} else {
-		return "invalid user"
-	}
-}
