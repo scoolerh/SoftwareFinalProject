@@ -77,7 +77,7 @@
             if (newRoll == "true") {
                 var button = document.getElementById("buttons").innerHTML = "<a href=\"{{ .newRollURL }}\"><button class=\"button\">ROLL DICE</button></a>";
             }
-            if (noMoves == "true") {
+            else if (noMoves == "true") {
                 document.getElementById("info").innerHTML = `<p>${player} has no possible moves.<p>`;
                 var url = urlList[0];
                 document.getElementById("buttons").innerHTML = `<a href=\"${url}\"><button class=\"button\">Continue</button></a>`;
