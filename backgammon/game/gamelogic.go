@@ -3,18 +3,8 @@ package game
 import (
 	"log"
 	"math/rand"
-	"net/url"
-	"strconv"
 	"strings"
 )
-
-type Gameplay interface {
-	Move() map[string]string
-	GetPossibleMoves() []MoveType
-	UpdateState()
-	IsWon() bool
-	isBearingOffAllowed(playerColor string) bool
-}
 
 type Game struct {
 	Gameid   string
@@ -228,6 +218,14 @@ func (g Game) isBearingOffAllowed(playerColor string) bool {
 	}
 }
 
+func (g *Game) UpdateCaptured(move MoveType) {
+	if g.CurrTurn.Color == "w" && move.Slot == 0 {
+		g.Captured["w"] -= 1
+	} else if g.CurrTurn.Color == "b" && move.Slot == 25 {
+		g.Captured["b"] -= 1
+	}
+}
+
 // deletes the die that was just played
 func (g *Game) UpdateDice(dieIndex int) {
 	g.Dice = DeleteElement(g.Dice, dieIndex)
@@ -260,12 +258,10 @@ func (g *Game) UpdateState(playerColor string, move MoveType) [26]string {
 
 // switches turns when necesesary
 func (g *Game) UpdateTurn() {
-	if len(g.Dice) == 0 {
-		if g.CurrTurn == g.Player1 {
-			g.CurrTurn = g.Player2
-		} else {
-			g.CurrTurn = g.Player1
-		}
+	if g.CurrTurn == g.Player1 {
+		g.CurrTurn = g.Player2
+	} else {
+		g.CurrTurn = g.Player1
 	}
 }
 
@@ -274,11 +270,7 @@ func (g *Game) UpdateTurn() {
 func CreateGame(games []Game, user1 string, user2 string) (Game, [26]string) {
 	p1, p2 := Player{Id: user1, Color: "w"}, Player{Id: user2, Color: "b"}
 	initialState := [26]string{"", "ww", "", "", "", "", "bbbbb", "", "bbb", "", "", "", "wwwww", "bbbbb", "", "", "", "www", "", "wwwww", "", "", "", "", "bb", ""}
-	//testState := [26]string{"", "bb", "bb", "bb", "bb", "bb", "bb", "", "", "", "", "", "", "", "ww", "", "bb", "wwww", "", "", "", "ww", "ww", "ww", "ww", ""}
 	capturedMap := initializeCapturedMap()
-	// testCaptured := make(map[string]int)
-	// testCaptured["w"] = 1
-	// testCaptured["b"] = 1
 	game := Game{Player1: p1, Player2: p2, CurrTurn: p2, State: initialState, Captured: capturedMap}
 	return game, initialState
 }
@@ -344,39 +336,4 @@ func RollDice(numDice int) []int {
 func WillCapturePiece(endSlotState string, playerColor string) bool {
 	return len(endSlotState) == 1 && endSlotState != playerColor
 	//so if the length of state is 1 and the color is not the same as the moving piece, it is captured
-}
-
-//api helper functions below
-
-// adds the url values to an array
-func AddUrlParams(urlParams url.Values, valuesToAdd [4]string) url.Values {
-	urlParams.Add("Slot", valuesToAdd[0])
-	urlParams.Add("Die", valuesToAdd[1])
-	urlParams.Add("DieIndex", valuesToAdd[2])
-	urlParams.Add("CapturePiece", valuesToAdd[3])
-	return urlParams
-}
-
-// converts the parameters that will be inserted into the URL from their respective types into strings
-func ConvertParams(slot int, die int, index int, capture bool) [4]string {
-	strSlot := strconv.Itoa(slot)
-	strDie := strconv.Itoa(die)
-	strDieIndex := strconv.Itoa(index)
-	strCapturePiece := strconv.FormatBool(capture)
-	returns := [4]string{strSlot, strDie, strDieIndex, strCapturePiece}
-	return returns
-}
-
-// takes the variables from the url and converts to their necessary types
-func ParseVariables(urlVariables url.Values) (int, int, int, bool) {
-	varSlot := urlVariables["Slot"][0]
-	varDie := urlVariables["Die"][0]
-	varDieIndex := urlVariables["DieIndex"][0]
-	varCapturePiece := urlVariables["CapturePiece"][0]
-
-	slot, _ := strconv.Atoi(varSlot)
-	die, _ := strconv.Atoi(varDie)
-	dieIndex, _ := strconv.Atoi(varDieIndex)
-	capturePiece, _ := strconv.ParseBool(varCapturePiece)
-	return slot, die, dieIndex, capturePiece
 }

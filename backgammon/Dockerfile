@@ -6,4 +6,4 @@ COPY . .
 
 EXPOSE 5555
 
-CMD ["go", "run", "app/api.go"] 
+CMD ["go", "run", "app/api.go", "app/api_functions.go"] 
