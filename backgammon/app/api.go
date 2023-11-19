@@ -297,19 +297,13 @@ func dbHandler(writer http.ResponseWriter, req *http.Request) {
 }
 
 func scoreboard(writer http.ResponseWriter, req *http.Request) {
-	err := exec.Command("python", "db_api.py").Start()
-	if err != nil {
-		log.Fatalf("Error getting current directory: %s", err)
-	}
-	pythonScript := filepath.Join(dir, "db_api.py")
-
-	//make sure python file exists
-	if _, err := os.Stat(pythonScript); os.IsNotExist(err) {
-		log.Fatalf("Python script '%s' does not exist", pythonScript)
-	}
+	pythonScript := "/db/db_api.py"
 	// Command to run Python script
 	cmd := exec.Command("python", pythonScript)
-	
+	outputVars := cmd
+
+	outputHTML(writer, "app/html/scoreoard.html", outputVars)
+
 }
 
 func initDB() {

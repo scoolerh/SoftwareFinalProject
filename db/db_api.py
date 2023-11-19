@@ -5,11 +5,11 @@ def sql_conversion():
     app = Flask(__name__)
 
     #Establishes connection to a SQL database using the Psycopg2
-    conn = psycopg2.connect(database="Backgammon", 
-                            user="statmaker", 
-                            host = 'localhost', 
+    conn = psycopg2.connect(dbname="backgammon", 
+                            user="postgres", 
+                            host = 'db', 
                             port = 5432, 
-                            password="secure")
+                            password="collective")
 
     #Creates a cursor 
     cur = conn.cursor()
@@ -33,11 +33,13 @@ def sql_conversion():
         ) 
 
     print(postDict)
-    jsonify(postDict)
+    #output = jsonify(postDict)
+    output = postDict
 
     conn.close()
+    cur.close()
 
-    return  render_template('scoreboard.html', table_data = postDict)
+    return output
 
 
 if __name__ == "__main__":
