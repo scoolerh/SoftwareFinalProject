@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
-	"log"
 	"os/exec"
 
 	_ "github.com/lib/pq"
@@ -42,7 +42,7 @@ func outputHTML(w http.ResponseWriter, filename string, data interface{}) {
 	}
 }
 
-// Open the home page 
+// Open the home page
 func home(writer http.ResponseWriter, req *http.Request) {
 	variables := map[string]interface{}{"username": ""}
 	outputHTML(writer, "app/html/index.html", variables)
@@ -302,7 +302,7 @@ func scoreboard(writer http.ResponseWriter, req *http.Request) {
 	cmd := exec.Command("python", pythonScript)
 	outputVars := cmd
 
-	outputHTML(writer, "app/html/scoreoard.html", outputVars)
+	outputHTML(writer, "app/html/scoreboard.html", outputVars)
 
 }
 
@@ -328,10 +328,10 @@ func main() {
 	initDB()
 	defer db.Close()
 
-	http.HandleFunc("/", home) 
-	http.HandleFunc("/selectOpponent", selectOpponent) 
-	http.HandleFunc("/selectAI", selectAI) 
-	http.HandleFunc("/selectHuman", selectHuman) 
+	http.HandleFunc("/", home)
+	http.HandleFunc("/selectOpponent", selectOpponent)
+	http.HandleFunc("/selectAI", selectAI)
+	http.HandleFunc("/selectHuman", selectHuman)
 	http.HandleFunc("/newgame", newgame)
 	http.HandleFunc("/play", play)
 	http.HandleFunc("/login", login)
