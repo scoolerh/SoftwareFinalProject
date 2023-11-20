@@ -6,10 +6,10 @@ def sql_conversion():
 
     #Establishes connection to a SQL database using the Psycopg2
     conn = psycopg2.connect(dbname="backgammon", 
-                            user="postgres", 
+                            user="joem", 
                             host = 'db', 
                             port = 5432, 
-                            password="collective")
+                            password="amahaha")
 
     #Creates a cursor 
     cur = conn.cursor()
