@@ -3,9 +3,21 @@
     <head> 
         <meta charset="utf-8">
         <title>Backgammon</title>
-        <h2>Leaderboard</h2>
         <link rel="stylesheet" href="/static/styles.css">
     </head>
+    <body>
+        <header>
+            <h1>BACKGAMMON</h1> 
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/selectPlayers">New Game</a></li>
+            </ul>
+        </nav>
+
     <!-- A scoreboard page to display statistics about each player stored in the database -->
     <!-- Implemented by Barinamene Nwike from the Coin Stealers-->
     <body onload = 'generateTable(table_data)'>
@@ -42,4 +54,6 @@
         </table>
         </div>
     </body>
+
+    
 </html>

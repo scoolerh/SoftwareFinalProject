@@ -5,6 +5,8 @@ services:
   #     - "7555"
   db:
     image: postgres
+    ports:
+    - "5432:5432"
     expose: 
       - "7788"
     environment:
