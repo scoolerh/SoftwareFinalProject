@@ -17,7 +17,7 @@ The app is built with a hope of giving the user a smooth and joyful Backgammon e
 - We do not have a doubling die as we do not condone gambling. We also dont have a pause/resume button because we always encourage people to finish what they started - this is an important value of our team. 
 - When a player is able to bear all their pieces off the board, the game is declared finished, and the players are taken to the "win" page, where the winner is clearly stated, and we present the options to play again or return to the home page
 - We have a database running in the background. We have a user table that handles registering and logins, it stores all usernames and passwords. This table is hidden from the group that only works with stats. A second table stores user stats: number of games, wins, and losses for each of the users, including the AIs. The third table store information about each game: the last saved gamestate, the current status of the game (for instance 'finished'), the white and black player, and the winner (if there is one). Currently we only update this when the game is created and when it is finished, however this can be changed in the future if there is a wish for that.
-- there is a scoreboard feature developed by a collaborating team, however not finished at the time of writing. This is located at the /scoreboard endpoint
+- there is a scoreboard feature developed by a collaborating team, mainly done by Barry Nwike. Find this by navigating to the scoreboard endpoint by adding "scoreboard" to the URL. It was not completed by the time of writing, so I can't describe it further. If the group working on it were not able to merge it into main, it can be found in the DataVisual branch
 
 ## Project File Structure
 Markdown:  
