@@ -39,16 +39,11 @@
             </table>
         </div>
         <script>
-            console.log("Hi there! Javascript here")
             var jsonDataElement = document.getElementById("jsonData");
-            console.log("We got the element")
-            var dataString = jsonDataElement.getAttribute("data-json");
-            console.log(dataString)
-            
+            var dataString = jsonDataElement.getAttribute("data-json");       
             var data = JSON.parse(dataString)
-            console.log("Is data an array? " + Array.isArray(data))
+
             let table = document.getElementById("scoreboard");
-            console.log("data parsed!")
 
             for (let element of data) {
                 let row = table.insertRow();
@@ -56,7 +51,6 @@
                     if (element.hasOwnProperty(key)) {
                         let cell = row.insertCell();
                         let text = document.createTextNode(element[key]);
-                        console.log("note created!")
                         cell.appendChild(text);
                     }
                 }

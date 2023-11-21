@@ -399,11 +399,6 @@ func scoreboard(writer http.ResponseWriter, req *http.Request) {
 		fmt.Println("Python script output:", string(outputVars))
 		return
 	}
-
-	log.Print("This is what GO got from python: ")
-	log.Print(outputVars)
-
-	//jsonData := []byte(outputVars) // Assuming outputVars is []byte
 	jsonStr := string(outputVars)
 
 	outputHTML(writer, "app/html/scoreboard.html", jsonStr)
