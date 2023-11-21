@@ -4,8 +4,12 @@
         <meta charset="utf-8">
         <title>Backgammon</title>
         <link rel="stylesheet" href="/static/styles.css">
+
+        <div id="jsonData" data-json='{{ data | tojson | safe }}'></div>
     </head>
+
     <body>
+
         <header>
             <h1>BACKGAMMON</h1> 
         </header>
@@ -20,39 +24,43 @@
 
     <!-- A scoreboard page to display statistics about each player stored in the database -->
     <!-- Implemented by Barinamene Nwike from the Coin Stealers-->
-    <body onload = 'generateTable(table_data)'>
+        <div class="table-container">
+            <table id="scoreboard">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Games Played</th>
+                        <th scope="col">Wins</th>
+                        <th scope="col">Losses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
         <script>
-            function generateTable(tableData){
-                let table = document.getElementById("scoreboard");
-                const data = JSON.parse(tableData);
-                for (let element of data) {
-                    let row = table.insertRow();
+            console.log("Hi there! Javascript here")
+            var jsonDataElement = document.getElementById("jsonData");
+            var dataString = jsonDataElement.getAttribute("data-json");
+            console.log(dataString)
 
-                    for (var key in element) {
+            let data = JSON.parse(dataString)
+            let table = document.getElementById("scoreboard");
+            console.log("data parsed!")
+
+            for (let element of data) {
+                let row = table.insertRow();
+                for (let key in element) {
+                    if (element.hasOwnProperty(key)) {
                         let cell = row.insertCell();
-                        for (let i = 0; i < 4; i++){
-                            let td = element[key][i]
-                        }
-                        let text = document.createTextNode(td);
+                        let text = document.createTextNode(element[key]);
+                        console.log("note created!")
                         cell.appendChild(text);
                     }
                 }
             }
+        
         </script>
-        <div class="table-container">
-        <table id="scoreboard">
-            <thead>
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Games Played</th>
-                    <th scope="col">Wins</th>
-                    <th scope="col">Losses</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-        </div>
     </body>
 
     

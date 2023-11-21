@@ -1,15 +1,16 @@
 import psycopg2
 from flask import Flask, jsonify, render_template
+import json
 
 def sql_conversion():
     app = Flask(__name__)
 
     #Establishes connection to a SQL database using the Psycopg2
     conn = psycopg2.connect(dbname="backgammon", 
-                            user="joem", 
+                            user="postgres", 
                             host = 'db', 
                             port = 5432, 
-                            password="amahaha")
+                            password="collective")
 
     #Creates a cursor 
     cur = conn.cursor()
@@ -17,33 +18,29 @@ def sql_conversion():
     table = cur.fetchall()
 
     #'Player': [Username, "Games Played", "Wins", "Losses"]
-    postDict = {}
 
+    columns = [desc[0] for desc in cur.description]
+
+    data = []
     for row in table:
-
-        player = row["username"]
-        gamesPlayed = row["gamesPlayed"]
-        gamesWon = row["wins"]
-        gamesLost = row["losses"]
+        row_data = {}
+        for idx, column in enumerate(columns):
+            row_data[column] = str(row[idx])
         
-        postDict.update(
-            {
-                player: [player, gamesPlayed, gamesWon, gamesLost]
-            }
-        ) 
-
-    print(postDict)
-    #output = jsonify(postDict)
-    output = postDict
+        data.append(row_data)
 
     conn.close()
     cur.close()
 
-    return output
+    with app.app_context():
+        print(data)
+        output = json.dumps(data)
+        print(output)
+        return output
 
 
 if __name__ == "__main__":
-    sql_conversion()
+    data = sql_conversion()
 
 
 
