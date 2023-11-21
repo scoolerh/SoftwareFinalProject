@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os/exec"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -387,6 +388,28 @@ func initDB() {
 
 }
 
+func scoreboard(writer http.ResponseWriter, req *http.Request) {
+	pythonScript := "app/db_api.py"
+	// Command to run Python script
+	cmd := exec.Command("python3", pythonScript)
+	outputVars, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println("Error executing Python script:", err)
+		fmt.Println("Python script output:", string(outputVars))
+		return
+	}
+
+	log.Print("This is what GO got from python: ")
+	log.Print(outputVars)
+
+	//jsonData := []byte(outputVars) // Assuming outputVars is []byte
+	jsonStr := string(outputVars)
+
+	outputHTML(writer, "app/html/scoreboard.html", jsonStr)
+
+}
+
 func main() {
 	initDB()
 	defer db.Close()
@@ -399,6 +422,7 @@ func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/registered", register)
 	http.HandleFunc("/loggedin", loggedin)
+	http.HandleFunc("/scoreboard", scoreboard)
 	http.HandleFunc("/won", won)
 	http.HandleFunc("/db", dbHandler)
 	fs := http.FileServer(http.Dir("app/static"))

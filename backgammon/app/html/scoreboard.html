@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en"> 
+    <head> 
+        <meta charset="utf-8">
+        <title>Backgammon</title>
+        <link rel="stylesheet" href="/static/styles.css">
+
+        <div id="jsonData" data-json='{{ . }}'></div>
+    </head>
+
+    <body>
+
+        <header>
+            <h1>BACKGAMMON</h1> 
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/selectPlayers">New Game</a></li>
+            </ul>
+        </nav>
+
+    <!-- A scoreboard page to display statistics about each player stored in the database -->
+    <!-- Implemented by Barinamene Nwike from the Coin Stealers-->
+        <div class="table-container">
+            <table class="board" id="scoreboard" style="width: 55em; padding: 0 2em 1em 0; border: 2px solid black; margin-left: auto; margin-right: auto; font-size: 20px;">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Games Played</th>
+                        <th scope="col">Wins</th>
+                        <th scope="col">Losses</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <script>
+            console.log("Hi there! Javascript here")
+            var jsonDataElement = document.getElementById("jsonData");
+            console.log("We got the element")
+            var dataString = jsonDataElement.getAttribute("data-json");
+            console.log(dataString)
+            
+            var data = JSON.parse(dataString)
+            console.log("Is data an array? " + Array.isArray(data))
+            let table = document.getElementById("scoreboard");
+            console.log("data parsed!")
+
+            for (let element of data) {
+                let row = table.insertRow();
+                for (let key in element) {
+                    if (element.hasOwnProperty(key)) {
+                        let cell = row.insertCell();
+                        let text = document.createTextNode(element[key]);
+                        console.log("note created!")
+                        cell.appendChild(text);
+                    }
+                }
+            }
+        
+        </script>
+    </body>
+
+    
+</html>
